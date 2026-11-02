@@ -22,8 +22,11 @@ struct FixtureWeatherService: WeatherService {
 
     var callsPerReport: Int { 0 }
 
+    /// The sample is laid out around the pinned app time, but stamped as fetched just now.
     func report(for location: GeoPoint) async throws -> WeatherReport {
-        makeReport(for: location, at: fixedNow ?? .now)
+        var report = makeReport(for: location, at: fixedNow ?? .now)
+        report.fetchedAt = .now
+        return report
     }
 
     func attribution() async throws -> WeatherAttributionInfo {
