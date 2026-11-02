@@ -37,7 +37,7 @@ private let altitudeReferences = [
 @Test(arguments: altitudeReferences)
 func altitudeMatchesPublishedValues(reference: AltitudeReference) {
     let altitude = SolarPosition.altitude(at: utc(reference.time), location: reference.place)
-    #expect(abs(altitude - reference.altitude) < 0.5, "computed \(altitude)°")
+    #expect(abs(altitude - reference.altitude) < 0.15, "computed \(altitude)°")
 }
 
 struct DaylightReference: Sendable, CustomTestStringConvertible {

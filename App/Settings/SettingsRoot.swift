@@ -1,3 +1,4 @@
+import PaneCore
 import SwiftUI
 
 /// Settings: the registry's sections as a native list, with a help pane for the focused row.
@@ -8,7 +9,12 @@ struct SettingsRoot: View {
     private static let placeholder = "Choose a row to see what it does."
 
     var body: some View {
-        let palette = model.palette(at: model.now())
+        TimelineView(.everyMinute) { timeline in
+            content(palette: model.palette(at: model.now(timeline.date)))
+        }
+    }
+
+    private func content(palette: ScenePalette) -> some View {
         NavigationStack {
             HStack(alignment: .top, spacing: 80) {
                 VStack(alignment: .leading, spacing: Theme.Space.l) {

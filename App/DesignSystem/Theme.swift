@@ -102,7 +102,8 @@ enum Theme {
         static let focus = Animation.spring(response: 0.35, dampingFraction: 0.82)
         static let state = Animation.easeOut(duration: 0.2)
         static let takeover = Animation.easeInOut(duration: 0.6)
-        static let nightDim = Animation.easeInOut(duration: 3)
+        static let nightDimSeconds: Double = 3
+        static let nightDim = Animation.easeInOut(duration: nightDimSeconds)
         static let sceneBlendSeconds: Double = 90
         static let driftPeriods: [Double] = [34, 41, 47, 53]
     }

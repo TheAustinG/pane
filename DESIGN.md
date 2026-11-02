@@ -294,7 +294,7 @@ SF Symbols, monochrome, Light weight, sized to their slot (104 pt hero, 44 pt ho
 A floating glass capsule: play symbol, the current frame's time, twelve capsule ticks (current wider and solid white, past at 80%, future at 20%), and "Now".
 
 ### The Sky (signature)
-A mesh gradient built from the scene's five colors, drifting slowly, with a soft vignette. Particles add the condition: rain streaks slanted about 14° at 10 to 22 percent white, snow as soft dots, fog as wide blurred bands, stars at night, and rare lightning in storms. Every render feature sits behind a quality knob (particle count, gradient resolution, glass pane count) so the A15 check can trade effects for frames.
+A mesh gradient built from the scene's five colors, drifting slowly, with a soft vignette. Particles add the condition: rain streaks slanted about 14° at 10 to 22 percent white, snow as soft dots, fog as wide blurred bands, stars at night, and rare lightning in storms. Every render feature sits behind a quality knob (particle count, gradient resolution, glass pane count) so the A15 check can trade effects for frames. With Reduce Motion on, the sky stops drifting, stars stop twinkling, fog stops sliding and lightning never flashes; rain and snow keep falling at half density, because falling precipitation is the weather itself. Night dim fades the particles out with the dim over 3 seconds.
 
 ## Do's and Don'ts
 

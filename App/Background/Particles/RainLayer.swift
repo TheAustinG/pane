@@ -59,17 +59,19 @@ final class RainLayer: ParticleLayer {
             emitter.emitterCells = nil
             return
         }
-        let lifetime = Float((size.height + 120) / style.speed)
         let perDepth = Float(count) / 3
         let images = style == .storm ? Self.stormImages : Self.rainImages
         emitter.emitterCells = (0..<3).map { depth in
             let cell = CAEmitterCell()
             cell.contents = images[depth]
             cell.contentsScale = Self.imageScale
-            cell.lifetime = lifetime
-            cell.birthRate = perDepth / lifetime
             cell.velocity = style.speed + CGFloat(depth) * 200
             cell.velocityRange = 250
+            // Sized for the slowest drop's vertical speed, so no drop vanishes above the bottom edge.
+            let slowestFall = (cell.velocity - cell.velocityRange) * cos(atan(Self.slant))
+            let lifetime = Float((size.height + 120) / slowestFall)
+            cell.lifetime = lifetime
+            cell.birthRate = perDepth / lifetime
             // Measured in the Phase 0 spike: with a line emitter, pi points straight down (a
             // point emitter uses pi / 2).
             cell.emissionLongitude = .pi + atan(Self.slant)

@@ -9,6 +9,7 @@ struct SkyView: View {
     var particlesEnabled = true
 
     @State private var transition: SceneTransition
+    @State private var particleFadeEnd = Date.distantPast
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Once-a-minute time-of-day updates glide over a minute, so they chain into steady motion.
@@ -24,19 +25,20 @@ struct SkyView: View {
     var body: some View {
         ZStack {
             SkyGradient(transition: transition, quality: quality, drifts: !reduceMotion)
-            if particlesEnabled {
-                ParticleField(
-                    palette: transition.to,
-                    transitionEnd: transition.end,
-                    particleCount: quality.particleCount,
-                    reduceMotion: reduceMotion
-                )
-            }
+            ParticleField(
+                palette: particlesEnabled ? transition.to : transition.to.withoutParticles,
+                transitionEnd: max(transition.end, particleFadeEnd),
+                particleCount: quality.particleCount,
+                reduceMotion: reduceMotion
+            )
             SkyVignette()
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .accessibilityHidden(true)
+        .onChange(of: particlesEnabled) {
+            particleFadeEnd = .now.addingTimeInterval(Theme.Motion.nightDimSeconds)
+        }
         .onChange(of: target) { _, newTarget in
             transition.retarget(
                 to: newTarget,
@@ -45,5 +47,13 @@ struct SkyView: View {
                 glideSeconds: Self.glideSeconds
             )
         }
+    }
+}
+
+private extension ScenePalette {
+    var withoutParticles: ScenePalette {
+        var palette = self
+        palette.particleIntensity = 0
+        return palette
     }
 }

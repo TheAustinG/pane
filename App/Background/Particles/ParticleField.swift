@@ -37,6 +37,7 @@ final class ParticleFieldView: UIView {
 
     private var layers: [ParticleKind: any ParticleLayer] = [:]
     private var targetWeights: [ParticleKind: Double] = [:]
+    private var hideTasks: [ParticleKind: Task<Void, Never>] = [:]
     private var particleCount = 0
     private var reduceMotion = false
     private var hasUpdated = false
@@ -78,6 +79,7 @@ final class ParticleFieldView: UIView {
             }
             guard let particleLayer = layers[kind], targetWeights[kind] != weight else { continue }
             targetWeights[kind] = weight
+            hideTasks[kind]?.cancel()
             particleLayer.layer.isHidden = false
             particleLayer.setWeight(weight, duration: fade)
             if weight == 0 {
@@ -111,9 +113,9 @@ final class ParticleFieldView: UIView {
 
     /// A faded-out layer keeps its twinkles and drifts running unless it is hidden.
     private func hideWhenFaded(_ kind: ParticleKind, after delay: TimeInterval) {
-        Task { [weak self] in
+        hideTasks[kind] = Task { [weak self] in
             try? await Task.sleep(for: .seconds(delay))
-            guard let self, self.targetWeights[kind] == 0 else { return }
+            guard !Task.isCancelled, let self, self.targetWeights[kind] == 0 else { return }
             self.layers[kind]?.layer.isHidden = true
         }
     }
