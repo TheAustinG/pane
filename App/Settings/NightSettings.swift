@@ -103,12 +103,27 @@ private extension ClockTime {
     }
 }
 
-/// Weather data attribution and app version (attribution arrives with WeatherKit in Phase 2).
+/// Weather data attribution and app version.
 enum AboutSettingsSection: SettingsSection {
     static let title = "About"
-    static var isAvailable: Bool { false }
 
     static func rows(model: AppModel) -> some View {
-        EmptyView()
+        let attribution = model.weather.attribution
+        SettingsValueRow(
+            title: "Weather data",
+            value: attribution?.serviceName ?? "Apple Weather",
+            help: "Weather data comes from Apple Weather. Scan for the data sources and legal notice.",
+            qrURL: attribution?.legalPageURL ?? WeatherAttributionInfo.fallbackLegalPageURL
+        ) {}
+        .accessibilityIdentifier("settings.about.attribution")
+        SettingsValueRow(title: "Version", value: version, help: "The installed build of Pane.") {}
+            .accessibilityIdentifier("settings.about.version")
+    }
+
+    private static var version: String {
+        let info = Bundle.main.infoDictionary
+        let short = info?["CFBundleShortVersionString"] as? String ?? "?"
+        let build = info?["CFBundleVersion"] as? String ?? "?"
+        return "\(short) (\(build))"
     }
 }

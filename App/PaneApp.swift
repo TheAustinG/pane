@@ -9,9 +9,11 @@ struct PaneApp: App {
     init() {
         let options = LaunchOptions.parse()
         self.options = options
+        let settings = AppSettings(reset: options.resetsSettings)
+        WeatherWiring.prefillHomeLocation(settings, options: options)
         _model = State(initialValue: AppModel(
             options: options,
-            settings: AppSettings(reset: options.resetsSettings),
+            settings: settings,
             secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane"),
             weather: WeatherWiring.controller(options: options)
         ))

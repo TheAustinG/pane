@@ -7,17 +7,21 @@ import SwiftUI
 @Observable
 final class SettingsHelpState {
     private(set) var text: String?
+    /// A link the help pane shows as a QR code, since the TV cannot open links.
+    private(set) var qrURL: URL?
     private var owner: UUID?
 
-    func focus(_ owner: UUID, text: String) {
+    func focus(_ owner: UUID, text: String, qrURL: URL? = nil) {
         self.owner = owner
         self.text = text
+        self.qrURL = qrURL
     }
 
     func blur(_ owner: UUID) {
         guard self.owner == owner else { return }
         self.owner = nil
         text = nil
+        qrURL = nil
     }
 }
 
@@ -27,6 +31,7 @@ extension EnvironmentValues {
 
 private struct SettingsHelpModifier: ViewModifier {
     let text: String
+    let qrURL: URL?
     @Environment(\.settingsHelp) private var help
     @FocusState private var isFocused: Bool
     @State private var owner = UUID()
@@ -35,18 +40,21 @@ private struct SettingsHelpModifier: ViewModifier {
         content
             .focused($isFocused)
             .onChange(of: isFocused) { _, focused in
-                if focused { help?.focus(owner, text: text) } else { help?.blur(owner) }
+                if focused { help?.focus(owner, text: text, qrURL: qrURL) } else { help?.blur(owner) }
             }
             .onChange(of: text) { _, text in
-                if isFocused { help?.focus(owner, text: text) }
+                if isFocused { help?.focus(owner, text: text, qrURL: qrURL) }
+            }
+            .onChange(of: qrURL) { _, qrURL in
+                if isFocused { help?.focus(owner, text: text, qrURL: qrURL) }
             }
     }
 }
 
 extension View {
-    /// Shows `text` in the Settings help pane while this row has focus.
-    func settingsHelp(_ text: String) -> some View {
-        modifier(SettingsHelpModifier(text: text))
+    /// Shows `text`, and `qrURL` as a QR code, in the Settings help pane while this row has focus.
+    func settingsHelp(_ text: String, qrURL: URL? = nil) -> some View {
+        modifier(SettingsHelpModifier(text: text, qrURL: qrURL))
     }
 }
 
@@ -55,30 +63,38 @@ struct SettingsValueRow: View {
     let title: String
     let value: String
     let help: String
+    var qrURL: URL?
     let action: () -> Void
 
     var body: some View {
         Button(action: action) {
             LabeledContent(title, value: value)
         }
-        .settingsHelp(help)
+        .settingsHelp(help, qrURL: qrURL)
     }
 }
 
 /// The glass pane that explains the focused row.
 struct SettingsHelpPane: View {
     let text: String
+    var qrURL: URL?
 
     var body: some View {
-        Text(text)
-            .font(Theme.Typeface.body)
-            .foregroundStyle(Theme.Ink.secondary)
-            .fixedSize(horizontal: false, vertical: true)
-            .padding(Theme.Layout.paneInset)
-            .frame(width: 620, alignment: .leading)
-            .glassPane()
-            .animation(Theme.Motion.state, value: text)
-            .accessibilityIdentifier("settings.help")
+        VStack(alignment: .leading, spacing: Theme.Space.l) {
+            Text(text)
+                .font(Theme.Typeface.body)
+                .foregroundStyle(Theme.Ink.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("settings.help")
+            if let qrURL {
+                QRCodeView(url: qrURL, side: 220)
+                    .accessibilityIdentifier("settings.help.qr")
+            }
+        }
+        .padding(Theme.Layout.paneInset)
+        .frame(width: 620, alignment: .leading)
+        .glassPane()
+        .animation(Theme.Motion.state, value: text)
     }
 }
 
