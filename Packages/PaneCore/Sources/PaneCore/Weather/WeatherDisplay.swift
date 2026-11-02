@@ -70,11 +70,12 @@ public struct WeatherDisplay: Hashable, Sendable {
             high: today.map { format.string($0.high) } ?? "--",
             low: today.map { format.string($0.low) } ?? "--"
         )
+        // "Now" repeats the current card's reading, so the two never disagree on screen.
         hours = report.hours(startingAt: date, count: 6).enumerated().map { index, hour in
             Hour(
                 label: index == 0 ? "Now" : HourLabel.string(hour.date, calendar: calendar),
-                symbolName: hour.symbolName,
-                temperature: format.string(hour.temperature),
+                symbolName: index == 0 ? conditions.symbolName : hour.symbolName,
+                temperature: format.string(index == 0 ? conditions.temperature : hour.temperature),
                 precipitationPercent: Self.percent(hour.precipitationChance)
             )
         }

@@ -56,6 +56,17 @@ struct WeatherDisplayMappingTests {
         #expect(report.minutes == nil)
     }
 
+    @Test func nowSlotRepeatsTheCurrentReading() throws {
+        var report = try WeatherCache.makeDecoder().decode(WeatherReport.self, from: Data(cacheFixture.utf8))
+        report.current.temperature = 21.1
+        report.current.symbolName = "sun.max"
+        let shown = display(report, at: utc("2026-11-02T20:10:00Z"))
+
+        #expect(shown.hours.first?.temperature == shown.now.temperature)
+        #expect(shown.hours.first?.symbolName == "sun.max")
+        #expect(shown.hours.dropFirst().first?.temperature == "55°")
+    }
+
     @Test func temperaturesInFahrenheitAndCelsius() {
         let now = local(2026, 11, 2, 14)
         let report = WeatherFixture.report(
