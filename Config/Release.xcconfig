@@ -1,0 +1,4 @@
+#include "Base.xcconfig"
+#include "Signing.xcconfig"
+
+SWIFT_COMPILATION_MODE = wholemodule

@@ -1,0 +1,15 @@
+#include "Base.xcconfig"
+#include "Signing.xcconfig"
+#include? "../local/Secrets.local.xcconfig"
+
+// Device builds never carry credentials; the TV gets them from the setup screens.
+PANE_HA_HOST[sdk=appletvos*] =
+PANE_HA_TOKEN[sdk=appletvos*] =
+PANE_GITHUB_TOKEN[sdk=appletvos*] =
+PANE_PORTAINER_HOST[sdk=appletvos*] =
+PANE_PORTAINER_TOKEN[sdk=appletvos*] =
+PANE_PORTAINER_ENDPOINT_ID[sdk=appletvos*] =
+PANE_HOME_LATITUDE[sdk=appletvos*] =
+PANE_HOME_LONGITUDE[sdk=appletvos*] =
+
+SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG
