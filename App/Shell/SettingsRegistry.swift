@@ -17,7 +17,7 @@ extension SettingsSection {
 
 enum SettingsRegistry {
     /// Display order of the Settings list.
-    static let sections: [any SettingsSection.Type] = [
+    @MainActor static let sections: [any SettingsSection.Type] = [
         WeatherSettingsSection.self,
         StormSettingsSection.self,
         BackgroundSettingsSection.self,
