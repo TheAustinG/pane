@@ -1,0 +1,74 @@
+name: Pane
+
+options:
+  developmentLanguage: en
+  createIntermediateGroups: true
+  deploymentTarget:
+    tvOS: "26.0"
+
+configs:
+  Debug: debug
+  Release: release
+
+configFiles:
+  Debug: Config/Debug.xcconfig
+  Release: Config/Release.xcconfig
+
+packages:
+  PaneCore:
+    path: Packages/PaneCore
+
+targets:
+  Pane:
+    type: application
+    platform: tvOS
+    sources:
+      - path: App
+    dependencies:
+      - package: PaneCore
+        product: PaneCore
+    settings:
+      base:
+        PRODUCT_NAME: Pane
+        PRODUCT_BUNDLE_IDENTIFIER: $(PANE_BUNDLE_PREFIX).pane
+        GENERATE_INFOPLIST_FILE: NO
+    entitlements:
+      path: build/Entitlements/Pane.entitlements
+      properties:
+        com.apple.developer.weatherkit: true
+    info:
+      path: build/Info/Pane-Info.plist
+      properties:
+        CFBundleDisplayName: Pane
+        CFBundleName: Pane
+        CFBundleShortVersionString: $(MARKETING_VERSION)
+        CFBundleVersion: $(CURRENT_PROJECT_VERSION)
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+        NSLocalNetworkUsageDescription: Pane reads Home Assistant and Portainer on your home network.
+
+  PaneUITests:
+    type: bundle.ui-testing
+    platform: tvOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: Pane
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: $(PANE_BUNDLE_PREFIX).pane.uitests
+        GENERATE_INFOPLIST_FILE: YES
+        TEST_TARGET_NAME: Pane
+
+schemes:
+  Pane:
+    build:
+      targets:
+        Pane: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+      targets: [PaneUITests]
+    archive:
+      config: Release
