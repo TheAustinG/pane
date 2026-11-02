@@ -24,7 +24,12 @@ enum PreviewDashboard {
         } else {
             settings.nightSchedule.isEnabled = false
         }
-        return AppModel(options: options, settings: settings, secrets: InMemorySecretStore())
+        return AppModel(
+            options: options,
+            settings: settings,
+            secrets: InMemorySecretStore(),
+            weather: WeatherController(service: OfflineWeatherService())
+        )
     }
 
     /// `-previewFocus` ids from the earlier sample layout, plus the Settings button.

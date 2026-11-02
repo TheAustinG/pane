@@ -12,7 +12,8 @@ struct PaneApp: App {
         _model = State(initialValue: AppModel(
             options: options,
             settings: AppSettings(reset: options.resetsSettings),
-            secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane")
+            secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane"),
+            weather: WeatherController(service: OfflineWeatherService())
         ))
     }
 
