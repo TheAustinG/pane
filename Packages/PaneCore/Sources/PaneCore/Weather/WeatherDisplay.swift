@@ -34,7 +34,7 @@ public struct WeatherDisplay: Hashable, Sendable {
         public var fraction: Double?
         public var sunrise: String
         public var sunset: String
-        /// "Sunset in 33 min", "5h 15m of light left", "Sunrise in 19 min" or "Night".
+        /// "Sunset in 33 min", "5h 15m of light left", "Sunrise in 19 min", "Sunrise 6:23 AM" or "Night".
         public var caption: String
     }
 
@@ -61,9 +61,10 @@ public struct WeatherDisplay: Hashable, Sendable {
         let conditions = report.conditions(at: date)
         let format = TemperatureFormat(unit: unit)
         let today = report.day(containing: date, calendar: calendar)
+        let sun = SunTimes(report: report, calendar: calendar)
         now = Now(
             temperature: format.string(conditions.temperature),
-            condition: WeatherConditionText.title(for: conditions.condition),
+            condition: WeatherConditionText.title(for: conditions.condition, isDaylight: conditions.isDaylight),
             symbolName: conditions.symbolName,
             family: ConditionFamily(weatherKitCondition: conditions.condition),
             high: today.map { format.string($0.high) } ?? "--",
@@ -85,27 +86,32 @@ public struct WeatherDisplay: Hashable, Sendable {
                 low: format.string(day.low)
             )
         }
-        daylight = Self.makeDaylight(today: today, at: date, calendar: calendar)
-        note = nil
+        daylight = Self.makeDaylight(
+            sunrise: sun.sunrise(on: date),
+            sunset: sun.sunset(on: date),
+            at: date,
+            calendar: calendar
+        )
+        note = WeatherNoteRules(report: report, date: date, calendar: calendar, format: format, sun: sun).note()
     }
 
     static func percent(_ chance: Double) -> Int? {
-        let rounded = Int((chance * 10).rounded()) * 10
-        return rounded >= 20 ? rounded : nil
+        guard chance >= 0.2 else { return nil }
+        return Int((chance * 10).rounded()) * 10
     }
 
-    static func makeDaylight(today: DayForecast?, at date: Date, calendar: Calendar) -> Daylight {
-        let sunrise = today?.sunrise
-        let sunset = today?.sunset
+    static func makeDaylight(sunrise: Date?, sunset: Date?, at date: Date, calendar: Calendar) -> Daylight {
         let label = { (time: Date?) in time.map { ClockLabel.string($0, calendar: calendar) } ?? "--" }
         var fraction: Double?
         var caption = "Night"
         if let sunrise, let sunset, sunset > sunrise {
             if date < sunrise {
-                caption = "Sunrise \(label(sunrise))"
-            } else if date <= sunset {
+                let wait = sunrise.timeIntervalSince(date)
+                caption = wait < 2 * 3600 ? "Sunrise in \(DurationText.string(wait))" : "Sunrise \(label(sunrise))"
+            } else if date < sunset {
                 fraction = date.timeIntervalSince(sunrise) / sunset.timeIntervalSince(sunrise)
-                caption = "Sunset \(label(sunset))"
+                let left = sunset.timeIntervalSince(date)
+                caption = left < 3600 ? "Sunset in \(DurationText.string(left))" : "\(DurationText.string(left)) of light left"
             }
         }
         return Daylight(fraction: fraction, sunrise: label(sunrise), sunset: label(sunset), caption: caption)
@@ -122,10 +128,11 @@ public struct ConditionsAtTime: Hashable, Sendable {
 }
 
 extension WeatherReport {
+    /// How far from the observation the current conditions still stand in for the moment.
+    static let currentWindow: TimeInterval = 45 * 60
+
     public func conditions(at date: Date) -> ConditionsAtTime {
-        let currentWindow: TimeInterval = 45 * 60
-        if abs(date.timeIntervalSince(current.date)) < currentWindow
-            || hourly.isEmpty {
+        if abs(date.timeIntervalSince(current.date)) < Self.currentWindow || hourly.isEmpty {
             return ConditionsAtTime(
                 temperature: current.temperature,
                 condition: current.condition,
@@ -157,54 +164,37 @@ extension WeatherReport {
     }
 }
 
-extension ConditionFamily {
-    /// Maps `WeatherKit.WeatherCondition.rawValue` to the scene engine's families.
-    public init(weatherKitCondition raw: String) {
-        switch raw {
-        case "clear", "mostlyClear", "hot", "frigid", "windy", "breezy", "haze", "smoky", "blowingDust":
-            self = .clear
-        case "partlyCloudy":
-            self = .partlyCloudy
-        case "mostlyCloudy", "cloudy":
-            self = .cloudy
-        case "drizzle", "rain", "heavyRain", "sunShowers", "freezingDrizzle", "freezingRain":
-            self = .rain
-        case "thunderstorms", "isolatedThunderstorms", "scatteredThunderstorms", "strongStorms",
-             "hurricane", "tropicalStorm":
-            self = .storm
-        case "snow", "heavySnow", "flurries", "sunFlurries", "blizzard", "blowingSnow", "sleet",
-             "wintryMix", "hail":
-            self = .snow
-        case "foggy":
-            self = .fog
-        default:
-            self = .cloudy
-        }
-    }
-}
+/// Sunrise and sunset from the report's days, or from the sun math where a day has none.
+struct SunTimes {
+    let report: WeatherReport
+    let calendar: Calendar
 
-enum WeatherConditionText {
-    static func title(for raw: String) -> String {
-        var words: [String] = []
-        var word = ""
-        for character in raw {
-            if character.isUppercase, !word.isEmpty {
-                words.append(word)
-                word = ""
-            }
-            word.append(character)
-        }
-        if !word.isEmpty { words.append(word) }
-        return words.map { $0.prefix(1).uppercased() + $0.dropFirst() }.joined(separator: " ")
+    func sunrise(on date: Date) -> Date? {
+        report.day(containing: date, calendar: calendar)?.sunrise
+            ?? SolarPosition.sunrise(on: date, location: report.location, timeZone: calendar.timeZone)
+    }
+
+    func sunset(on date: Date) -> Date? {
+        report.day(containing: date, calendar: calendar)?.sunset
+            ?? SolarPosition.sunset(on: date, location: report.location, timeZone: calendar.timeZone)
+    }
+
+    func nextSunrise(after date: Date) -> Date? {
+        if let today = sunrise(on: date), today > date { return today }
+        guard let tomorrow = calendar.date(byAdding: .day, value: 1, to: date) else { return nil }
+        return sunrise(on: tomorrow)
     }
 }
 
 struct TemperatureFormat {
     let unit: UnitTemperature
 
+    func value(_ celsius: Double) -> Int {
+        Int(Measurement(value: celsius, unit: UnitTemperature.celsius).converted(to: unit).value.rounded())
+    }
+
     func string(_ celsius: Double) -> String {
-        let value = Measurement(value: celsius, unit: UnitTemperature.celsius).converted(to: unit).value
-        return "\(Int(value.rounded()))°"
+        "\(value(celsius))°"
     }
 }
 
@@ -229,5 +219,15 @@ enum ClockLabel {
         let hour = parts.hour ?? 0
         let hour12 = hour % 12 == 0 ? 12 : hour % 12
         return "\(hour12):\(String(format: "%02d", parts.minute ?? 0)) \(hour < 12 ? "AM" : "PM")"
+    }
+}
+
+/// "33 min", "1h 40m", "5h" from a positive interval, counting whole minutes down.
+enum DurationText {
+    static func string(_ interval: TimeInterval) -> String {
+        let minutes = max(Int(interval / 60), 1)
+        if minutes < 60 { return "\(minutes) min" }
+        let rest = minutes % 60
+        return rest == 0 ? "\(minutes / 60)h" : "\(minutes / 60)h \(rest)m"
     }
 }
