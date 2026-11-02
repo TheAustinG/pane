@@ -2,11 +2,67 @@ import MapKit
 import PaneCore
 import SwiftUI
 
-struct LocationMatch: Hashable {
-    let name: String
-    let detail: String?
-    let latitude: Double
-    let longitude: Double
+/// City suggestions as the query changes. A completion carries no coordinate; `resolve` fetches
+/// one for the completion the user picks.
+@MainActor
+@Observable
+final class CityCompleter: NSObject {
+    enum State: Equatable {
+        case idle
+        case searching
+        case results
+        case failed
+    }
+
+    private(set) var state = State.idle
+    private(set) var completions: [MKLocalSearchCompletion] = []
+    @ObservationIgnored private let completer = MKLocalSearchCompleter()
+
+    override init() {
+        super.init()
+        completer.resultTypes = .address
+        completer.addressFilter = MKAddressFilter(including: .locality)
+        completer.delegate = self
+    }
+
+    func update(_ query: String) {
+        let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !text.isEmpty else {
+            completer.cancel()
+            completions = []
+            state = .idle
+            return
+        }
+        state = .searching
+        completer.queryFragment = text
+    }
+
+    func resolve(_ completion: MKLocalSearchCompletion) async -> HomeLocation? {
+        let request = MKLocalSearch.Request(completion: completion)
+        request.resultTypes = .address
+        guard let item = try? await MKLocalSearch(request: request).start().mapItems.first else {
+            state = .failed
+            return nil
+        }
+        let coordinate = item.location.coordinate
+        let name = item.addressRepresentations?.cityWithContext ?? completion.title
+        return HomeLocation(name: name, coordinate: GeoPoint(latitude: coordinate.latitude, longitude: coordinate.longitude))
+    }
+}
+
+extension CityCompleter: @preconcurrency MKLocalSearchCompleterDelegate {
+    func completerDidUpdateResults(_ completer: MKLocalSearchCompleter) {
+        var seen = Set<String>()
+        completions = completer.results
+            .filter { seen.insert($0.title + "|" + $0.subtitle).inserted }
+            .prefix(8)
+            .map { $0 }
+        state = .results
+    }
+
+    func completer(_ completer: MKLocalSearchCompleter, didFailWithError error: any Error) {
+        state = .failed
+    }
 }
 
 /// City search for the home location. Laid out like the Settings choice screens: title and help on
@@ -15,15 +71,8 @@ struct LocationSearchScreen: View {
     let model: AppModel
     @Environment(\.dismiss) private var dismiss
     @State private var query = ""
-    @State private var phase = Phase.idle
+    @State private var completer = CityCompleter()
     @FocusState private var fieldFocused: Bool
-
-    enum Phase: Equatable {
-        case idle
-        case searching
-        case results([LocationMatch])
-        case failed
-    }
 
     var body: some View {
         HStack(alignment: .top, spacing: 80) {
@@ -46,29 +95,29 @@ struct LocationSearchScreen: View {
         .padding(.vertical, Theme.Layout.marginVertical)
         .padding(.horizontal, Theme.Layout.marginHorizontal)
         .defaultFocus($fieldFocused, true)
-        .task(id: query) { await search() }
+        .onChange(of: query) { _, text in completer.update(text) }
     }
 
     @ViewBuilder private var resultRows: some View {
-        switch phase {
+        switch completer.state {
         case .idle:
             stateLine("Type a city name")
-        case .searching:
+        case .searching where completer.completions.isEmpty:
             stateLine("Searching")
         case .failed:
             stateLine("Search is unavailable right now")
-        case .results(let matches) where matches.isEmpty:
+        case .results where completer.completions.isEmpty:
             stateLine("No cities found")
-        case .results(let matches):
-            ForEach(Array(matches.enumerated()), id: \.offset) { index, match in
+        case .searching, .results:
+            ForEach(Array(completer.completions.enumerated()), id: \.offset) { index, completion in
                 Button {
-                    choose(match)
+                    Task { await choose(completion) }
                 } label: {
                     HStack {
-                        Text(match.name)
+                        Text(completion.title)
                         Spacer()
-                        if let detail = match.detail {
-                            Text(detail).foregroundStyle(.secondary)
+                        if !completion.subtitle.isEmpty {
+                            Text(completion.subtitle).foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -84,47 +133,9 @@ struct LocationSearchScreen: View {
             .accessibilityIdentifier("settings.location.state")
     }
 
-    private func choose(_ match: LocationMatch) {
-        model.setHomeLocation(
-            HomeLocation(name: match.name, coordinate: GeoPoint(latitude: match.latitude, longitude: match.longitude))
-        )
+    private func choose(_ completion: MKLocalSearchCompletion) async {
+        guard let home = await completer.resolve(completion) else { return }
+        model.setHomeLocation(home)
         dismiss()
-    }
-
-    private func search() async {
-        let text = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !text.isEmpty else {
-            phase = .idle
-            return
-        }
-        phase = .searching
-        do {
-            try await Task.sleep(for: .milliseconds(400))
-            phase = .results(try await Self.matches(for: text))
-        } catch is CancellationError {
-            return
-        } catch {
-            phase = .failed
-        }
-    }
-
-    private static func matches(for text: String) async throws -> [LocationMatch] {
-        let request = MKLocalSearch.Request()
-        request.naturalLanguageQuery = text
-        request.resultTypes = .address
-        request.addressFilter = MKAddressFilter(including: .locality)
-        let response = try await MKLocalSearch(request: request).start()
-        var seen = Set<String>()
-        return response.mapItems.compactMap { item in
-            guard let name = item.addressRepresentations?.cityWithContext ?? item.name,
-                  seen.insert(name).inserted else { return nil }
-            let coordinate = item.location.coordinate
-            return LocationMatch(
-                name: name,
-                detail: item.addressRepresentations?.regionName,
-                latitude: coordinate.latitude,
-                longitude: coordinate.longitude
-            )
-        }
     }
 }
