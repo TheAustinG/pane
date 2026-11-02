@@ -83,38 +83,53 @@ public struct ScenePalette: Hashable, Sendable {
     }
 }
 
-public enum SceneEngine {
-    public static func palette(for scene: WeatherScene) -> ScenePalette {
-        ScenePalette(
-            colors: [0x1E2148, 0x4A3F7A, 0xB9708A, 0xEFA06A, 0x31507E].map { RGB(hex: $0) },
-            accent: RGB(hex: 0xFFC896),
-            glassShade: 0.2,
-            particles: .none,
-            particleIntensity: 0
+extension ScenePalette {
+    /// Blends toward `other` in OKLab. Particles of the same kind blend their intensity; a change
+    /// of kind fades the old layer out over the first half and the new one in over the second.
+    public func interpolated(to other: ScenePalette, fraction: Double) -> ScenePalette {
+        let t = min(max(fraction, 0), 1)
+        return blended(
+            to: other,
+            fraction: t,
+            colors: zip(colors, other.colors).map { $0.interpolated(to: $1, fraction: t) },
+            accent: accent.interpolated(to: other.accent, fraction: t)
         )
     }
 
-    public static func scene(condition: ConditionFamily, at date: Date, location: GeoPoint) -> WeatherScene {
-        WeatherScene(
-            condition: condition,
-            sunAltitude: SolarPosition.altitude(at: date, location: location),
-            isMorning: true
+    func blended(to other: ScenePalette, fraction t: Double, colors: [RGB], accent: RGB) -> ScenePalette {
+        let kind: ParticleKind
+        let intensity: Double
+        if particles == other.particles {
+            kind = particles
+            intensity = particleIntensity + (other.particleIntensity - particleIntensity) * t
+        } else if t < 0.5 {
+            kind = particles
+            intensity = particleIntensity * (1 - 2 * t)
+        } else {
+            kind = other.particles
+            intensity = other.particleIntensity * (2 * t - 1)
+        }
+        return ScenePalette(
+            colors: colors,
+            accent: accent,
+            glassShade: glassShade + (other.glassShade - glassShade) * t,
+            particles: kind,
+            particleIntensity: intensity
         )
     }
-}
 
-public enum SolarPosition {
-    /// Sun altitude in degrees, NOAA solar position algorithm.
-    public static func altitude(at date: Date, location: GeoPoint) -> Double {
-        0
+    /// The largest OKLab distance between matching sky colors or the accents.
+    public func colorDistance(to other: ScenePalette) -> Double {
+        zip(colors, other.colors).reduce(accent.distance(to: other.accent)) { max($0, $1.0.distance(to: $1.1)) }
     }
-}
 
-extension WeatherScene {
-    /// Fixed scenes for `-scene` and the debug menu: golden, day, rain, night, dawn, snow, fog, storm.
-    public static let presetNames = ["golden", "day", "rain", "night", "dawn", "snow", "fog", "storm"]
+    /// How strongly `kind` shows in this palette: the intensity for its own kind, otherwise 0.
+    public func particleWeight(for kind: ParticleKind) -> Double {
+        kind == particles && kind != .none ? particleIntensity : 0
+    }
 
-    public static func preset(named name: String) -> WeatherScene? {
-        presetNames.contains(name) ? WeatherScene(condition: .clear, sunAltitude: 4, isMorning: false) : nil
+    /// The largest change in any particle layer's weight between the two palettes.
+    public func particleDistance(to other: ScenePalette) -> Double {
+        ParticleKind.allCases.reduce(0) { max($0, abs(particleWeight(for: $1) - other.particleWeight(for: $1))) }
     }
 }
