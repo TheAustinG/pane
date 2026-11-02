@@ -7,3 +7,5 @@ DerivedData/
 .build/
 .swiftpm/
 local/
+.impeccable/*
+!.impeccable/design.json

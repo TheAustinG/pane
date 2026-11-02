@@ -1,0 +1,676 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-11-02T02:34:13+00:00",
+  "title": "Design System: Pane",
+  "extensions": {
+    "colorMeta": {
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#FFFFFF",
+        "oklch": "oklch(100.0% 0.000 89.9)",
+        "tonalRamp": [
+          "oklch(15% 0.000 89.9)",
+          "oklch(26% 0.000 89.9)",
+          "oklch(38% 0.000 89.9)",
+          "oklch(49% 0.000 89.9)",
+          "oklch(61% 0.000 89.9)",
+          "oklch(72% 0.000 89.9)",
+          "oklch(84% 0.000 89.9)",
+          "oklch(95% 0.000 89.9)"
+        ]
+      },
+      "glass-shade": {
+        "role": "neutral",
+        "displayName": "Glass Shade",
+        "canonical": "#0E1024",
+        "oklch": "oklch(18.3% 0.041 277.3)",
+        "tonalRamp": [
+          "oklch(15% 0.023 277.3)",
+          "oklch(26% 0.028 277.3)",
+          "oklch(38% 0.033 277.3)",
+          "oklch(49% 0.038 277.3)",
+          "oklch(61% 0.038 277.3)",
+          "oklch(72% 0.033 277.3)",
+          "oklch(84% 0.028 277.3)",
+          "oklch(95% 0.023 277.3)"
+        ]
+      },
+      "rain-chance": {
+        "role": "secondary",
+        "displayName": "Rain Chance Blue",
+        "canonical": "#A9DBFF",
+        "oklch": "oklch(86.9% 0.072 239.9)",
+        "tonalRamp": [
+          "oklch(15% 0.041 239.9)",
+          "oklch(26% 0.050 239.9)",
+          "oklch(38% 0.059 239.9)",
+          "oklch(49% 0.068 239.9)",
+          "oklch(61% 0.068 239.9)",
+          "oklch(72% 0.059 239.9)",
+          "oklch(84% 0.050 239.9)",
+          "oklch(95% 0.041 239.9)"
+        ]
+      },
+      "sun": {
+        "role": "secondary",
+        "displayName": "Sunlight",
+        "canonical": "#FFE6AA",
+        "oklch": "oklch(93.1% 0.081 88.0)",
+        "tonalRamp": [
+          "oklch(15% 0.046 88.0)",
+          "oklch(26% 0.056 88.0)",
+          "oklch(38% 0.066 88.0)",
+          "oklch(49% 0.076 88.0)",
+          "oklch(61% 0.076 88.0)",
+          "oklch(72% 0.066 88.0)",
+          "oklch(84% 0.056 88.0)",
+          "oklch(95% 0.046 88.0)"
+        ]
+      },
+      "nudge-amber": {
+        "role": "secondary",
+        "displayName": "Nudge Amber",
+        "canonical": "#FFD27F",
+        "oklch": "oklch(88.5% 0.113 81.7)",
+        "tonalRamp": [
+          "oklch(15% 0.064 81.7)",
+          "oklch(26% 0.078 81.7)",
+          "oklch(38% 0.092 81.7)",
+          "oklch(49% 0.106 81.7)",
+          "oklch(61% 0.106 81.7)",
+          "oklch(72% 0.092 81.7)",
+          "oklch(84% 0.078 81.7)",
+          "oklch(95% 0.064 81.7)"
+        ]
+      },
+      "nudge-ink": {
+        "role": "secondary",
+        "displayName": "Nudge Ink",
+        "canonical": "#FFE2A8",
+        "oklch": "oklch(92.3% 0.081 84.3)",
+        "tonalRamp": [
+          "oklch(15% 0.045 84.3)",
+          "oklch(26% 0.055 84.3)",
+          "oklch(38% 0.065 84.3)",
+          "oklch(49% 0.076 84.3)",
+          "oklch(61% 0.076 84.3)",
+          "oklch(72% 0.065 84.3)",
+          "oklch(84% 0.055 84.3)",
+          "oklch(95% 0.045 84.3)"
+        ]
+      },
+      "warning": {
+        "role": "secondary",
+        "displayName": "Warning Coral",
+        "canonical": "#FFA898",
+        "oklch": "oklch(81.3% 0.106 30.9)",
+        "tonalRamp": [
+          "oklch(15% 0.060 30.9)",
+          "oklch(26% 0.073 30.9)",
+          "oklch(38% 0.086 30.9)",
+          "oklch(49% 0.100 30.9)",
+          "oklch(61% 0.100 30.9)",
+          "oklch(72% 0.086 30.9)",
+          "oklch(84% 0.073 30.9)",
+          "oklch(95% 0.060 30.9)"
+        ]
+      },
+      "sky-night-top": {
+        "role": "primary",
+        "displayName": "Night Top",
+        "canonical": "#050816",
+        "oklch": "oklch(14.0% 0.032 270.3)",
+        "tonalRamp": [
+          "oklch(15% 0.018 270.3)",
+          "oklch(26% 0.022 270.3)",
+          "oklch(38% 0.026 270.3)",
+          "oklch(49% 0.030 270.3)",
+          "oklch(61% 0.030 270.3)",
+          "oklch(72% 0.026 270.3)",
+          "oklch(84% 0.022 270.3)",
+          "oklch(95% 0.018 270.3)"
+        ]
+      },
+      "sky-night-glow": {
+        "role": "primary",
+        "displayName": "Night Glow",
+        "canonical": "#3B356A",
+        "oklch": "oklch(36.3% 0.089 286.2)",
+        "tonalRamp": [
+          "oklch(15% 0.050 286.2)",
+          "oklch(26% 0.061 286.2)",
+          "oklch(38% 0.072 286.2)",
+          "oklch(49% 0.084 286.2)",
+          "oklch(61% 0.084 286.2)",
+          "oklch(72% 0.072 286.2)",
+          "oklch(84% 0.061 286.2)",
+          "oklch(95% 0.050 286.2)"
+        ]
+      },
+      "sky-golden-top": {
+        "role": "primary",
+        "displayName": "Golden Hour Top",
+        "canonical": "#1E2148",
+        "oklch": "oklch(26.8% 0.071 277.1)",
+        "tonalRamp": [
+          "oklch(15% 0.040 277.1)",
+          "oklch(26% 0.049 277.1)",
+          "oklch(38% 0.058 277.1)",
+          "oklch(49% 0.067 277.1)",
+          "oklch(61% 0.067 277.1)",
+          "oklch(72% 0.058 277.1)",
+          "oklch(84% 0.049 277.1)",
+          "oklch(95% 0.040 277.1)"
+        ]
+      },
+      "sky-golden-glow": {
+        "role": "primary",
+        "displayName": "Golden Hour Glow",
+        "canonical": "#EFA06A",
+        "oklch": "oklch(77.3% 0.117 54.4)",
+        "tonalRamp": [
+          "oklch(15% 0.066 54.4)",
+          "oklch(26% 0.081 54.4)",
+          "oklch(38% 0.095 54.4)",
+          "oklch(49% 0.110 54.4)",
+          "oklch(61% 0.110 54.4)",
+          "oklch(72% 0.095 54.4)",
+          "oklch(84% 0.081 54.4)",
+          "oklch(95% 0.066 54.4)"
+        ]
+      },
+      "sky-day-top": {
+        "role": "primary",
+        "displayName": "Day Top",
+        "canonical": "#123F75",
+        "oklch": "oklch(36.9% 0.104 255.5)",
+        "tonalRamp": [
+          "oklch(15% 0.059 255.5)",
+          "oklch(26% 0.072 255.5)",
+          "oklch(38% 0.085 255.5)",
+          "oklch(49% 0.098 255.5)",
+          "oklch(61% 0.098 255.5)",
+          "oklch(72% 0.085 255.5)",
+          "oklch(84% 0.072 255.5)",
+          "oklch(95% 0.059 255.5)"
+        ]
+      },
+      "sky-day-glow": {
+        "role": "primary",
+        "displayName": "Day Glow",
+        "canonical": "#E4D3A0",
+        "oklch": "oklch(86.8% 0.069 91.8)",
+        "tonalRamp": [
+          "oklch(15% 0.039 91.8)",
+          "oklch(26% 0.048 91.8)",
+          "oklch(38% 0.056 91.8)",
+          "oklch(49% 0.065 91.8)",
+          "oklch(61% 0.065 91.8)",
+          "oklch(72% 0.056 91.8)",
+          "oklch(84% 0.048 91.8)",
+          "oklch(95% 0.039 91.8)"
+        ]
+      },
+      "sky-rain-top": {
+        "role": "primary",
+        "displayName": "Rain Top",
+        "canonical": "#1C232D",
+        "oklch": "oklch(25.4% 0.022 257.3)",
+        "tonalRamp": [
+          "oklch(15% 0.012 257.3)",
+          "oklch(26% 0.015 257.3)",
+          "oklch(38% 0.018 257.3)",
+          "oklch(49% 0.020 257.3)",
+          "oklch(61% 0.020 257.3)",
+          "oklch(72% 0.018 257.3)",
+          "oklch(84% 0.015 257.3)",
+          "oklch(95% 0.012 257.3)"
+        ]
+      },
+      "sky-rain-glow": {
+        "role": "primary",
+        "displayName": "Rain Glow",
+        "canonical": "#6E8094",
+        "oklch": "oklch(59.3% 0.037 251.2)",
+        "tonalRamp": [
+          "oklch(15% 0.021 251.2)",
+          "oklch(26% 0.026 251.2)",
+          "oklch(38% 0.030 251.2)",
+          "oklch(49% 0.035 251.2)",
+          "oklch(61% 0.035 251.2)",
+          "oklch(72% 0.030 251.2)",
+          "oklch(84% 0.026 251.2)",
+          "oklch(95% 0.021 251.2)"
+        ]
+      },
+      "ink-secondary": {
+        "role": "neutral",
+        "displayName": "Ink 80%",
+        "canonical": "rgba(255, 255, 255, 0.80)"
+      },
+      "ink-tertiary": {
+        "role": "neutral",
+        "displayName": "Ink 72%",
+        "canonical": "rgba(255, 255, 255, 0.72)"
+      },
+      "rule": {
+        "role": "neutral",
+        "displayName": "Rule 20%",
+        "canonical": "rgba(255, 255, 255, 0.20)"
+      },
+      "well": {
+        "role": "neutral",
+        "displayName": "Well 14%",
+        "canonical": "rgba(255, 255, 255, 0.14)"
+      },
+      "faint": {
+        "role": "neutral",
+        "displayName": "Faint 10%",
+        "canonical": "rgba(255, 255, 255, 0.10)"
+      },
+      "focus-sheen": {
+        "role": "neutral",
+        "displayName": "Focus Sheen",
+        "canonical": "rgba(255, 255, 255, 0.16)"
+      },
+      "focus-rim": {
+        "role": "neutral",
+        "displayName": "Focus Rim",
+        "canonical": "rgba(255, 255, 255, 0.75)"
+      },
+      "nudge-fill": {
+        "role": "secondary",
+        "displayName": "Nudge Fill",
+        "canonical": "rgba(255, 190, 90, 0.18)"
+      },
+      "nudge-stroke": {
+        "role": "secondary",
+        "displayName": "Nudge Stroke",
+        "canonical": "rgba(255, 205, 120, 0.40)"
+      },
+      "warning-fill": {
+        "role": "secondary",
+        "displayName": "Warning Fill",
+        "canonical": "rgba(255, 90, 70, 0.24)"
+      },
+      "warning-stroke": {
+        "role": "secondary",
+        "displayName": "Warning Stroke",
+        "canonical": "rgba(255, 140, 120, 0.55)"
+      }
+    },
+    "typographyMeta": {
+      "clock": {
+        "displayName": "Clock",
+        "purpose": "The time, top left of the dashboard."
+      },
+      "meridiem": {
+        "displayName": "Meridiem",
+        "purpose": "AM or PM beside the clock."
+      },
+      "hero-temperature": {
+        "displayName": "Hero temperature",
+        "purpose": "Current temperature in the weather pane."
+      },
+      "date": {
+        "displayName": "Date",
+        "purpose": "Under the clock."
+      },
+      "screen-title": {
+        "displayName": "Screen title",
+        "purpose": "Settings and setup screens."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Condition and alert titles."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Streak line."
+      },
+      "metric": {
+        "displayName": "Metric",
+        "purpose": "Hourly temperatures, tabular figures."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Status row titles, help text, hi and lo."
+      },
+      "body-strong": {
+        "displayName": "Body strong",
+        "purpose": "Status row titles."
+      },
+      "callout": {
+        "displayName": "Callout",
+        "purpose": "Weather note, daily temperatures, alert text."
+      },
+      "subhead": {
+        "displayName": "Subhead",
+        "purpose": "Latest commit line."
+      },
+      "caption": {
+        "displayName": "Caption",
+        "purpose": "Hour and day labels, details, arc captions."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Pane headings and chip text, uppercase and tracked."
+      }
+    },
+    "shadows": [
+      {
+        "name": "focus-lift",
+        "value": "0 26pt 28pt rgba(8, 8, 24, 0.45), masked to outside the pane",
+        "purpose": "Under a focused glass pane only."
+      },
+      {
+        "name": "sky-text",
+        "value": "0 2pt 15pt rgba(0, 0, 0, 0.22)",
+        "purpose": "Clock and date, which sit directly on the sky."
+      }
+    ],
+    "motion": [
+      {
+        "name": "focus",
+        "value": "spring(response: 0.35, dampingFraction: 0.82)",
+        "purpose": "Pane lift, sheen and rim on focus."
+      },
+      {
+        "name": "state",
+        "value": "easeOut 0.2s",
+        "purpose": "Pressed scale, help pane text changes."
+      },
+      {
+        "name": "storm-takeover",
+        "value": "easeInOut 0.6s",
+        "purpose": "Dashboard to radar and back; must finish within 1 s of the trigger."
+      },
+      {
+        "name": "night-dim",
+        "value": "easeInOut 3s",
+        "purpose": "Dim and undim."
+      },
+      {
+        "name": "scene-blend",
+        "value": "90s linear interpolation",
+        "purpose": "Sky palette moving between scenes."
+      },
+      {
+        "name": "sky-drift",
+        "value": "34s, 41s, 47s, 53s ease-in-out alternating",
+        "purpose": "Mesh point drift on the resting screen."
+      },
+      {
+        "name": "focus-scale",
+        "value": "1.04 focused, 0.98 pressed",
+        "purpose": "Glass pane scale steps."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "tv-1x",
+        "value": "1920x1080pt"
+      }
+    ],
+    "scenes": {
+      "anchors": {
+        "note": "Sky anchors by sun altitude. Five colors each: top left, top right, center, low glow, bottom. The scene engine interpolates between neighbors.",
+        "night": {
+          "sunAltitudeMax": -12,
+          "colors": [
+            "#050816",
+            "#111838",
+            "#232A58",
+            "#3B356A",
+            "#0B1230"
+          ],
+          "accent": "#B2BCFF",
+          "glassShade": 0.1,
+          "particles": "stars"
+        },
+        "blue-hour": {
+          "sunAltitude": -4,
+          "colors": [
+            "#151A3E",
+            "#2E2F66",
+            "#6B5287",
+            "#D98F86",
+            "#223463"
+          ],
+          "accent": "#FFC8B4",
+          "glassShade": 0.16
+        },
+        "golden-hour": {
+          "sunAltitudeRange": [
+            0,
+            8
+          ],
+          "colors": [
+            "#1E2148",
+            "#4A3F7A",
+            "#B9708A",
+            "#EFA06A",
+            "#31507E"
+          ],
+          "accent": "#FFC896",
+          "glassShade": 0.2
+        },
+        "day": {
+          "sunAltitudeMin": 25,
+          "colors": [
+            "#123F75",
+            "#2163AD",
+            "#5596D4",
+            "#E4D3A0",
+            "#1B5597"
+          ],
+          "accent": "#FFEAAF",
+          "glassShade": 0.32
+        }
+      },
+      "overlays": {
+        "note": "Condition palettes mixed over the anchor at the given amount (full daylight). Particles name the layer the condition adds.",
+        "partly-cloudy": {
+          "mixesWith": "cloudy",
+          "amount": 0.25
+        },
+        "cloudy": {
+          "colors": [
+            "#2B3442",
+            "#4C5869",
+            "#7D8A99",
+            "#A2ACB7",
+            "#3B4656"
+          ],
+          "amount": 0.6,
+          "accent": "#C8D4E2",
+          "glassShade": 0.26
+        },
+        "rain": {
+          "colors": [
+            "#1C232D",
+            "#364352",
+            "#58687A",
+            "#6E8094",
+            "#283442"
+          ],
+          "amount": 0.85,
+          "accent": "#AAD0EE",
+          "glassShade": 0.16,
+          "particles": "rain"
+        },
+        "storm": {
+          "colors": [
+            "#15161F",
+            "#2B2C40",
+            "#4B4662",
+            "#645C7E",
+            "#1F2030"
+          ],
+          "amount": 0.9,
+          "accent": "#C8B8FF",
+          "glassShade": 0.14,
+          "particles": "rain, lightning"
+        },
+        "snow": {
+          "colors": [
+            "#3C4757",
+            "#66748A",
+            "#9AA8B9",
+            "#C9D2DC",
+            "#4F5D72"
+          ],
+          "amount": 0.75,
+          "accent": "#E6F0FF",
+          "glassShade": 0.36,
+          "particles": "snow"
+        },
+        "fog": {
+          "colors": [
+            "#3A3F47",
+            "#5D646E",
+            "#8B929B",
+            "#B1B6BC",
+            "#4A5058"
+          ],
+          "amount": 0.75,
+          "accent": "#D7DCE2",
+          "glassShade": 0.3,
+          "particles": "fog"
+        }
+      },
+      "nightDim": {
+        "brightness": 0.3,
+        "particles": "off",
+        "transitionSeconds": 3
+      }
+    }
+  },
+  "components": [
+    {
+      "name": "Glass Pane",
+      "kind": "card",
+      "refersTo": "glass-pane",
+      "description": "Liquid Glass container over the sky; lifts, brightens and gains a rim on focus.",
+      "html": "<div class=\"ds-sky\"><button class=\"ds-pane\"><span class=\"ds-heading\">HOME</span><span class=\"ds-title\">70° inside</span><span class=\"ds-detail\">Heating to 69°</span></button></div>",
+      "css": ".ds-sky{padding:32px;background:linear-gradient(160deg,#1E2148,#B9708A 55%,#EFA06A)}.ds-pane{display:flex;flex-direction:column;gap:6px;align-items:flex-start;width:300px;padding:20px 26px;border:0;border-radius:26px;color:#fff;font:500 18px -apple-system,system-ui,sans-serif;background:rgba(14,16,36,.2);backdrop-filter:blur(30px) saturate(160%);box-shadow:inset 0 1px 0 rgba(255,255,255,.35);transition:transform .35s cubic-bezier(.3,1.3,.5,1),box-shadow .35s}.ds-pane:hover,.ds-pane:focus-visible{outline:none;transform:scale(1.04);background:rgba(255,255,255,.16);box-shadow:inset 0 0 0 2px rgba(255,255,255,.75),0 18px 22px rgba(8,8,24,.45)}.ds-heading{font:600 13px -apple-system,system-ui,sans-serif;letter-spacing:1.1px;color:rgba(255,255,255,.72)}.ds-detail{font-weight:400;font-size:15px;color:rgba(255,255,255,.8)}"
+    },
+    {
+      "name": "Nudge Chip",
+      "kind": "chip",
+      "refersTo": "nudge-chip",
+      "description": "Amber chip for a condition the owner would act on.",
+      "html": "<div class=\"ds-sky\"><span class=\"ds-nudge\">Dry air</span></div>",
+      "css": ".ds-sky{padding:24px;background:#232A58}.ds-nudge{display:inline-block;padding:5px 11px;border-radius:13px;font:600 15px -apple-system,system-ui,sans-serif;color:#FFE2A8;background:rgba(255,190,90,.18);box-shadow:inset 0 0 0 1px rgba(255,205,120,.4)}"
+    },
+    {
+      "name": "Warning Chip",
+      "kind": "chip",
+      "refersTo": "warning-chip",
+      "description": "Coral chip for a lost connection or failed setup test.",
+      "html": "<div class=\"ds-sky\"><span class=\"ds-warn\">Home Assistant offline, retrying</span></div>",
+      "css": ".ds-sky{padding:24px;background:#232A58}.ds-warn{display:inline-block;padding:5px 11px;border-radius:13px;font:600 15px -apple-system,system-ui,sans-serif;color:#FFA898;background:rgba(255,90,70,.24);box-shadow:inset 0 0 0 1px rgba(255,140,120,.55)}"
+    },
+    {
+      "name": "Alert Banner",
+      "kind": "custom",
+      "refersTo": "alert-banner",
+      "description": "Weather alert with text exactly as issued and a QR code to the details page.",
+      "html": "<div class=\"ds-sky\"><div class=\"ds-alert\"><strong>Severe Thunderstorm Warning</strong><span class=\"ds-meta\">National Weather Service, until 8:15 PM</span><p>Hazards include 60 mph wind gusts and penny size hail.</p></div></div>",
+      "css": ".ds-sky{padding:24px;background:#1F2030}.ds-alert{max-width:420px;padding:18px;border-radius:18px;color:#fff;font:400 16px -apple-system,system-ui,sans-serif;background:rgba(255,90,70,.24);box-shadow:inset 0 0 0 1.5px rgba(255,140,120,.55)}.ds-alert strong{display:block;font-weight:500;font-size:22px}.ds-meta{font-size:13px;color:rgba(255,255,255,.8)}.ds-alert p{margin:8px 0 0}"
+    },
+    {
+      "name": "Scene Button",
+      "kind": "button",
+      "refersTo": "scene-button",
+      "description": "Native tvOS glass button; focus is the platform's white platter with dark text.",
+      "html": "<div class=\"ds-sky\"><button class=\"ds-scene\">Goodnight</button></div>",
+      "css": ".ds-sky{padding:24px;background:linear-gradient(160deg,#1E2148,#B9708A)}.ds-scene{padding:10px 22px;border:0;border-radius:999px;font:500 17px -apple-system,system-ui,sans-serif;color:#fff;background:rgba(255,255,255,.14);backdrop-filter:blur(20px);transition:transform .2s,background .2s,color .2s}.ds-scene:hover,.ds-scene:focus-visible{outline:none;background:#fff;color:#1a1a1a;transform:scale(1.06)}"
+    },
+    {
+      "name": "Status Row",
+      "kind": "custom",
+      "refersTo": "status-row-well",
+      "description": "Icon well, title and detail, with an optional trailing chip.",
+      "html": "<div class=\"ds-sky\"><div class=\"ds-row\"><span class=\"ds-well\"></span><span><b>31% humidity</b><small>Bedroom 33%</small></span></div></div>",
+      "css": ".ds-sky{padding:24px;background:#232A58}.ds-row{display:flex;align-items:center;gap:12px;color:#fff;font:500 18px -apple-system,system-ui,sans-serif}.ds-well{width:32px;height:32px;border-radius:50%;background:rgba(255,255,255,.14)}.ds-row b{display:block;font-weight:500}.ds-row small{font-size:14px;font-weight:400;color:rgba(255,255,255,.8)}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Window Pane",
+    "overview": "The biggest screen in the room becomes a window onto the actual sky. A mesh-gradient sky fills the frame, its colors set by the real condition and the sun's altitude, and a few Liquid Glass panes float over it with the time, the forecast, the house and the code. Everything is read in a glance from the couch, so the system spends its ambition on the sky and on legibility, never on chrome.\n\nThe resting screen is calm: one huge thin clock, one sky, four panes. Motion is slow and continuous, the sky drifting on 34 to 53 second cycles and blending between scenes over about 90 seconds, so nothing moves faster than weather does. The only fast moments are earned: focus lifting a pane when the remote is picked up, a storm swapping the dashboard for radar, a rare flash of lightning.\n\nThe panes use the platform's own Liquid Glass and native tvOS controls. Brand lives in the sky, the thin display numerals, the 40 pt continuous corners and the restraint of the signal colors. The approved mockup (board A, animated gradient) is the composition reference.",
+    "keyCharacteristics": [
+      "The sky is the color; panes are glass and ink.",
+      "White ink at three opacities carries all text.",
+      "Each signal color has exactly one job.",
+      "SF Pro Thin only at hero scale, Regular to Semibold everywhere else.",
+      "Native tvOS focus, lists, fields and glass buttons; custom only where the platform has no equivalent."
+    ],
+    "rules": [
+      {
+        "name": "The Sky Is the Color Rule",
+        "body": "Large fields of color come only from the scene. No pane, button or heading carries a brand color of its own.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Job Rule",
+        "body": "Rain blue means rain chance, amber means a nudge, coral means a warning, sunlight means the sun. A color never appears for decoration or a second meaning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Shade Follows the Sun Rule",
+        "body": "The brighter the sky, the more Glass Shade goes into every pane, so white ink keeps its contrast on a clear afternoon or a snowy morning.",
+        "section": "colors"
+      },
+      {
+        "name": "The Thin Hero Rule",
+        "body": "Thin and Light weights appear only at 64 pt and above (clock, meridiem, hero temperature, compact storm clock). Below that, Regular is the lightest weight.",
+        "section": "typography"
+      },
+      {
+        "name": "The 24-Point Floor Rule",
+        "body": "No text role is smaller than 24 pt. The tvOS HIG puts legibility at 23 pt; the mockup's 22 pt captions were raised to 24.",
+        "section": "typography"
+      },
+      {
+        "name": "The Tabular Numbers Rule",
+        "body": "Temperatures in rows (hourly, daily) use tabular figures so columns do not wobble as values change. The clock stays proportional; it is one line and reads better that way.",
+        "section": "typography"
+      },
+      {
+        "name": "The Stacked Actions Rule",
+        "body": "Buttons under a field stack vertically. tvOS sends focus to the geometrically nearest control, so a side-by-side row under a wide field sends Down to the wrong button.",
+        "section": "layout"
+      },
+      {
+        "name": "The Glass Only Rule",
+        "body": "Every container over the sky is Liquid Glass. No opaque cards, no hand-rolled blur, no gradient fills standing in for glass.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Flat at Rest Rule",
+        "body": "A pane gains shadow, sheen and rim only while it has focus.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do take every large color field from the scene palette, and raise Glass Shade as the sky brightens (10% at night up to 36% on snow).",
+      "Do keep text at 24 pt or larger and at Regular weight or heavier below 64 pt.",
+      "Do use native tvOS controls for lists, toggles, fields and scene buttons, and let the platform draw their focus.",
+      "Do show focus on custom panes with the 1.04 lift, 16% sheen, 75% rim and the outside-only shadow.",
+      "Do show weather alert text exactly as issued, wrapped, with the QR code to Apple's alert page.",
+      "Do keep the Apple Weather mark on screen whenever weather data is shown.",
+      "Do stack setup actions vertically under their fields."
+    ],
+    "donts": [
+      "Don't give a pane, heading or button a brand color; the sky is the only color field.",
+      "Don't use amber, coral, rain blue or sunlight for anything but their one job.",
+      "Don't use Thin or Light weights below 64 pt.",
+      "Don't put a resting shadow on a pane, or a text shadow on text inside a pane.",
+      "Don't shorten, rephrase or truncate weather alert text.",
+      "Don't animate anything faster than the weather on the resting screen; fast motion is reserved for focus, storm takeover and lightning.",
+      "Don't force a foreground color on native controls; it breaks their focus platter (white text on white)."
+    ]
+  }
+}
