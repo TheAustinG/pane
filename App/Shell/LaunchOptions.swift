@@ -15,6 +15,8 @@ struct LaunchOptions {
     var opensDebugMenu: Bool
     var opensSettings: Bool
     var resetsSettings: Bool
+    /// `on` or `off` pins night dim regardless of the schedule.
+    var nightDim: Bool?
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {
         LaunchOptions(
@@ -26,7 +28,8 @@ struct LaunchOptions {
             showFPS: defaults.bool(forKey: "fps"),
             opensDebugMenu: defaults.bool(forKey: "debugMenu"),
             opensSettings: defaults.bool(forKey: "settings"),
-            resetsSettings: defaults.bool(forKey: "resetSettings")
+            resetsSettings: defaults.bool(forKey: "resetSettings"),
+            nightDim: defaults.string(forKey: "nightDim").flatMap { ["on": true, "off": false][$0] }
         )
     }
 

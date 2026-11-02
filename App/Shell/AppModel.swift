@@ -65,6 +65,7 @@ final class AppModel {
     var isDebugMenuPresented: Bool
     var isSettingsPresented: Bool
     let usesSampleFixtures: Bool
+    let pinnedNightDim: Bool?
     let settings: AppSettings
     let secrets: any SecretStore
     @ObservationIgnored var calendar = Calendar.current
@@ -77,6 +78,7 @@ final class AppModel {
         isDebugMenuPresented = options.opensDebugMenu
         isSettingsPresented = options.opensSettings
         usesSampleFixtures = options.fixtures == "sample"
+        pinnedNightDim = options.nightDim
         self.settings = settings
         self.secrets = secrets
     }
@@ -94,7 +96,7 @@ final class AppModel {
     }
 
     func isNightDimmed(at date: Date) -> Bool {
-        NightDim.isDimmed(
+        pinnedNightDim ?? NightDim.isDimmed(
             at: date,
             schedule: settings.nightSchedule,
             override: settings.nightDimOverride,
