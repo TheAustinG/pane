@@ -61,7 +61,8 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(waitForFocus(settings))
 
         XCUIRemote.shared.press(.select)
-        XCTAssertTrue(waitForFocus(settings, is: false), "Settings did not take focus from the dashboard")
+        let nightRow = app.descendants(matching: .any).matching(identifier: "settings.night.enabled").firstMatch
+        XCTAssertTrue(nightRow.waitForExistence(timeout: 5), "Settings did not open")
         XCTAssertFalse(weather.hasFocus)
 
         XCUIRemote.shared.press(.menu)
@@ -70,23 +71,5 @@ final class DashboardUITests: XCTestCase {
 
     private func nightDim(_ app: XCUIApplication) -> XCUIElement {
         app.otherElements["dashboard.nightDim"]
-    }
-
-    private func waitForFocus(_ element: XCUIElement, is focused: Bool = true, timeout: TimeInterval = 5) -> Bool {
-        let predicate = NSPredicate(format: "hasFocus == %@", NSNumber(value: focused))
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
-    }
-
-    private func waitForValue(_ element: XCUIElement, _ value: String, timeout: TimeInterval = 5) -> Bool {
-        let predicate = NSPredicate(format: "value == %@", value)
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
-    }
-
-    private func waitForNonExistence(_ element: XCUIElement, timeout: TimeInterval = 5) -> Bool {
-        let predicate = NSPredicate(format: "exists == false")
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
     }
 }

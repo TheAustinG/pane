@@ -45,7 +45,7 @@ struct DashboardView: View {
         let dimmed = model.isNightDimmed(at: date)
         let context = CardContext(model: model, date: date, palette: palette)
         return ZStack {
-            SkyView(target: palette, quality: model.quality, particlesEnabled: !dimmed)
+            SkyView(target: palette, quality: model.quality, particlesEnabled: !dimmed, animates: !model.isSettingsPresented)
             layout(date: date, context: context)
                 .disabled(!isInteractive)
             settingsEntry

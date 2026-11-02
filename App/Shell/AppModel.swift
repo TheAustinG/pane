@@ -19,7 +19,11 @@ final class AppSettings {
     @ObservationIgnored private let defaults: UserDefaults
 
     var nightSchedule: NightSchedule {
-        didSet { store(nightSchedule, key: Keys.nightSchedule) }
+        didSet {
+            store(nightSchedule, key: Keys.nightSchedule)
+            // An override's expiry was computed from the old schedule.
+            if nightSchedule != oldValue { nightDimOverride = .none }
+        }
     }
 
     var nightDimOverride: NightDimOverride {

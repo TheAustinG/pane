@@ -16,7 +16,7 @@ struct HomeCard: DashboardCard {
     }
 
     private var placeholder: some View {
-        CardPlaceholder(heading: "Home", symbol: "house", line: "Connect Home Assistant in Settings")
+        CardPlaceholder(heading: "Home", symbol: "house", line: "Not connected yet")
     }
 }
 

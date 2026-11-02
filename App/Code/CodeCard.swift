@@ -17,7 +17,7 @@ struct CodeCard: DashboardCard {
     }
 
     private var placeholder: some View {
-        CardPlaceholder(heading: "GitHub", symbol: "arrow.triangle.branch", line: "Connect GitHub in Settings")
+        CardPlaceholder(heading: "GitHub", symbol: "arrow.triangle.branch", line: "Not connected yet")
     }
 }
 

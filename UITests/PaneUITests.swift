@@ -24,10 +24,4 @@ final class PaneUITests: XCTestCase {
         XCUIRemote.shared.press(.left)
         XCTAssertTrue(waitForFocus(app.buttons["dashboard.card.forecast"]))
     }
-
-    private func waitForFocus(_ element: XCUIElement, timeout: TimeInterval = 5) -> Bool {
-        let predicate = NSPredicate(format: "hasFocus == true")
-        let expectation = XCTNSPredicateExpectation(predicate: predicate, object: element)
-        return XCTWaiter().wait(for: [expectation], timeout: timeout) == .completed
-    }
 }

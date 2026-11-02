@@ -224,13 +224,19 @@ struct QRCodeView: View {
         .accessibilityLabel("QR code for \(url.host() ?? url.absoluteString)")
     }
 
-    private static func render(_ string: String) -> UIImage? {
+    @MainActor private static let context = CIContext()
+    @MainActor private static let cache = NSCache<NSString, UIImage>()
+
+    @MainActor private static func render(_ string: String) -> UIImage? {
+        if let cached = cache.object(forKey: string as NSString) { return cached }
         let filter = CIFilter.qrCodeGenerator()
         filter.message = Data(string.utf8)
         filter.correctionLevel = "M"
         guard let output = filter.outputImage,
-              let cgImage = CIContext().createCGImage(output, from: output.extent) else { return nil }
-        return UIImage(cgImage: cgImage)
+              let cgImage = context.createCGImage(output, from: output.extent) else { return nil }
+        let image = UIImage(cgImage: cgImage)
+        cache.setObject(image, forKey: string as NSString)
+        return image
     }
 }
 

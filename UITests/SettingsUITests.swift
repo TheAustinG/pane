@@ -92,7 +92,7 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(enabled.waitForExistence(timeout: 10))
 
         XCUIRemote.shared.press(.menu)
-        XCTAssertTrue(waitForDisappearance(enabled))
+        XCTAssertTrue(waitForNonExistence(enabled, timeout: 10))
         XCTAssertTrue(app.buttons["dashboard.card.current"].waitForExistence(timeout: 10))
     }
 
@@ -121,20 +121,5 @@ final class SettingsUITests: XCTestCase {
 
     private func waitForHelp(_ app: XCUIApplication, containing text: String, timeout: TimeInterval = 5) -> Bool {
         waitForLabel(app.staticTexts["settings.help"], containing: text, timeout: timeout)
-    }
-
-    private func waitForLabel(_ element: XCUIElement, containing text: String, timeout: TimeInterval = 5) -> Bool {
-        let predicate = NSPredicate(format: "label CONTAINS %@", text)
-        return XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: element)], timeout: timeout) == .completed
-    }
-
-    private func waitForFocus(_ element: XCUIElement, timeout: TimeInterval = 5) -> Bool {
-        let predicate = NSPredicate(format: "hasFocus == true")
-        return XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: element)], timeout: timeout) == .completed
-    }
-
-    private func waitForDisappearance(_ element: XCUIElement, timeout: TimeInterval = 10) -> Bool {
-        let predicate = NSPredicate(format: "exists == false")
-        return XCTWaiter().wait(for: [XCTNSPredicateExpectation(predicate: predicate, object: element)], timeout: timeout) == .completed
     }
 }

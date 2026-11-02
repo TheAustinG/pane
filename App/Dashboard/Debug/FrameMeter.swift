@@ -138,7 +138,7 @@ private final class DisplayLinkTrampoline: NSObject {
     }
 }
 
-/// Frame rate readout in the top right corner, driven by a display link while it is on screen.
+/// Frame rate readout, driven by a display link while it is on screen.
 struct FrameHUD: View {
     let quality: RenderQuality
     @State private var meter = FrameMeter()
