@@ -7,19 +7,19 @@ struct DebugOverlay: View {
     @Bindable var model: AppModel
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
+        ZStack(alignment: .top) {
             if model.isDebugMenuPresented {
                 Color.black.opacity(0.35).ignoresSafeArea()
                 DebugMenu(model: model)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
             if model.showFPS {
+                // Top center is the one strip no pane, clock or Settings button reaches.
                 FrameHUD(quality: model.quality)
-                    .padding(.bottom, 6)
-                    .padding(.trailing, 16)
+                    .padding(.top, 8)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
     }
 }
 
