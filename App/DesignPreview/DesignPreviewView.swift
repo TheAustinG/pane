@@ -50,6 +50,8 @@ struct DesignPreviewView: View {
     private let stormLayout: StormLayout
     private let setupState: SetupSampleState
     private let requestedFocus: String?
+    @State private var dashboardModel: AppModel
+    @State private var nightModel: AppModel
 
     init(page: PreviewPage, defaults: UserDefaults = .standard) {
         _page = State(initialValue: page)
@@ -57,11 +59,37 @@ struct DesignPreviewView: View {
         stormLayout = StormLayout(rawValue: defaults.string(forKey: "stormLayout") ?? "") ?? .side
         setupState = SetupSampleState(rawValue: defaults.string(forKey: "setupState") ?? "") ?? .ok
         requestedFocus = defaults.string(forKey: "previewFocus")
+        _dashboardModel = State(initialValue: PreviewDashboard.model(scene: scene, night: false))
+        _nightModel = State(initialValue: PreviewDashboard.model(scene: .night, night: true))
     }
 
     var body: some View {
-        content
+        pageView
             .id(page)
+            .onPlayPauseCommand { page = page.next }
+    }
+
+    @ViewBuilder private var pageView: some View {
+        switch page {
+        case .dashboard:
+            DashboardView(
+                model: dashboardModel,
+                initialFocus: PreviewDashboard.focus(for: requestedFocus),
+                handlesDebugMenu: false
+            )
+        case .night:
+            DashboardView(
+                model: nightModel,
+                initialFocus: PreviewDashboard.focus(for: requestedFocus),
+                handlesDebugMenu: false
+            )
+        default:
+            samplePage
+        }
+    }
+
+    private var samplePage: some View {
+        content
             .overlay(alignment: .bottomTrailing) {
                 if page.defaultFocus == nil || page == .components {
                     Text("Design preview: \(page.title). Play/Pause shows the next page.")
@@ -72,7 +100,6 @@ struct DesignPreviewView: View {
                 }
             }
             .defaultFocus($focus, initialFocus)
-            .onPlayPauseCommand { page = page.next }
             .task(id: page) {
                 // Lazy lists realize far rows late, so a second attempt reaches them.
                 for delay in [400, 1200] {
@@ -94,21 +121,14 @@ struct DesignPreviewView: View {
             PalettePage()
         case .components:
             ComponentsPage(focus: $focus)
-        case .dashboard:
-            DashboardSample(scene: scene, focus: $focus)
         case .storm:
             StormSample(scene: .storm, layout: stormLayout, focus: $focus)
-        case .night:
-            DashboardSample(scene: .night, particles: false, focus: $focus)
-                .overlay {
-                    Color.black.opacity(1 - Theme.Dim.night)
-                        .ignoresSafeArea()
-                        .allowsHitTesting(false)
-                }
         case .settings:
             SettingsSample(scene: scene, focus: $focus, scrollTarget: requestedFocus)
         case .setup:
             SetupSample(scene: scene, state: setupState, focus: $focus)
+        case .dashboard, .night:
+            EmptyView()
         }
     }
 }

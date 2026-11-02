@@ -1,4 +1,5 @@
 #if DEBUG
+import PaneCore
 import SwiftUI
 
 /// Static scene samples for the design preview. The live scene engine replaces these palettes with
@@ -185,6 +186,20 @@ struct ScenePreset: Identifiable {
 
     static func named(_ id: String?) -> ScenePreset? {
         all.first { $0.id == id }
+    }
+
+    /// The sample whose scene the app is showing; golden when the live scene is.
+    static func matching(_ scene: WeatherScene?) -> ScenePreset {
+        guard let scene else { return .golden }
+        return all.first { WeatherScene.preset(named: $0.id) == scene } ?? .golden
+    }
+
+    /// The frozen app time that makes the real clock read this sample's time and date.
+    var sampleDate: Date? {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy EEEE, MMMM d h:mm a"
+        return formatter.date(from: "2026 \(date) \(time) \(meridiem)")
     }
 
     /// Deterministic contribution levels with a 12-day streak ending today.
