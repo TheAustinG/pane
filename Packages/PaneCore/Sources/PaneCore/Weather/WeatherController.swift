@@ -10,39 +10,192 @@ public final class WeatherController {
     public private(set) var attribution: WeatherAttributionInfo?
     /// PNG bytes of the combined dark mark, kept so the mark still shows offline.
     public private(set) var markImageData: Data?
+    /// When the last attempt failed; nil once one succeeds.
     public private(set) var lastFailure: Date?
-    public var location: GeoPoint?
+    /// Billable WeatherKit calls counted this calendar month.
+    public private(set) var callsThisMonth: Int
+    /// Changing it wakes the refresh loop to fetch the new place.
+    public var location: GeoPoint? {
+        didSet {
+            if location != oldValue { wakeLoop() }
+        }
+    }
+
+    static let attributionLifetime: TimeInterval = 24 * 3600
 
     @ObservationIgnored private let service: any WeatherService
-    @ObservationIgnored private let now: @Sendable () -> Date
+    @ObservationIgnored private let cache: WeatherCache
+    @ObservationIgnored private let budget: CallBudget
+    @ObservationIgnored private let policy: RefreshPolicy
+    @ObservationIgnored private let clock: any WeatherClock
+    @ObservationIgnored private let loadData: WeatherDataLoader
+    @ObservationIgnored private var refreshState = RefreshState()
+    /// Where the last attempt fetched; a different `location` is due at once.
+    @ObservationIgnored private var attemptedLocation: GeoPoint?
+    @ObservationIgnored private var attributionFetchedAt: Date?
+    @ObservationIgnored private var hasLoadedCache = false
+    @ObservationIgnored private var inFlight: Task<Void, Never>?
+    @ObservationIgnored private var sleeper: Task<Void, any Error>?
 
-    public init(service: any WeatherService, now: @escaping @Sendable () -> Date = { .now }) {
+    public init(
+        service: any WeatherService,
+        cache: WeatherCache = WeatherCache(directory: WeatherCache.defaultDirectory),
+        budget: CallBudget = CallBudget(),
+        policy: RefreshPolicy = RefreshPolicy(),
+        clock: any WeatherClock = SystemWeatherClock(),
+        loadData: @escaping WeatherDataLoader = WeatherDownload.data(from:)
+    ) {
         self.service = service
-        self.now = now
+        self.cache = cache
+        self.budget = budget
+        self.policy = policy
+        self.clock = clock
+        self.loadData = loadData
+        callsThisMonth = budget.calls(at: clock.now)
     }
 
-    /// Runs until the calling task is cancelled.
+    /// Shows the cached report at once, then refreshes whenever due. Runs until the calling task
+    /// is cancelled.
     public func run() async {
-        await refreshNow()
+        loadCache()
+        while !Task.isCancelled {
+            updateCallCount()
+            if isDue(at: clock.now) {
+                await refresh()
+            } else {
+                await sleep(until: nextWake(at: clock.now))
+            }
+        }
     }
 
+    /// Fetches now whatever the schedule says, joining a fetch already under way for this place.
     public func refreshNow() async {
-        guard let location else { return }
-        do {
-            report = try await service.report(for: location)
-            lastFailure = nil
-        } catch {
-            lastFailure = now()
+        if let inFlight {
+            await inFlight.value
+            if attemptedLocation == location { return }
         }
-        if attribution == nil {
-            attribution = try? await service.attribution()
-        }
+        await refresh()
     }
 
     public func freshness(at date: Date) -> Freshness {
-        guard let report else { return .none }
-        let minutes = Int(date.timeIntervalSince(report.fetchedAt) / 60)
-        if minutes >= 30 { return .stale(minutes: minutes) }
-        return lastFailure == nil ? .fresh : .delayed(minutes: minutes)
+        policy.freshness(fetchedAt: report?.fetchedAt, lastAttemptFailed: lastFailure != nil, at: date)
+    }
+
+    private func loadCache() {
+        guard !hasLoadedCache else { return }
+        hasLoadedCache = true
+        let now = clock.now
+        if report == nil, let cached = cache.loadReport() {
+            report = cached
+            // A recent fetch for this place counts as the last attempt, so a relaunch spends no calls.
+            let age = now.timeIntervalSince(cached.fetchedAt)
+            if age >= 0, age < policy.interval {
+                refreshState.recordSuccess(at: cached.fetchedAt)
+                attemptedLocation = cached.location
+            }
+        }
+        if attribution == nil, let saved = cache.loadAttribution() {
+            attribution = saved.info
+            attributionFetchedAt = saved.fetchedAt
+        }
+        if markImageData == nil {
+            markImageData = cache.loadMark()
+        }
+    }
+
+    private var isOverBudget: Bool {
+        budget.isOverSoftLimit(at: clock.now)
+    }
+
+    private func isDue(at now: Date) -> Bool {
+        guard let location else { return false }
+        if location != attemptedLocation { return true }
+        return policy.isDue(refreshState, at: now, overBudget: isOverBudget)
+    }
+
+    /// Never later than one interval away, so a month rollover or a clock change is noticed.
+    private func nextWake(at now: Date) -> Date {
+        let latest = now.addingTimeInterval(policy.interval)
+        guard location != nil, let next = policy.nextRefresh(after: refreshState, overBudget: isOverBudget) else {
+            return latest
+        }
+        return min(next, latest)
+    }
+
+    private func refresh() async {
+        if let inFlight {
+            await inFlight.value
+            return
+        }
+        guard let target = location else { return }
+        let task = Task {
+            await fetch(target)
+            inFlight = nil
+        }
+        inFlight = task
+        await task.value
+    }
+
+    private func fetch(_ target: GeoPoint) async {
+        let started = clock.now
+        attemptedLocation = target
+        budget.record(service.callsPerReport, at: started)
+        updateCallCount()
+        do {
+            let fresh = try await service.report(for: target)
+            report = fresh
+            lastFailure = nil
+            refreshState.recordSuccess(at: started)
+            cache.save(fresh)
+        } catch {
+            refreshState.recordFailure(at: started)
+            lastFailure = clock.now
+        }
+        await refreshAttributionIfDue()
+        // A fetch started by `refreshNow` moves the schedule, so the sleeping loop recomputes it.
+        wakeLoop()
+    }
+
+    private func refreshAttributionIfDue() async {
+        let now = clock.now
+        var renewed = false
+        if attributionIsDue(at: now), let fresh = try? await service.attribution() {
+            attribution = fresh
+            attributionFetchedAt = now
+            cache.save(fresh, fetchedAt: now)
+            renewed = true
+        }
+        guard let attribution, renewed || markImageData == nil else { return }
+        if let data = try? await loadData(attribution.combinedMarkDarkURL), !data.isEmpty {
+            markImageData = data
+            cache.saveMark(data)
+        }
+    }
+
+    private func attributionIsDue(at now: Date) -> Bool {
+        guard attribution != nil, let fetchedAt = attributionFetchedAt else { return true }
+        let age = now.timeIntervalSince(fetchedAt)
+        return age < 0 || age >= Self.attributionLifetime
+    }
+
+    private func updateCallCount() {
+        let calls = budget.calls(at: clock.now)
+        if calls != callsThisMonth { callsThisMonth = calls }
+    }
+
+    private func sleep(until deadline: Date) async {
+        let clock = clock
+        let task = Task { try await clock.sleep(until: deadline) }
+        sleeper = task
+        await withTaskCancellationHandler {
+            _ = try? await task.value
+        } onCancel: {
+            task.cancel()
+        }
+        sleeper = nil
+    }
+
+    private func wakeLoop() {
+        sleeper?.cancel()
     }
 }
