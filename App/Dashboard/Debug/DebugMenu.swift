@@ -7,7 +7,7 @@ struct DebugOverlay: View {
     @Bindable var model: AppModel
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
+        ZStack(alignment: .bottomTrailing) {
             if model.isDebugMenuPresented {
                 Color.black.opacity(0.35).ignoresSafeArea()
                 DebugMenu(model: model)
@@ -15,11 +15,11 @@ struct DebugOverlay: View {
             }
             if model.showFPS {
                 FrameHUD(quality: model.quality)
-                    .padding(.top, 8)
+                    .padding(.bottom, 6)
                     .padding(.trailing, 16)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
     }
 }
 

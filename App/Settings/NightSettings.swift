@@ -23,7 +23,7 @@ private struct NightSettingsRows: View {
     var body: some View {
         let settings = Bindable(model.settings)
         Toggle("Night dim", isOn: settings.nightSchedule.isEnabled)
-            .settingsHelp("The dashboard dims to about 30 percent overnight. Storm mode and nudges still brighten it.")
+            .settingsHelp("The dashboard dims to about 30 percent overnight.")
             .accessibilityIdentifier("settings.night.enabled")
         timePicker(
             "Starts",

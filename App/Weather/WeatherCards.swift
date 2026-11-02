@@ -6,7 +6,7 @@ struct CurrentWeatherCard: DashboardCard {
     var body: some View {
         #if DEBUG
         if context.model.usesSampleFixtures {
-            CurrentWeatherContent(scene: ScenePreset.matching(context.model.sceneOverride))
+            CurrentWeatherContent(scene: ScenePreset.matching(context.model.scene(at: context.date)))
         } else {
             placeholder
         }
@@ -16,7 +16,7 @@ struct CurrentWeatherCard: DashboardCard {
     }
 
     private var placeholder: some View {
-        CardPlaceholder(heading: "Weather", line: "Waiting for weather")
+        CardPlaceholder(heading: "Weather", line: "No data yet")
     }
 }
 
@@ -26,7 +26,7 @@ struct ForecastCard: DashboardCard {
     var body: some View {
         #if DEBUG
         if context.model.usesSampleFixtures {
-            ForecastContent(scene: ScenePreset.matching(context.model.sceneOverride))
+            ForecastContent(scene: ScenePreset.matching(context.model.scene(at: context.date)))
         } else {
             placeholder
         }
@@ -36,7 +36,7 @@ struct ForecastCard: DashboardCard {
     }
 
     private var placeholder: some View {
-        CardPlaceholder(heading: "Forecast", line: "Forecast appears with live weather")
+        CardPlaceholder(heading: "Forecast", line: "No data yet")
     }
 }
 

@@ -19,7 +19,7 @@ struct SettingsSample: View {
         "location": "Pane has no GPS. Search for your city once; it is stored as coordinates.",
         "background": "Gradient draws the sky live. Photo uses a blurred photo for the scene. Auto uses photos by day and the gradient at night and in storms.",
         "stormLayout": "Where the weather strip sits when radar takes over: a column at the side, or a strip along the bottom.",
-        "nightSchedule": "The dashboard dims to about 30 percent overnight. Storm mode and nudges still brighten it.",
+        "nightSchedule": "The dashboard dims to about 30 percent overnight.",
         "dimNow": "Dim the dashboard until the schedule next ends.",
         "homeAssistant": "Server address and access token for a non-admin Home Assistant user.",
         "github": "A fine-grained token with read-only Contents, Metadata and Actions.",

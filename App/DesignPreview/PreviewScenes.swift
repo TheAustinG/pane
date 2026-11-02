@@ -188,10 +188,22 @@ struct ScenePreset: Identifiable {
         all.first { $0.id == id }
     }
 
-    /// The sample whose scene the app is showing; golden when the live scene is.
-    static func matching(_ scene: WeatherScene?) -> ScenePreset {
-        guard let scene else { return .golden }
-        return all.first { WeatherScene.preset(named: $0.id) == scene } ?? .golden
+    /// The sample for the scene the app is showing: the preset itself when one is pinned,
+    /// otherwise the closest sample by condition and sun, so a night sky never gets the golden
+    /// hour card.
+    static func matching(_ scene: WeatherScene) -> ScenePreset {
+        if let exact = all.first(where: { WeatherScene.preset(named: $0.id) == scene }) { return exact }
+        switch scene.condition {
+        case .rain: return .rain
+        case .storm: return .storm
+        case .snow: return .snow
+        case .fog: return .fog
+        case .clear, .partlyCloudy, .cloudy:
+            if scene.sunAltitude < -6 { return .night }
+            if scene.sunAltitude < 0 { return scene.isMorning ? .dawn : .night }
+            if scene.sunAltitude < 12, !scene.isMorning { return .golden }
+            return .day
+        }
     }
 
     /// The frozen app time that makes the real clock read this sample's time and date.
