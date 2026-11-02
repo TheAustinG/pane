@@ -1,31 +1,42 @@
+import PaneCore
 import SwiftUI
 
 @main
 struct PaneApp: App {
+    @State private var model: AppModel
+    private let options: LaunchOptions
+
+    init() {
+        let options = LaunchOptions.parse()
+        self.options = options
+        _model = State(initialValue: AppModel(
+            options: options,
+            settings: AppSettings(reset: options.resetsSettings),
+            secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane")
+        ))
+    }
+
     var body: some Scene {
         WindowGroup {
-            RootView()
+            RootView(model: model, options: options)
                 .preferredColorScheme(.dark)
         }
     }
 }
 
 private struct RootView: View {
+    let model: AppModel
+    let options: LaunchOptions
+
     var body: some View {
         #if DEBUG
-        if let page = PreviewPage(rawValue: UserDefaults.standard.string(forKey: "designPreview") ?? "") {
+        if let page = PreviewPage(rawValue: options.designPreview ?? "") {
             DesignPreviewView(page: page)
         } else {
-            placeholder
+            DashboardView(model: model)
         }
         #else
-        placeholder
+        DashboardView(model: model)
         #endif
-    }
-
-    private var placeholder: some View {
-        Text("Pane")
-            .font(.largeTitle)
-            .accessibilityIdentifier("pane.placeholder")
     }
 }
