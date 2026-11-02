@@ -9,7 +9,8 @@ struct CurrentWeatherCard: DashboardCard {
         if let report = weather.report {
             CurrentWeatherContent(
                 display: WeatherDisplay(report: report, at: context.date, calendar: context.model.calendar),
-                freshness: weather.freshness(at: context.date).label
+                // Real time, not the app clock: a pinned or scrubbed clock says nothing about data age.
+                freshness: weather.freshness(at: .now).label
             )
         } else {
             WeatherEmptyCard(heading: "Weather", model: context.model)

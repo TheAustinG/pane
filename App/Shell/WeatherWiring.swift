@@ -39,8 +39,10 @@ enum WeatherWiring {
     private static func fixtureController(options: LaunchOptions) -> WeatherController {
         let cache = WeatherCache.inMemory()
         if let minutes = options.weatherAge {
-            let fetchedAt = (options.now ?? .now).addingTimeInterval(-Double(minutes) * 60)
-            cache.save(WeatherFixtures.report(scene: options.scene, at: fetchedAt))
+            let age = -Double(minutes) * 60
+            var report = WeatherFixtures.report(scene: options.scene, at: (options.now ?? .now).addingTimeInterval(age))
+            report.fetchedAt = Date.now.addingTimeInterval(age)
+            cache.save(report)
         }
         let service: any WeatherService = options.offline
             ? OfflineWeatherService()
