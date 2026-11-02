@@ -4,6 +4,12 @@ import SwiftUI
 struct CurrentWeatherCard: DashboardCard {
     let context: CardContext
 
+    /// The Settings button stays hidden until focused, so with no location the card itself is the
+    /// way in.
+    static func activate(model: AppModel) {
+        if model.weather.location == nil { model.isSettingsPresented = true }
+    }
+
     var body: some View {
         let weather = context.model.weather
         if let report = weather.report {
@@ -51,7 +57,7 @@ private struct WeatherEmptyCard: View {
 
     private var line: String {
         if model.weather.location == nil { return "Set your location in Settings" }
-        if model.weather.lastFailure != nil { return "Weather unavailable" }
+        if model.weather.lastFailure != nil { return "Weather unavailable, trying again soon" }
         return "Loading weather"
     }
 }

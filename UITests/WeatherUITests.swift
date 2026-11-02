@@ -23,6 +23,9 @@ final class WeatherUITests: XCTestCase {
         let empty = element(app, "weather.empty")
         XCTAssertTrue(empty.waitForExistence(timeout: 10))
         XCTAssertTrue(waitForLabel(empty, containing: "Set your location in Settings"), empty.label)
+        XCTAssertTrue(waitForFocus(app.buttons["dashboard.card.current"], timeout: 10))
+        XCUIRemote.shared.press(.select)
+        XCTAssertTrue(element(app, "settings.weather.location").waitForExistence(timeout: 10))
     }
 
     func testAttributionQRInSettings() {
