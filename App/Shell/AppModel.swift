@@ -92,7 +92,7 @@ final class AppModel {
         self.settings = settings
         self.secrets = secrets
         self.weather = weather
-        weather.location = settings.homeLocation?.coordinate
+        weather.location = settings.homeLocation?.coordinate ?? weather.location
     }
 
     var location: GeoPoint {
