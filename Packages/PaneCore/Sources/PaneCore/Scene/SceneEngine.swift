@@ -66,7 +66,6 @@ func smoothstep(_ x: Double) -> Double {
     return t * t * (3 - 2 * t)
 }
 
-/// One sky in OKLab: five colors, accent and glass shade.
 struct SkyState {
     var colors: [OKLab]
     var accent: OKLab

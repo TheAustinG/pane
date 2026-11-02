@@ -1,7 +1,6 @@
 import PaneCore
 import SwiftUI
 
-/// The sky's mesh gradient, drifting on one animation timeline and following the transition.
 struct SkyGradient: View {
     let transition: SceneTransition
     let quality: RenderQuality
@@ -37,7 +36,6 @@ struct SkyGradient: View {
     }
 }
 
-/// The soft darkening toward the corners from the design preview.
 struct SkyVignette: View {
     var body: some View {
         RadialGradient(

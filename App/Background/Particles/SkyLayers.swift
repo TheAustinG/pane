@@ -1,7 +1,6 @@
 import PaneCore
 import UIKit
 
-/// Soft dots drifting down from a line emitter above the frame, in three depths.
 @MainActor
 final class SnowLayer: ParticleLayer {
     private static let depthScale: [CGFloat] = [0.3, 0.45, 0.65]
@@ -128,7 +127,6 @@ final class StarLayer: ParticleLayer {
     }
 }
 
-/// Wide soft bands of mist drifting slowly sideways.
 @MainActor
 final class FogLayer: ParticleLayer {
     private let container = CALayer()
@@ -188,7 +186,6 @@ final class FogLayer: ParticleLayer {
     }
 }
 
-/// The storm's rare lightning: a brief white wash over the whole sky.
 @MainActor
 final class LightningFlash {
     let layer = CALayer()
