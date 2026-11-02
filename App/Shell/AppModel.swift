@@ -63,7 +63,7 @@ final class AppModel {
     var quality: RenderQuality
     var showFPS: Bool
     var isDebugMenuPresented: Bool
-    var isSettingsPresented = false
+    var isSettingsPresented: Bool
     let usesSampleFixtures: Bool
     let settings: AppSettings
     let secrets: any SecretStore
@@ -75,6 +75,7 @@ final class AppModel {
         quality = options.quality
         showFPS = options.showFPS
         isDebugMenuPresented = options.opensDebugMenu
+        isSettingsPresented = options.opensSettings
         usesSampleFixtures = options.fixtures == "sample"
         self.settings = settings
         self.secrets = secrets

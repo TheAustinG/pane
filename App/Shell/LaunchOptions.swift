@@ -13,6 +13,7 @@ struct LaunchOptions {
     var quality: RenderQuality
     var showFPS: Bool
     var opensDebugMenu: Bool
+    var opensSettings: Bool
     var resetsSettings: Bool
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {
@@ -24,6 +25,7 @@ struct LaunchOptions {
             quality: RenderQuality.named(defaults.string(forKey: "quality")) ?? .standard,
             showFPS: defaults.bool(forKey: "fps"),
             opensDebugMenu: defaults.bool(forKey: "debugMenu"),
+            opensSettings: defaults.bool(forKey: "settings"),
             resetsSettings: defaults.bool(forKey: "resetSettings")
         )
     }

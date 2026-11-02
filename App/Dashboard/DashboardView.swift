@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct DashboardView: View {
-    let model: AppModel
+    @Bindable var model: AppModel
 
     var body: some View {
         let date = model.now()
@@ -10,6 +10,9 @@ struct DashboardView: View {
             Text("Pane")
                 .font(.largeTitle)
                 .accessibilityIdentifier("pane.placeholder")
+        }
+        .fullScreenCover(isPresented: $model.isSettingsPresented) {
+            SettingsRoot(model: model)
         }
     }
 }
