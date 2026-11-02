@@ -147,11 +147,11 @@ func overlaysDarkenWithTheSky(condition: ConditionFamily) {
     #expect(try preset("night").particles == .stars)
     #expect(try preset("night").particleIntensity == 1)
     #expect(distance(try preset("dawn"), Design.blueHour) < 0.035)
-    // An overlay mixes at 75 to 90 percent, so 10 to 25 percent of the day sky remains.
-    #expect(distance(try preset("rain"), Design.rain) < 0.06)
-    #expect(distance(try preset("storm"), Design.storm) < 0.06)
-    #expect(distance(try preset("snow"), Design.snow) < 0.06)
-    #expect(distance(try preset("fog"), Design.fog) < 0.06)
+    // An overlay mixes at 75 to 90 percent, so 10 to 25 percent of the sky beneath remains.
+    #expect(distance(try preset("rain"), Design.rain) < 0.05)
+    #expect(distance(try preset("storm"), Design.storm) < 0.05)
+    #expect(distance(try preset("snow"), Design.snow) < 0.05)
+    #expect(distance(try preset("fog"), Design.fog) < 0.05)
     #expect(try preset("rain").particles == .rain)
     #expect(try preset("storm").particles == .storm)
     #expect(try preset("snow").particles == .snow)

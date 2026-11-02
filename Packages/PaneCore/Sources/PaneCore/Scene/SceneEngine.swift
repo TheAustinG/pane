@@ -209,12 +209,12 @@ extension WeatherScene {
         switch name {
         case "golden": WeatherScene(condition: .clear, sunAltitude: 4, isMorning: false)
         case "day": WeatherScene(condition: .clear, sunAltitude: 40, isMorning: true)
-        case "rain": WeatherScene(condition: .rain, sunAltitude: 35, isMorning: false)
+        case "rain": WeatherScene(condition: .rain, sunAltitude: 16, isMorning: false)
         case "night": WeatherScene(condition: .clear, sunAltitude: -30, isMorning: false)
         case "dawn": WeatherScene(condition: .clear, sunAltitude: -4, isMorning: true)
         case "snow": WeatherScene(condition: .snow, sunAltitude: 35, isMorning: true)
         case "fog": WeatherScene(condition: .fog, sunAltitude: 35, isMorning: true)
-        case "storm": WeatherScene(condition: .storm, sunAltitude: 35, isMorning: false)
+        case "storm": WeatherScene(condition: .storm, sunAltitude: 12, isMorning: false)
         default: nil
         }
     }
