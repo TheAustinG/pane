@@ -6,11 +6,14 @@ import PaneCore
 enum WeatherWiring {
     @MainActor
     static func controller(options: LaunchOptions) -> WeatherController {
-        let controller = WeatherController(service: service(options: options))
         #if DEBUG
-        if options.fixtures == "sample" { controller.location = AppModel.referenceLocation }
+        if options.fixtures == "sample" { return fixtureController(options: options) }
         #endif
-        return controller
+        if options.resetsSettings {
+            try? FileManager.default.removeItem(at: WeatherCache.defaultDirectory)
+        }
+        let service: any WeatherService = options.offline ? OfflineWeatherService() : WeatherKitService()
+        return WeatherController(service: service)
     }
 
     /// Debug simulator builds start with the home location from `local/Secrets.local.xcconfig`, so
@@ -29,13 +32,26 @@ enum WeatherWiring {
         (Bundle.main.object(forInfoDictionaryKey: key) as? String).flatMap(Double.init)
     }
 
-    private static func service(options: LaunchOptions) -> any WeatherService {
-        if options.offline { return OfflineWeatherService() }
-        #if DEBUG
-        if options.fixtures == "sample" {
-            return WeatherFixtures.service(scene: options.scene, fixedNow: options.now)
+    #if DEBUG
+    /// Fixture runs keep their reports and call counts in memory, away from the live cache and budget.
+    /// `-weatherAge` seeds the cache with a sample that old, as if fetched before going offline.
+    @MainActor
+    private static func fixtureController(options: LaunchOptions) -> WeatherController {
+        let cache = WeatherCache.inMemory()
+        if let minutes = options.weatherAge {
+            let fetchedAt = (options.now ?? .now).addingTimeInterval(-Double(minutes) * 60)
+            cache.save(WeatherFixtures.report(scene: options.scene, at: fetchedAt))
         }
-        #endif
-        return OfflineWeatherService()
+        let service: any WeatherService = options.offline
+            ? OfflineWeatherService()
+            : WeatherFixtures.service(scene: options.scene, fixedNow: options.now)
+        let controller = WeatherController(
+            service: service,
+            cache: cache,
+            budget: CallBudget(store: InMemoryKeyValueStore())
+        )
+        controller.location = AppModel.referenceLocation
+        return controller
     }
+    #endif
 }
