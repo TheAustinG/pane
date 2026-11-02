@@ -93,7 +93,7 @@ final class SettingsUITests: XCTestCase {
 
         XCUIRemote.shared.press(.menu)
         XCTAssertTrue(waitForDisappearance(enabled))
-        XCTAssertTrue(app.staticTexts["pane.placeholder"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["dashboard.card.current"].waitForExistence(timeout: 10))
     }
 
     private func launch(reset: Bool) -> XCUIApplication {

@@ -6,29 +6,23 @@ final class PaneUITests: XCTestCase {
         continueAfterFailure = false
     }
 
-    func testLaunchShowsPlaceholder() {
-        let app = XCUIApplication()
-        app.launch()
-        XCTAssertTrue(app.staticTexts["pane.placeholder"].waitForExistence(timeout: 10))
-    }
-
     func testDesignPreviewFocusMovesBetweenPanes() {
         let app = XCUIApplication()
         app.launchArguments = ["-designPreview", "dashboard", "-scene", "golden"]
         app.launch()
 
-        let weather = app.buttons["preview.pane.weather"]
+        let weather = app.buttons["dashboard.card.current"]
         XCTAssertTrue(weather.waitForExistence(timeout: 10))
         XCTAssertTrue(waitForFocus(weather))
 
         XCUIRemote.shared.press(.down)
-        XCTAssertTrue(waitForFocus(app.buttons["preview.pane.github"]))
+        XCTAssertTrue(waitForFocus(app.buttons["dashboard.card.code"]))
 
         XCUIRemote.shared.press(.left)
-        XCTAssertTrue(waitForFocus(app.buttons["preview.pane.home"]))
+        XCTAssertTrue(waitForFocus(app.buttons["dashboard.card.home"]))
 
         XCUIRemote.shared.press(.left)
-        XCTAssertTrue(waitForFocus(app.buttons["preview.pane.forecast"]))
+        XCTAssertTrue(waitForFocus(app.buttons["dashboard.card.forecast"]))
     }
 
     private func waitForFocus(_ element: XCUIElement, timeout: TimeInterval = 5) -> Bool {
