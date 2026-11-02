@@ -13,7 +13,7 @@ struct PaneApp: App {
             options: options,
             settings: AppSettings(reset: options.resetsSettings),
             secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane"),
-            weather: WeatherController(service: OfflineWeatherService())
+            weather: WeatherWiring.controller(options: options)
         ))
     }
 
@@ -21,6 +21,7 @@ struct PaneApp: App {
         WindowGroup {
             RootView(model: model, options: options)
                 .preferredColorScheme(.dark)
+                .task { await model.weather.run() }
         }
     }
 }
