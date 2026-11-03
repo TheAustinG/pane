@@ -140,6 +140,8 @@ struct AlertBanner: View {
     var qrURL: URL?
     /// Puts the message under the title row at full width, for narrow columns.
     var stacked = false
+    /// Prefix for the title's and QR code's accessibility identifiers.
+    var identifier: String?
 
     var body: some View {
         Group {
@@ -175,6 +177,7 @@ struct AlertBanner: View {
         VStack(alignment: .leading, spacing: Theme.Space.xs) {
             Label {
                 Text(title)
+                    .accessibilityIdentifier(identifier.map { "\($0).title" } ?? "")
             } icon: {
                 Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(tone.accent)
             }
@@ -197,6 +200,7 @@ struct AlertBanner: View {
     private func qr(_ url: URL) -> some View {
         VStack(spacing: Theme.Space.xxs) {
             QRCodeView(url: url, side: stacked ? 104 : 132)
+                .accessibilityIdentifier(identifier.map { "\($0).qr" } ?? "")
             Text("Details")
                 .font(Theme.Typeface.caption)
                 .foregroundStyle(Theme.Ink.secondary)

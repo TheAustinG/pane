@@ -32,6 +32,6 @@ final class RadarImageCache: @unchecked Sendable {
     }
 
     func isComplete(frame: String, tiles: [TileCoordinate]) -> Bool {
-        tiles.allSatisfy { store.contains(frame: frame, tile: $0) }
+        tiles.allSatisfy { store.isResolved(frame: frame, tile: $0) }
     }
 }

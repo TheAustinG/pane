@@ -7,54 +7,11 @@ extension WeatherAlertInfo {
     }
 }
 
-/// An alert as the takeover shows it: the summary exactly as issued, wrapped, with the issuer and a
-/// QR code to Apple's alert page. It follows `AlertBanner`'s look; the identifiers are why it is
-/// separate.
-struct StormAlertBanner: View {
-    let alert: WeatherAlertInfo
-    let index: Int
-    var meta: String
-    var stacked = false
-
-    private let tone = Tone.warning
-
-    var body: some View {
-        HStack(alignment: .top, spacing: Theme.Space.l) {
-            VStack(alignment: .leading, spacing: Theme.Space.xs) {
-                Label {
-                    Text(alert.summary)
-                        .accessibilityIdentifier("storm.alert.\(index).title")
-                } icon: {
-                    Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(tone.accent)
-                }
-                .font(Theme.Typeface.title)
-                Text(meta)
-                    .font(Theme.Typeface.caption)
-                    .foregroundStyle(Theme.Ink.secondary)
-            }
-            .fixedSize(horizontal: false, vertical: true)
-            Spacer(minLength: 0)
-            VStack(spacing: Theme.Space.xxs) {
-                QRCodeView(url: alert.detailsURL, side: stacked ? 104 : 132)
-                    .accessibilityIdentifier("storm.alert.\(index).qr")
-                Text("Details")
-                    .font(Theme.Typeface.caption)
-                    .foregroundStyle(Theme.Ink.secondary)
-            }
-        }
-        .padding(Theme.Space.l)
-        .background(tone.fill, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay {
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .strokeBorder(tone.stroke, lineWidth: 1.5)
-        }
-    }
-}
-
 /// Every active alert with a large QR code, over the takeover. Each row is a button so focus has
 /// somewhere to rest and the list scrolls with the remote; selecting one closes the overlay.
 struct StormAlertDetail: View {
     let alerts: [WeatherAlertInfo]
+    let markImageData: Data?
     var focus: FocusState<StormFocus?>.Binding
     let close: () -> Void
 
@@ -62,7 +19,11 @@ struct StormAlertDetail: View {
         ZStack {
             Color.black.opacity(0.8).ignoresSafeArea()
             VStack(alignment: .leading, spacing: Theme.Space.l) {
-                PaneHeading(text: alerts.count == 1 ? "Weather alert" : "Weather alerts")
+                HStack {
+                    PaneHeading(text: alerts.count == 1 ? "Weather alert" : "Weather alerts")
+                    Spacer()
+                    AppleWeatherMark(imageData: markImageData)
+                }
                 ScrollView {
                     VStack(spacing: Theme.Layout.gutter) {
                         ForEach(Array(alerts.enumerated()), id: \.offset) { index, alert in

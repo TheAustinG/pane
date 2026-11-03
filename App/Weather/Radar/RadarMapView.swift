@@ -4,7 +4,11 @@ import SwiftUI
 
 final class RadarMKMapView: MKMapView {
     var visibleBounds: GeoBounds? {
-        didSet { if visibleBounds != oldValue { applied = nil } }
+        didSet {
+            guard visibleBounds != oldValue else { return }
+            applied = nil
+            setNeedsLayout()
+        }
     }
     private var applied: CGSize?
 

@@ -60,10 +60,6 @@ struct RadarTimelineBar: View {
     }
 
     private func timeLabel(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.timeZone = timeZone
-        formatter.dateFormat = "h:mm a"
-        return formatter.string(from: date)
+        date.formatted(Date.FormatStyle(date: .omitted, time: .shortened, locale: Locale(identifier: "en_US"), timeZone: timeZone))
     }
 }

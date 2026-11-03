@@ -38,7 +38,7 @@ struct StormTakeover: View {
             }
             .disabled(isDetailShown)
             if isDetailShown {
-                StormAlertDetail(alerts: alerts, focus: $focus) { closeDetail() }
+                StormAlertDetail(alerts: alerts, markImageData: model.weather.markImageData, focus: $focus) { closeDetail() }
                     .transition(.opacity)
             }
         }
@@ -94,7 +94,14 @@ struct StormTakeover: View {
 
     private func alertButton(_ index: Int, stacked: Bool, meta: String) -> some View {
         Button { openDetail(from: index) } label: {
-            StormAlertBanner(alert: alerts[index], index: index, meta: meta, stacked: stacked)
+            AlertBanner(
+                tone: .warning,
+                title: alerts[index].summary,
+                meta: meta,
+                qrURL: alerts[index].detailsURL,
+                stacked: stacked,
+                identifier: "storm.alert.\(index)"
+            )
         }
         .buttonStyle(GlassPaneButtonStyle())
         .focused($focus, equals: .alert(index))
