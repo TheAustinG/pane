@@ -21,7 +21,7 @@ final class StormUITests: XCTestCase {
         moveFocusInStormRow(app, to: "debug.storm.storm")
         XCUIRemote.shared.press(.select)
         let appeared = secondsUntil(takeover(app), is: "on")
-        XCTAssertNotNil(appeared, "No takeover within 1 s")
+        XCTAssertNotNil(appeared, "No takeover within 2 s")
         print("takeover appeared after \(appeared ?? -1) s")
 
         XCUIRemote.shared.press(.menu)
@@ -33,7 +33,7 @@ final class StormUITests: XCTestCase {
         moveFocusInStormRow(app, to: "debug.storm.clear")
         XCUIRemote.shared.press(.select)
         let cleared = secondsUntil(takeover(app), is: "off")
-        XCTAssertNotNil(cleared, "Takeover still up 1 s after clearing")
+        XCTAssertNotNil(cleared, "Takeover still up 2 s after clearing")
         print("takeover cleared after \(cleared ?? -1) s")
         XCUIRemote.shared.press(.menu)
         XCTAssertTrue(waitForFocus(app.buttons["dashboard.card.current"], timeout: 5))
@@ -128,12 +128,15 @@ final class StormUITests: XCTestCase {
         app.descendants(matching: .any).matching(identifier: id).firstMatch
     }
 
-    /// `XCTNSPredicateExpectation` polls about once a second, too coarse for a 1 s limit. Each
-    /// query here takes a snapshot, so the time measured includes XCUITest's own latency.
-    private func secondsUntil(_ element: XCUIElement, is value: String, limit: TimeInterval = 1) -> TimeInterval? {
+    /// `XCTNSPredicateExpectation` polls about once a second, too coarse here. Each query waits for
+    /// the app to go idle, which includes the 0.6 s crossfade, so this measures up to about a second
+    /// more than the app takes to show the takeover; the limit allows for that.
+    private func secondsUntil(_ element: XCUIElement, is value: String, limit: TimeInterval = 2) -> TimeInterval? {
         let start = Date.now
         while Date.now.timeIntervalSince(start) < limit {
-            if element.value as? String == value { return Date.now.timeIntervalSince(start) }
+            let matches = element.value as? String == value
+            let elapsed = Date.now.timeIntervalSince(start)
+            if matches { return elapsed <= limit ? elapsed : nil }
         }
         return nil
     }
