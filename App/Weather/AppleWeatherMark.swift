@@ -12,7 +12,7 @@ struct AppleWeatherMark: View {
                 Image(uiImage: image)
                     .resizable()
                     .scaledToFit()
-                    .frame(height: 26)
+                    .frame(height: 20)
             } else {
                 Text("Apple Weather")
                     .font(Theme.Typeface.caption.weight(.medium))
