@@ -55,8 +55,10 @@ struct StormTakeover: View {
         }
         .task { await model.radar.run() }
         .task {
+            // The focus engine often picks the timeline over `defaultFocus` as the takeover replaces
+            // the dashboard.
             try? await Task.sleep(for: .milliseconds(600))
-            if focus == nil { focus = defaultFocus }
+            if focus == nil || focus == .timeline { focus = defaultFocus }
         }
         .onChange(of: model.isDebugMenuPresented) { _, presented in
             if !presented { focus = isDetailShown ? .detail(0) : defaultFocus }

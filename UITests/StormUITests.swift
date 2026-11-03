@@ -62,7 +62,7 @@ final class StormUITests: XCTestCase {
             XCTAssertTrue(title.waitForExistence(timeout: 5))
             XCTAssertEqual(title.label, "Severe Thunderstorm Warning")
             XCTAssertTrue(element(app, "storm.alert.0.qr").exists)
-            XCTAssertTrue(waitForFocus(app.buttons["storm.alert.0"], timeout: 5))
+            XCTAssertTrue(waitForFocus(app.buttons["storm.alert.0"], timeout: 5), "Focused: \(focusedIdentifier(app))")
             saveGateShot("storm-alert-\(layout)")
 
             XCUIRemote.shared.press(.select)
@@ -73,9 +73,11 @@ final class StormUITests: XCTestCase {
             XCUIRemote.shared.press(.menu)
             XCTAssertTrue(waitForNonExistence(element(app, "storm.alertDetail")))
             XCTAssertEqual(takeover(app).value as? String, "on")
+            XCTAssertTrue(waitForFocus(app.buttons["storm.alert.0"], timeout: 5), "Focused: \(focusedIdentifier(app))")
 
             XCUIRemote.shared.press(.menu)
-            XCTAssertTrue(waitForValue(takeover(app), "off", timeout: 2))
+            let closed = waitForValue(takeover(app), "off", timeout: 2)
+            XCTAssertTrue(closed, "Takeover \(takeover(app).value ?? "?"), focused: \(focusedIdentifier(app))")
             app.terminate()
         }
     }
@@ -111,6 +113,11 @@ final class StormUITests: XCTestCase {
         app.launchArguments = Self.baseArguments + (pinned ? Self.pinnedNow : []) + extra
         app.launch()
         return app
+    }
+
+    private func focusedIdentifier(_ app: XCUIApplication) -> String {
+        let focused = app.descendants(matching: .any).matching(NSPredicate(format: "hasFocus == true")).firstMatch
+        return focused.exists ? "\(focused.elementType.rawValue) \(focused.identifier) \(focused.label)" : "nothing"
     }
 
     private func takeover(_ app: XCUIApplication) -> XCUIElement {
