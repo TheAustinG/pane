@@ -1,7 +1,8 @@
 import XCTest
 
-/// Gate checks against the real Home Assistant. The server and token come from the gitignored
-/// `local/Secrets.local.xcconfig` at run time, so these skip anywhere it is missing. They touch only
+/// Gate checks against the real Home Assistant, run only with `TEST_RUNNER_PANE_LIVE_HA=1` and a
+/// signed build (an unsigned one cannot write the token to the Keychain). The server and token come
+/// from the gitignored `local/Secrets.local.xcconfig` at run time. They touch only
 /// the test helpers: the `input_boolean.pane_test` toggle and the script named "Pane test". Run them
 /// in name order: the first one completes setup and picks the entities the others rely on.
 @MainActor
@@ -13,6 +14,7 @@ final class HomeLiveUITests: XCTestCase {
 
     override func setUp() async throws {
         continueAfterFailure = false
+        try XCTSkipUnless(ProcessInfo.processInfo.environment["PANE_LIVE_HA"] == "1", "Live Home Assistant tests are opt-in")
         server = try LiveServer.load()
     }
 
