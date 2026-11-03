@@ -16,6 +16,9 @@ final class CityCompleter: NSObject {
 
     private(set) var state = State.idle
     private(set) var completions: [MKLocalSearchCompletion] = []
+    private(set) var isResolving = false
+    /// The chosen city could not be looked up; the suggestions stay so another can be picked.
+    private(set) var resolveFailed = false
     @ObservationIgnored private let completer = MKLocalSearchCompleter()
 
     override init() {
@@ -38,10 +41,14 @@ final class CityCompleter: NSObject {
     }
 
     func resolve(_ completion: MKLocalSearchCompletion) async -> HomeLocation? {
+        guard !isResolving else { return nil }
+        isResolving = true
+        resolveFailed = false
+        defer { isResolving = false }
         let request = MKLocalSearch.Request(completion: completion)
         request.resultTypes = .address
         guard let item = try? await MKLocalSearch(request: request).start().mapItems.first else {
-            state = .failed
+            resolveFailed = true
             return nil
         }
         let coordinate = item.location.coordinate
@@ -109,6 +116,9 @@ struct LocationSearchScreen: View {
         case .results where completer.completions.isEmpty:
             stateLine("No cities found")
         case .searching, .results:
+            if completer.resolveFailed {
+                stateLine("That city could not be loaded. Try again or pick another.")
+            }
             ForEach(Array(completer.completions.enumerated()), id: \.offset) { index, completion in
                 Button {
                     Task { await choose(completion) }
