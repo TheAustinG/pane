@@ -17,7 +17,7 @@ struct StormTakeover: View {
     @State private var detailOrigin = 0
     @FocusState private var focus: StormFocus?
 
-    private var alerts: [WeatherAlertInfo] { model.storm.state.alerts }
+    private var alerts: [WeatherAlertInfo] { model.storm.alerts }
 
     private var defaultFocus: StormFocus { alerts.isEmpty ? .timeline : .alert(0) }
 
@@ -38,7 +38,7 @@ struct StormTakeover: View {
             }
             .disabled(isDetailShown)
             if isDetailShown {
-                StormAlertDetail(alerts: alerts, markImageData: model.weather.markImageData, focus: $focus) { closeDetail() }
+                StormAlertDetail(alerts: alerts, date: date, calendar: model.calendar, markImageData: model.weather.markImageData, focus: $focus) { closeDetail() }
                     .transition(.opacity)
             }
         }
@@ -123,7 +123,7 @@ struct StormTakeover: View {
                 ScrollView {
                     VStack(spacing: Theme.Layout.gutter) {
                         ForEach(alerts.indices, id: \.self) { index in
-                            alertButton(index, stacked: true, meta: alerts[index].meta)
+                            alertButton(index, stacked: true, meta: alerts[index].meta(at: date, calendar: model.calendar))
                                 .frame(width: Theme.Layout.stormColumnWidth)
                         }
                     }
@@ -177,7 +177,7 @@ struct StormTakeover: View {
     private var bottomMeta: String {
         let extra = alerts.count - 1
         let hint = extra > 0 ? "\(extra) more \(extra == 1 ? "alert" : "alerts"). Click to see all." : "Click for details."
-        return "\(alerts[0].meta). \(hint)"
+        return "\(alerts[0].meta(at: date, calendar: model.calendar)). \(hint)"
     }
 }
 

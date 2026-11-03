@@ -2,8 +2,19 @@ import PaneCore
 import SwiftUI
 
 extension WeatherAlertInfo {
-    var meta: String {
-        [source, region].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")
+    /// The issuer, and the end time when WeatherKit gives one: "National Weather Service, until 8:15 PM".
+    func meta(at date: Date, calendar: Calendar) -> String {
+        let issuer = [source, region].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: ", ")
+        guard let endDate else { return issuer }
+        let base = Date.FormatStyle(locale: Locale(identifier: "en_US"), calendar: calendar, timeZone: calendar.timeZone)
+        let style = if calendar.isDate(endDate, inSameDayAs: date) {
+            base.hour().minute()
+        } else if endDate.timeIntervalSince(date) < 6 * 24 * 3600 {
+            base.weekday(.abbreviated).hour().minute()
+        } else {
+            base.month(.abbreviated).day().hour().minute()
+        }
+        return "\(issuer), until \(endDate.formatted(style))"
     }
 }
 
@@ -11,6 +22,8 @@ extension WeatherAlertInfo {
 /// somewhere to rest and the list scrolls with the remote; selecting one closes the overlay.
 struct StormAlertDetail: View {
     let alerts: [WeatherAlertInfo]
+    let date: Date
+    let calendar: Calendar
     let markImageData: Data?
     var focus: FocusState<StormFocus?>.Binding
     let close: () -> Void
@@ -53,7 +66,7 @@ struct StormAlertDetail: View {
                     Image(systemName: "exclamationmark.triangle.fill").foregroundStyle(Tone.warning.accent)
                 }
                 .font(Theme.Typeface.title)
-                Text(alert.meta)
+                Text(alert.meta(at: date, calendar: calendar))
                     .font(Theme.Typeface.body)
                     .foregroundStyle(Theme.Ink.secondary)
             }
