@@ -4,14 +4,15 @@ import Synchronization
 
 /// Reports with alerts, minute data and hourly chances for the storm rules.
 enum StormFixture {
-    static func alert(_ id: String, severity: String = "severe", summary: String? = nil) -> WeatherAlertInfo {
+    static func alert(_ id: String, severity: String = "severe", summary: String? = nil, endDate: Date? = nil) -> WeatherAlertInfo {
         WeatherAlertInfo(
             id: id,
             summary: summary ?? "Alert \(id)",
             source: "National Weather Service",
             severity: severity,
             detailsURL: URL(string: "https://example.com/alerts/\(id)")!,
-            region: nil
+            region: nil,
+            endDate: endDate
         )
     }
 

@@ -112,7 +112,8 @@ private extension WeatherAlertInfo {
             source: alert.source,
             severity: alert.severity.rawValue,
             detailsURL: alert.detailsURL,
-            region: alert.region
+            region: alert.region,
+            endDate: (try? JSONEncoder().encode(alert)).flatMap(Self.endDate(fromEncodedAlert:))
         )
     }
 }

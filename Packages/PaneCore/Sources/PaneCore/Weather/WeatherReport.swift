@@ -155,14 +155,29 @@ public struct WeatherAlertInfo: Codable, Hashable, Sendable {
     public var severity: String
     public var detailsURL: URL
     public var region: String?
+    /// When the event ends; nil when unknown, including reports cached before this was kept.
+    public var endDate: Date?
 
-    public init(id: String, summary: String, source: String, severity: String, detailsURL: URL, region: String?) {
+    public init(
+        id: String,
+        summary: String,
+        source: String,
+        severity: String,
+        detailsURL: URL,
+        region: String?,
+        endDate: Date? = nil
+    ) {
         self.id = id
         self.summary = summary
         self.source = source
         self.severity = severity
         self.detailsURL = detailsURL
         self.region = region
+        self.endDate = endDate
+    }
+
+    public func hasEnded(at date: Date) -> Bool {
+        endDate.map { $0 <= date } ?? false
     }
 }
 
