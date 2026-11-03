@@ -158,7 +158,10 @@ private struct HomeContent: View {
         trailing: AnyView = AnyView(EmptyView())
     ) -> some View {
         let kinds = chips(row)
-        return ViewThatFits(in: .horizontal) {
+        if kinds.isEmpty {
+            return AnyView(StatusRow(symbol: symbol, title: title, detail: detail) { trailing })
+        }
+        return AnyView(ViewThatFits(in: .horizontal) {
             StatusRow(symbol: symbol, title: title, detail: detail) {
                 HStack(spacing: Theme.Space.s) {
                     chipStack(kinds)
@@ -179,7 +182,7 @@ private struct HomeContent: View {
                 Spacer(minLength: Theme.Space.s)
                 trailing
             }
-        }
+        })
     }
 
     private func climateRow(_ climate: HomeSummary.Climate) -> some View {

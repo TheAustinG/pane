@@ -148,8 +148,11 @@ final class HomeUITests: XCTestCase {
         ]
         for entry in cases {
             let app = launch(["-homeNudge", entry.kind] + entry.extra)
-            XCTAssertTrue(element(app, "home.nudge.\(entry.kind)").waitForExistence(timeout: 10), "No \(entry.kind) chip")
+            let chip = element(app, "home.nudge.\(entry.kind)")
+            XCTAssertTrue(chip.waitForExistence(timeout: 10), "No \(entry.kind) chip")
             saveGateShot("home-nudge-\(entry.kind)")
+            pressInDebugHomeRow(app, "debug.home.clear")
+            XCTAssertTrue(waitForNonExistence(chip, timeout: 5), "\(entry.kind) chip stayed after its condition cleared")
             app.terminate()
         }
     }
@@ -183,16 +186,29 @@ final class HomeUITests: XCTestCase {
         XCTAssertTrue(waitForValue(element(app, "home.connection"), "connected", timeout: 10))
         XCUIRemote.shared.press(.playPause)
         XCTAssertTrue(app.staticTexts["debug.menu"].waitForExistence(timeout: 5))
+        focusDebugHomeRow(app, "debug.home.drop")
+        XCUIRemote.shared.press(.select)
+        XCTAssertTrue(waitForValue(element(app, "home.connection"), "disconnected", timeout: 5))
+        XCTAssertTrue(waitForValue(element(app, "home.connection"), "connected", timeout: 30))
+    }
+
+    private func pressInDebugHomeRow(_ app: XCUIApplication, _ id: String) {
+        XCUIRemote.shared.press(.playPause)
+        XCTAssertTrue(app.staticTexts["debug.menu"].waitForExistence(timeout: 5))
+        focusDebugHomeRow(app, id)
+        XCUIRemote.shared.press(.select)
+        XCUIRemote.shared.press(.menu)
+        XCTAssertTrue(waitForNonExistence(app.staticTexts["debug.menu"]))
+    }
+
+    private func focusDebugHomeRow(_ app: XCUIApplication, _ id: String) {
         let homeRow = ["dryAir", "humidAir", "doorUnlockedLate", "lightsOnAway", "bedroomTVLate"].map { app.buttons["debug.home.nudge.\($0)"] }
             + [app.buttons["debug.home.clear"], app.buttons["debug.home.drop"]]
         for _ in 0..<30 where !homeRow.contains(where: \.hasFocus) {
             XCUIRemote.shared.press(.down)
-            _ = waitForFocus(app.buttons["debug.home.drop"], timeout: 1)
+            _ = waitForFocus(app.buttons[id], timeout: 1)
         }
-        moveFocus(app, to: app.buttons["debug.home.drop"], directions: [.down, .right, .left], limit: 8)
-        XCUIRemote.shared.press(.select)
-        XCTAssertTrue(waitForValue(element(app, "home.connection"), "disconnected", timeout: 5))
-        XCTAssertTrue(waitForValue(element(app, "home.connection"), "connected", timeout: 30))
+        moveFocus(app, to: app.buttons[id], directions: [.down, .right, .left], limit: 8)
     }
 
     private func launch(_ extra: [String] = [], fixtures: Bool = true, pinnedNightDim: Bool = true) -> XCUIApplication {

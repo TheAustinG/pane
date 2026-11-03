@@ -100,8 +100,9 @@ public struct HomeSummary: Hashable, Sendable {
         summary.lights = selection.lights.compactMap { id in
             entities[id].map { Light(id: id, name: $0.friendlyName, isOn: $0.state == "on") }
         }
+        // A tracker that has gone unavailable says nothing about whether its person is away.
         summary.people = selection.people.compactMap { id in
-            entities[id].map { Person(id: id, name: $0.friendlyName, isHome: $0.state == "home") }
+            entities[id].flatMap { $0.isUnavailable ? nil : Person(id: id, name: $0.friendlyName, isHome: $0.state == "home") }
         }
         return summary
     }

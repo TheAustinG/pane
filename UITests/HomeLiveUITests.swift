@@ -40,7 +40,7 @@ final class HomeLiveUITests: XCTestCase {
         XCUIRemote.shared.press(.select)
         let choice = app.buttons["settings.choice.\(Self.helperScriptName)"]
         XCTAssertTrue(choice.waitForExistence(timeout: 5))
-        moveFocus(app, to: choice, directions: [.down], limit: 3)
+        moveFocus(app, to: app.cells.containing(.button, identifier: "settings.choice.\(Self.helperScriptName)").firstMatch, directions: [.down], limit: 3)
         XCUIRemote.shared.press(.select)
         XCTAssertTrue(waitForLabel(element(app, "settings.home.goodnight"), containing: Self.helperScriptName, timeout: 5))
         saveGateShot("live-settings")
@@ -106,12 +106,18 @@ final class HomeLiveUITests: XCTestCase {
             _ = waitForFocus(drop, timeout: 1)
         }
         moveFocus(app, to: drop, directions: [.down, .right, .left], limit: 8)
-        XCUIRemote.shared.press(.select)
-        XCTAssertTrue(waitForValue(connection, "disconnected", timeout: 5))
+        let state = app.staticTexts["debug.home.state"]
+        let before = reconnects(state.label)
+        XCTAssertTrue(state.label.hasPrefix("connected"), state.label)
         let dropped = Date()
-        XCTAssertTrue(waitForValue(connection, "connected", timeout: 30))
-        print("live reconnect after \(String(format: "%.1f", Date().timeIntervalSince(dropped))) s")
+        XCUIRemote.shared.press(.select)
+        // The first retry comes about a second after the drop, faster than predicate polling sees.
+        let back = secondsUntil(timeout: 30) { self.reconnects(state.label) > before && state.label.hasPrefix("connected") }
+        print("live reconnect after \(back.map { _ in String(format: "%.1f", Date().timeIntervalSince(dropped)) } ?? "never") s, \(state.label)")
+        XCTAssertNotNil(back, "No reconnect within 30 s: \(state.label)")
+        saveGateShot("live-reconnected")
         XCUIRemote.shared.press(.menu)
+        XCTAssertTrue(waitForValue(connection, "connected", timeout: 5))
     }
 
     /// The night schedule dims the dashboard late in the evening, which would hide whether the
@@ -135,15 +141,21 @@ final class HomeLiveUITests: XCTestCase {
 
     private func pickAll(_ app: XCUIApplication, role: String, shot: String? = nil) {
         openPicker(app, role: role)
-        let rows = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'home.picker.row.'"))
-        let count = rows.count
-        for index in 0..<count {
-            let row = rows.element(boundBy: index)
-            moveFocus(app, to: row, directions: [.down], limit: count)
+        let rowID = NSPredicate(format: "identifier BEGINSWITH 'home.picker.row.'")
+        let rows = app.buttons.matching(rowID)
+        let focusedCell = app.cells.matching(NSPredicate(format: "hasFocus == true")).firstMatch
+        XCTAssertTrue(focusedCell.waitForExistence(timeout: 5), "Focused: \(focusedIdentifier(app))")
+        var visited: Set<String> = []
+        for _ in 0..<(rows.count + 2) {
+            let id = focusedCell.descendants(matching: .any).matching(rowID).firstMatch.identifier
+            guard !id.isEmpty, visited.insert(id).inserted else { break }
+            let row = app.buttons[id]
             if row.value as? String != "selected" {
                 XCUIRemote.shared.press(.select)
                 XCTAssertTrue(waitForValue(row, "selected"))
             }
+            XCUIRemote.shared.press(.down)
+            _ = waitForFocus(row, is: false, timeout: 1)
         }
         if let shot { saveGateShot(shot) }
         XCUIRemote.shared.press(.menu)
@@ -152,9 +164,10 @@ final class HomeLiveUITests: XCTestCase {
 
     private func pickMatching(_ app: XCUIApplication, role: String, label: String) {
         openPicker(app, role: role)
-        let row = app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'home.picker.row.' AND label CONTAINS %@", label)).firstMatch
+        let match = NSPredicate(format: "identifier BEGINSWITH 'home.picker.row.' AND label CONTAINS %@", label)
+        let row = app.buttons.matching(match).firstMatch
         XCTAssertTrue(row.waitForExistence(timeout: 5))
-        moveFocus(app, to: row, directions: [.down], limit: 20)
+        moveFocus(app, to: app.cells.containing(match).firstMatch, directions: [.down], limit: 20)
         XCUIRemote.shared.press(.select)
         XCTAssertTrue(waitForValue(row, "selected"))
         XCUIRemote.shared.press(.menu)
@@ -165,6 +178,10 @@ final class HomeLiveUITests: XCTestCase {
         moveFocus(app, to: cell(app, "settings.home.role.\(role)"), directions: [.down], limit: 10)
         XCUIRemote.shared.press(.select)
         XCTAssertTrue(element(app, "home.picker.\(role)").waitForExistence(timeout: 5))
+    }
+
+    private func reconnects(_ label: String) -> Int {
+        label.split(separator: ",").dropFirst().first.flatMap { Int($0.trimmingCharacters(in: .whitespaces).split(separator: " ").first ?? "") } ?? -1
     }
 
     private func rowText(_ row: XCUIElement) -> String {

@@ -53,6 +53,14 @@ struct HomeSummaryTests {
         #expect(summary.lights.map(\.id) == ["light.pantry"])
     }
 
+    @Test func unavailableTrackersAreNotCountedAsAway() {
+        var entities = HomeSample.byID
+        entities["person.kit"] = HomeSample.entity("person.kit", "unavailable", name: "Kit")
+        let summary = HomeSummary.make(entities: entities, selection: HomeSample.selection, nudges: [])
+        #expect(summary.people.map(\.isHome) == [true])
+        #expect(!summary.people.contains { $0.id == "person.kit" })
+    }
+
     @Test func anEmptySelectionShowsNothing() {
         let summary = HomeSummary.make(entities: HomeSample.byID, selection: .empty, nudges: [])
         #expect(summary == HomeSummary())
