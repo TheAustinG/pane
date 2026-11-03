@@ -15,6 +15,7 @@ final class WeatherUITests: XCTestCase {
         XCTAssertTrue(temperature.waitForExistence(timeout: 10))
         XCTAssertTrue(temperature.label.contains("52°"), temperature.label)
         XCTAssertTrue(waitForLabel(element(app, "weather.freshness"), containing: "Updated 20 min ago", timeout: 10))
+        XCTAssertFalse(element(app, "weather.note").label.trimmingCharacters(in: .whitespaces).isEmpty)
         saveGateShot("offline-20min")
     }
 

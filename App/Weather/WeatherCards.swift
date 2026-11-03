@@ -81,9 +81,17 @@ private struct CurrentWeatherContent: View {
                 Text(display.now.condition)
                     .font(Theme.Typeface.title)
                     .accessibilityIdentifier("weather.condition")
-                Text("H \(display.now.high)   L \(display.now.low)")
-                    .font(Theme.Typeface.body)
-                    .foregroundStyle(Theme.Ink.secondary)
+                HStack(alignment: .firstTextBaseline, spacing: Theme.Space.m) {
+                    Text("H \(display.now.high)   L \(display.now.low)")
+                        .font(Theme.Typeface.body)
+                        .foregroundStyle(Theme.Ink.secondary)
+                    Spacer(minLength: 0)
+                    if let freshness {
+                        StaleNote(text: freshness)
+                            .lineLimit(1)
+                            .accessibilityIdentifier("weather.freshness")
+                    }
+                }
             }
             Spacer(minLength: Theme.Space.s)
             noteRow
@@ -97,21 +105,14 @@ private struct CurrentWeatherContent: View {
         }
     }
 
-    @ViewBuilder private var noteRow: some View {
-        if let freshness {
-            StaleNote(text: freshness)
-                .lineLimit(1)
-                .frame(height: Self.noteHeight, alignment: .leading)
-                .accessibilityIdentifier("weather.freshness")
-        } else {
-            Label(display.note?.text ?? " ", systemImage: display.note?.symbolName ?? "umbrella")
-                .font(Theme.Typeface.callout)
-                .lineLimit(1)
-                .opacity(display.note == nil ? 0 : 1)
-                .accessibilityHidden(display.note == nil)
-                .frame(height: Self.noteHeight, alignment: .leading)
-                .accessibilityIdentifier("weather.note")
-        }
+    private var noteRow: some View {
+        Label(display.note?.text ?? " ", systemImage: display.note?.symbolName ?? "umbrella")
+            .font(Theme.Typeface.callout)
+            .lineLimit(1)
+            .opacity(display.note == nil ? 0 : 1)
+            .accessibilityHidden(display.note == nil)
+            .frame(height: Self.noteHeight, alignment: .leading)
+            .accessibilityIdentifier("weather.note")
     }
 
     private static let noteHeight: CGFloat = 34
