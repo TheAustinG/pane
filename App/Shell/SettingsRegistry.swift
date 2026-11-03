@@ -23,6 +23,7 @@ enum SettingsRegistry {
         BackgroundSettingsSection.self,
         NightSettingsSection.self,
         HomeSettingsSection.self,
+        HomeNudgeSettingsSection.self,
         CodeSettingsSection.self,
         AboutSettingsSection.self,
     ]

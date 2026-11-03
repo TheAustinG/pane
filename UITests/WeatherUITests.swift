@@ -67,7 +67,7 @@ final class WeatherUITests: XCTestCase {
     }
 
     private func moveFocus(to target: XCUIElement) {
-        for _ in 0..<10 where !target.hasFocus {
+        for _ in 0..<30 where !target.hasFocus {
             XCUIRemote.shared.press(.down)
             _ = waitForFocus(target, timeout: 1)
         }

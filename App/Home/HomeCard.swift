@@ -189,7 +189,9 @@ private struct HomeContent: View {
         } else {
             title = "Thermostat unavailable"
         }
-        return StatusRow(symbol: "thermometer.medium", title: title, detail: climateDetail(climate))
+        // Four stacked chips overrun the pane; the thermostat detail is the line the card can spare.
+        let detail = summary.nudges.count >= 4 ? nil : climateDetail(climate)
+        return StatusRow(symbol: "thermometer.medium", title: title, detail: detail)
     }
 
     private func climateDetail(_ climate: HomeSummary.Climate) -> String? {

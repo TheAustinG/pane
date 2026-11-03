@@ -1,7 +1,7 @@
 import PaneCore
 import SwiftUI
 
-/// Home Assistant connection, entities and nudges.
+/// Home Assistant connection and entities.
 enum HomeSettingsSection: SettingsSection {
     static let title = "Home"
 
@@ -19,6 +19,22 @@ enum HomeSettingsSection: SettingsSection {
         case .doorUnlockedLate: "Shows a nudge when the door lock is unlocked after 10 PM."
         case .lightsOnAway: "Shows a nudge when a light is on and everyone is away."
         case .bedroomTVLate: "Shows a nudge when the bedroom TV is on after midnight."
+        }
+    }
+}
+
+/// One toggle per Home card nudge.
+enum HomeNudgeSettingsSection: SettingsSection {
+    static let title = "Nudges"
+
+    static func rows(model: AppModel) -> some View {
+        ForEach(HomeNudgeKind.allCases, id: \.self) { kind in
+            Toggle(kind.settingsTitle, isOn: Binding(
+                get: { model.home.nudgePreferences.isEnabled(kind) },
+                set: { model.home.nudgePreferences.setEnabled($0, kind) }
+            ))
+            .settingsHelp(HomeSettingsSection.nudgeHelp(kind))
+            .accessibilityIdentifier("settings.home.nudge.\(kind.rawValue)")
         }
     }
 }
@@ -51,15 +67,6 @@ private struct HomeSettingsRows: View {
             label: { id in id.map { model.home.entities[$0]?.friendlyName ?? $0 } ?? "Auto (Goodnight)" }
         )
         .accessibilityIdentifier("settings.home.goodnight")
-
-        ForEach(HomeNudgeKind.allCases, id: \.self) { kind in
-            Toggle(kind.settingsTitle, isOn: Binding(
-                get: { model.home.nudgePreferences.isEnabled(kind) },
-                set: { model.home.nudgePreferences.setEnabled($0, kind) }
-            ))
-            .settingsHelp(HomeSettingsSection.nudgeHelp(kind))
-            .accessibilityIdentifier("settings.home.nudge.\(kind.rawValue)")
-        }
     }
 
     @ViewBuilder
