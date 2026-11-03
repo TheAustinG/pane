@@ -187,9 +187,21 @@ final class HomeUITests: XCTestCase {
         XCUIRemote.shared.press(.playPause)
         XCTAssertTrue(app.staticTexts["debug.menu"].waitForExistence(timeout: 5))
         focusDebugHomeRow(app, "debug.home.drop")
+        let state = app.staticTexts["debug.home.state"]
+        XCTAssertTrue(state.label.hasPrefix("connected"), state.label)
+        let before = reconnects(state.label)
         XCUIRemote.shared.press(.select)
-        XCTAssertTrue(waitForValue(element(app, "home.connection"), "disconnected", timeout: 5))
-        XCTAssertTrue(waitForValue(element(app, "home.connection"), "connected", timeout: 30))
+        // The retry lands about a second after the drop, inside one predicate polling interval.
+        let start = Date()
+        var back = false
+        while !back, Date().timeIntervalSince(start) < 30 {
+            back = reconnects(state.label) > before && state.label.hasPrefix("connected")
+        }
+        XCTAssertTrue(back, "No reconnect within 30 s: \(state.label)")
+    }
+
+    private func reconnects(_ label: String) -> Int {
+        label.split(separator: ",").dropFirst().first.flatMap { Int($0.trimmingCharacters(in: .whitespaces).split(separator: " ").first ?? "") } ?? -1
     }
 
     private func pressInDebugHomeRow(_ app: XCUIApplication, _ id: String) {
