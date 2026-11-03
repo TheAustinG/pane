@@ -21,7 +21,7 @@ struct SettingsRoot: View {
                     Text("Settings")
                         .font(Theme.Typeface.screenTitle)
                         .accessibilityAddTraits(.isHeader)
-                    SettingsHelpPane(text: help.text ?? Self.placeholder)
+                    SettingsHelpPane(text: help.text ?? Self.placeholder, qrURL: help.qrURL)
                 }
                 .frame(width: 620, alignment: .leading)
                 List {

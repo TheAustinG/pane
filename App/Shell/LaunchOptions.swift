@@ -17,6 +17,10 @@ struct LaunchOptions {
     var resetsSettings: Bool
     /// `on` or `off` pins night dim regardless of the schedule.
     var nightDim: Bool?
+    /// `-offline 1` makes every weather fetch fail like a dropped connection.
+    var offline = false
+    /// With `-fixtures sample`, seeds the offline cache with a report this many minutes old.
+    var weatherAge: Int?
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {
         LaunchOptions(
@@ -29,7 +33,9 @@ struct LaunchOptions {
             opensDebugMenu: defaults.bool(forKey: "debugMenu"),
             opensSettings: defaults.bool(forKey: "settings"),
             resetsSettings: defaults.bool(forKey: "resetSettings"),
-            nightDim: defaults.string(forKey: "nightDim").flatMap { ["on": true, "off": false][$0] }
+            nightDim: defaults.string(forKey: "nightDim").flatMap { ["on": true, "off": false][$0] },
+            offline: defaults.bool(forKey: "offline"),
+            weatherAge: defaults.object(forKey: "weatherAge") == nil ? nil : defaults.integer(forKey: "weatherAge")
         )
     }
 

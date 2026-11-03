@@ -1,12 +1,29 @@
+import PaneCore
 import SwiftUI
 
-/// Location and attribution (Phase 2).
+/// The home location, found by city search.
 enum WeatherSettingsSection: SettingsSection {
     static let title = "Weather"
-    static var isAvailable: Bool { false }
+    static var isAvailable: Bool { true }
 
     static func rows(model: AppModel) -> some View {
-        EmptyView()
+        WeatherSettingsRows(model: model)
+    }
+
+    static let locationHelp = "Pane has no GPS. Search for your city once; it is stored as coordinates."
+}
+
+private struct WeatherSettingsRows: View {
+    let model: AppModel
+
+    var body: some View {
+        NavigationLink {
+            LocationSearchScreen(model: model)
+        } label: {
+            LabeledContent("Location", value: model.settings.homeLocation?.name ?? "Not set")
+        }
+        .settingsHelp(WeatherSettingsSection.locationHelp)
+        .accessibilityIdentifier("settings.weather.location")
     }
 }
 

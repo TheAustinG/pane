@@ -16,6 +16,10 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(element(app, "settings.night.end").exists)
         XCTAssertTrue(element(app, "settings.night.dimNow").exists)
 
+        XCTAssertTrue(waitForFocus(cell(app, "settings.weather.location")))
+        XCTAssertTrue(waitForHelp(app, containing: "Pane has no GPS"))
+
+        XCUIRemote.shared.press(.down)
         XCTAssertTrue(waitForFocus(cell(app, "settings.night.enabled")))
         XCTAssertTrue(waitForHelp(app, containing: "dims to about 30 percent"))
 

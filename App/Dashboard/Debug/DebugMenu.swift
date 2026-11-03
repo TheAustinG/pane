@@ -52,6 +52,7 @@ struct DebugMenu: View {
                     .accessibilityIdentifier("debug.fps")
             }
             section("Quality") { qualityRow }
+            section("Weather") { weatherRow }
         }
         .padding(Theme.Layout.paneInset)
         .frame(width: 1240)
@@ -133,6 +134,25 @@ struct DebugMenu: View {
             }
             .buttonStyle(.glass)
             .accessibilityIdentifier("debug.time.reset")
+        }
+    }
+
+    private var weatherRow: some View {
+        let weather = model.weather
+        let updated = weather.report.map { "fetched \($0.fetchedAt.formatted(date: .omitted, time: .shortened))" } ?? "no report"
+        return HStack(spacing: Theme.Space.l) {
+            Text("\(weather.callsThisMonth) calls this month, \(updated)")
+                .font(Theme.Typeface.caption.monospacedDigit())
+                .foregroundStyle(Theme.Ink.secondary)
+                .accessibilityIdentifier("debug.weather.calls")
+            Spacer(minLength: Theme.Space.l)
+            Button {
+                Task { await weather.refreshNow() }
+            } label: {
+                Label("Refresh now", systemImage: "arrow.clockwise")
+            }
+            .buttonStyle(.glass)
+            .accessibilityIdentifier("debug.weather.refresh")
         }
     }
 

@@ -9,10 +9,13 @@ struct PaneApp: App {
     init() {
         let options = LaunchOptions.parse()
         self.options = options
+        let settings = AppSettings(reset: options.resetsSettings)
+        WeatherWiring.prefillHomeLocation(settings, options: options)
         _model = State(initialValue: AppModel(
             options: options,
-            settings: AppSettings(reset: options.resetsSettings),
-            secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane")
+            settings: settings,
+            secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane"),
+            weather: WeatherWiring.controller(options: options)
         ))
     }
 
@@ -33,10 +36,16 @@ private struct RootView: View {
         if let page = PreviewPage(rawValue: options.designPreview ?? "") {
             DesignPreviewView(page: page)
         } else {
-            DashboardView(model: model)
+            dashboard
         }
         #else
-        DashboardView(model: model)
+        dashboard
         #endif
+    }
+
+    /// The live weather loop runs only behind the real dashboard, never behind the design preview.
+    private var dashboard: some View {
+        DashboardView(model: model)
+            .task { await model.weather.run() }
     }
 }
