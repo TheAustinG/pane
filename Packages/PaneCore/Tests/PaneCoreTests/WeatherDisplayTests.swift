@@ -416,6 +416,19 @@ struct WeatherNoteTests {
         #expect(note(warmerDay, at: morning)?.text == "High of 59° around 2 PM")
     }
 
+    @Test func highThatAlreadyPassedIsNotQuoted() {
+        let now = local(2026, 11, 2, 14)
+        let temperatures: [Date: Double] = [
+            local(2026, 11, 2, 12): 22.2, now: 18.9, local(2026, 11, 2, 15): 19.4, local(2026, 11, 2, 16): 19.0,
+        ]
+        let report = WeatherFixture.report(
+            at: now,
+            hour: { .init(temperature: temperatures[$0] ?? 10) },
+            day: { _ in .init(high: 22.2) }
+        )
+        #expect(note(report, at: now)?.text == "High of 67° around 3 PM")
+    }
+
     @Test func clearSkiesThroughTheEvening() {
         let report = WeatherFixture.report(at: afternoon)
         #expect(note(report, at: afternoon) == .init(text: "Clear skies through the evening", symbolName: "sun.max"))

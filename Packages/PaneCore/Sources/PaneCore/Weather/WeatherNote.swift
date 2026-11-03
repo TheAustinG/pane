@@ -63,8 +63,12 @@ struct WeatherNoteRules {
             ?? hours(within: Self.nearHours)
         guard let peak = window.max(by: { $0.temperature < $1.temperature }),
               format.value(peak.temperature) > format.value(temperature) else { return nil }
-        // The day's high can fall between hourly samples; quoting it keeps the note in step with the card's H.
-        let high = max(peak.temperature, report.day(containing: date, calendar: calendar)?.high ?? peak.temperature)
+        // The day's high can fall between hourly samples; quoting it keeps the note in step with the
+        // card's H, but only while no earlier hour today has already reached the coming peak.
+        let earlier = report.hourly.filter { $0.date <= date && calendar.isDate($0.date, inSameDayAs: date) }
+        let highIsAhead = earlier.allSatisfy { $0.temperature < peak.temperature }
+        let dayHigh = report.day(containing: date, calendar: calendar)?.high ?? peak.temperature
+        let high = highIsAhead ? max(peak.temperature, dayHigh) : peak.temperature
         return .init(text: "High of \(format.string(high)) around \(hourName(peak.date))", symbolName: "thermometer.high")
     }
 
