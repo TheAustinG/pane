@@ -1,7 +1,7 @@
 import PaneCore
 import SwiftUI
 
-/// Location and attribution (Phase 2).
+/// The home location, found by city search.
 enum WeatherSettingsSection: SettingsSection {
     static let title = "Weather"
     static var isAvailable: Bool { true }
