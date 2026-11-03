@@ -35,18 +35,33 @@ public enum StormSimulation: String, Hashable, Sendable, CaseIterable {
 @Observable
 public final class StormController {
     public private(set) var state: StormState = .calm
-    /// Debug override; nil follows the weather report.
+    /// Debug override; nil follows the weather report. Setting it updates `state` at once.
     public var simulation: StormSimulation? {
-        didSet { evaluate() }
+        didSet {
+            if simulation != nil { isDismissed = false }
+            evaluate()
+        }
     }
     public private(set) var isDismissed = false
 
+    /// The longest the loop waits between evaluations when the report does not change.
+    public static let tick: TimeInterval = 60
+
     @ObservationIgnored private let weather: WeatherController
     @ObservationIgnored private let clock: any WeatherClock
+    @ObservationIgnored private let rules: StormRules
+    @ObservationIgnored private var evaluation = StormEvaluation.calm
+    @ObservationIgnored private var dismissedAlertIDs: Set<String> = []
 
-    public init(weather: WeatherController, clock: any WeatherClock = SystemWeatherClock(), simulation: StormSimulation? = nil) {
+    public init(
+        weather: WeatherController,
+        clock: any WeatherClock = SystemWeatherClock(),
+        simulation: StormSimulation? = nil,
+        rules: StormRules = StormRules()
+    ) {
         self.weather = weather
         self.clock = clock
+        self.rules = rules
         self.simulation = simulation
         evaluate()
     }
@@ -55,25 +70,54 @@ public final class StormController {
         state.isActive && !isDismissed
     }
 
-    /// Hides the takeover until storm mode ends or a new alert arrives. Clears a simulation.
+    /// Hides the takeover until storm mode ends or an alert with a new id arrives. Clears a simulation.
     public func dismiss() {
         if simulation != nil {
             simulation = nil
-        } else {
+        } else if state.isActive {
+            dismissedAlertIDs = Set(state.alerts.map(\.id))
             isDismissed = true
         }
     }
 
-    /// Keeps `state` current until the calling task is cancelled.
+    /// Re-evaluates whenever the report changes and at least every `tick`, until the calling task
+    /// is cancelled.
     public func run() async {
-        evaluate()
+        while !Task.isCancelled {
+            evaluate()
+            await waitForReport(until: clock.now.addingTimeInterval(Self.tick))
+        }
     }
 
-    private func evaluate() {
+    /// Measured on the controller's clock: a pinned or scrubbed app clock says nothing about the storm.
+    func evaluate() {
+        evaluation = rules.evaluate(report: weather.report, at: clock.now, previous: evaluation)
+        let next = simulation.map(Self.simulatedState) ?? evaluation.state
+        if next != state { state = next }
+        if isDismissed, !next.isActive || next.alerts.contains(where: { !dismissedAlertIDs.contains($0.id) }) {
+            isDismissed = false
+        }
+    }
+
+    private func waitForReport(until deadline: Date) async {
+        let clock = clock
+        let sleeper = Task { try await clock.sleep(until: deadline) }
+        withObservationTracking {
+            _ = weather.report
+        } onChange: {
+            sleeper.cancel()
+        }
+        await withTaskCancellationHandler {
+            _ = try? await sleeper.value
+        } onCancel: {
+            sleeper.cancel()
+        }
+    }
+
+    private static func simulatedState(_ simulation: StormSimulation) -> StormState {
         switch simulation {
-        case .storm: state = StormState(isActive: true, reasons: [.minutePrecipitation], alerts: [])
-        case .alert: state = StormState(isActive: true, reasons: [.alert], alerts: [Self.sampleAlert])
-        case nil: state = .calm
+        case .storm: StormState(isActive: true, reasons: [.minutePrecipitation], alerts: [])
+        case .alert: StormState(isActive: true, reasons: [.alert], alerts: [sampleAlert])
         }
     }
 
