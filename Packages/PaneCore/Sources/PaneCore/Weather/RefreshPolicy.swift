@@ -44,7 +44,7 @@ public struct RefreshPolicy: Hashable, Sendable {
     public func freshness(fetchedAt: Date?, lastAttemptFailed: Bool, at date: Date) -> Freshness {
         guard let fetchedAt else { return .none }
         let age = date.timeIntervalSince(fetchedAt)
-        // A negative age means the app clock is pinned before the fetch by `-now`.
+        // A negative age means the clock moved back past the fetch.
         guard age >= 0 else { return .fresh }
         let minutes = Int(age / 60)
         if age >= staleAfter { return .stale(minutes: minutes) }

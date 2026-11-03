@@ -15,8 +15,7 @@ struct CurrentWeatherCard: DashboardCard {
         if let report = weather.report {
             CurrentWeatherContent(
                 display: WeatherDisplay(report: report, at: context.date, calendar: context.model.calendar),
-                // Real time, not the app clock: a pinned or scrubbed clock says nothing about data age.
-                freshness: weather.freshness(at: .now).label
+                freshness: weather.freshness.label
             )
         } else {
             WeatherEmptyCard(heading: "Weather", model: context.model)
@@ -45,14 +44,7 @@ private struct WeatherEmptyCard: View {
     let model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.s) {
-            PaneHeading(text: heading)
-            Text(line)
-                .font(Theme.Typeface.body)
-                .foregroundStyle(Theme.Ink.tertiary)
-                .accessibilityIdentifier("weather.empty")
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
+        CardPlaceholder(heading: heading, line: line, lineIdentifier: "weather.empty")
     }
 
     private var line: String {

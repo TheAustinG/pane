@@ -129,6 +129,32 @@ struct WeatherControllerTests {
         await stop(task)
     }
 
+    @Test func locationChangeDropsTheOtherPlacesReport() async {
+        let harness = Harness()
+        let controller = harness.controller
+        let (task, _) = await harness.launch()
+        #expect(controller.report?.location == WeatherFixture.chicago)
+
+        harness.service.setFailing(true)
+        controller.location = WeatherFixture.grantPark
+        #expect(controller.report == nil)
+        _ = await harness.clock.nextSleep()
+        #expect(controller.report == nil)
+        #expect(controller.lastFailure != nil)
+        #expect(controller.freshness == .none)
+        await stop(task)
+    }
+
+    @Test func cacheFromAnotherPlaceIsNotShownWhileOffline() async {
+        let cache = WeatherCache.inMemory()
+        cache.save(WeatherFixture.report(at: start.addingTimeInterval(-3 * minute), location: WeatherFixture.grantPark))
+        let harness = Harness(failing: true, cache: cache)
+        let (task, _) = await harness.launch()
+        #expect(harness.controller.report == nil)
+        #expect(harness.service.requests == [WeatherFixture.chicago])
+        await stop(task)
+    }
+
     @Test func budgetCountsEveryAttempt() async {
         let harness = Harness()
         let controller = harness.controller

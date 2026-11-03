@@ -14,10 +14,16 @@ public final class WeatherController {
     public private(set) var lastFailure: Date?
     /// Billable WeatherKit calls counted this calendar month.
     public private(set) var callsThisMonth: Int
-    /// Changing it wakes the refresh loop to fetch the new place.
+    /// Changing it wakes the refresh loop to fetch the new place, and drops a report for any other
+    /// place so the cards never show the wrong city while that fetch is pending or failing.
     public var location: GeoPoint? {
         didSet {
-            if location != oldValue { wakeLoop() }
+            guard location != oldValue else { return }
+            if report?.location != location {
+                report = nil
+                lastFailure = nil
+            }
+            wakeLoop()
         }
     }
 
@@ -77,6 +83,11 @@ public final class WeatherController {
         await refresh()
     }
 
+    /// Measured on the controller's clock: a pinned or scrubbed app clock says nothing about data age.
+    public var freshness: Freshness {
+        freshness(at: clock.now)
+    }
+
     public func freshness(at date: Date) -> Freshness {
         policy.freshness(fetchedAt: report?.fetchedAt, lastAttemptFailed: lastFailure != nil, at: date)
     }
@@ -85,7 +96,7 @@ public final class WeatherController {
         guard !hasLoadedCache else { return }
         hasLoadedCache = true
         let now = clock.now
-        if report == nil, let cached = cache.loadReport() {
+        if report == nil, let cached = cache.loadReport(), cached.location == location {
             report = cached
             // A recent fetch for this place counts as the last attempt, so a relaunch spends no calls.
             let age = now.timeIntervalSince(cached.fetchedAt)

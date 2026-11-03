@@ -102,7 +102,6 @@ final class AppModel {
     func setHomeLocation(_ home: HomeLocation) {
         settings.homeLocation = home
         weather.location = home.coordinate
-        Task { await weather.refreshNow() }
     }
 
     func now(_ real: Date = .now) -> Date {
