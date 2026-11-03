@@ -34,20 +34,34 @@ final class AppSettings {
         didSet { store(homeLocation, key: Keys.homeLocation) }
     }
 
+    var stormLayout: StormLayout {
+        didSet { store(stormLayout, key: Keys.stormLayout) }
+    }
+
+    /// Off keeps the dashboard up through storms; radar still opens from the weather card.
+    var stormAutomatic: Bool {
+        didSet { store(stormAutomatic, key: Keys.stormAutomatic) }
+    }
+
     init(defaults: UserDefaults = .standard, reset: Bool = false) {
         self.defaults = defaults
         if reset {
-            [Keys.nightSchedule, Keys.nightDimOverride, Keys.homeLocation].forEach { defaults.removeObject(forKey: $0) }
+            [Keys.nightSchedule, Keys.nightDimOverride, Keys.homeLocation, Keys.stormLayout, Keys.stormAutomatic]
+                .forEach { defaults.removeObject(forKey: $0) }
         }
         nightSchedule = Self.load(NightSchedule.self, from: defaults, key: Keys.nightSchedule) ?? .standard
         nightDimOverride = Self.load(NightDimOverride.self, from: defaults, key: Keys.nightDimOverride) ?? .none
         homeLocation = Self.load(HomeLocation.self, from: defaults, key: Keys.homeLocation)
+        stormLayout = Self.load(StormLayout.self, from: defaults, key: Keys.stormLayout) ?? .side
+        stormAutomatic = Self.load(Bool.self, from: defaults, key: Keys.stormAutomatic) ?? true
     }
 
     private enum Keys {
         static let nightSchedule = "settings.nightSchedule"
         static let nightDimOverride = "settings.nightDimOverride"
         static let homeLocation = "settings.homeLocation"
+        static let stormLayout = "settings.stormLayout"
+        static let stormAutomatic = "settings.stormAutomatic"
     }
 
     private func store<T: Encodable>(_ value: T, key: String) {
@@ -70,11 +84,15 @@ final class AppModel {
     var showFPS: Bool
     var isDebugMenuPresented: Bool
     var isSettingsPresented: Bool
+    /// Radar opened from the weather card, as opposed to a storm taking over.
+    var isRadarPresented: Bool
     let usesSampleFixtures: Bool
     let pinnedNightDim: Bool?
     let settings: AppSettings
     let secrets: any SecretStore
     let weather: WeatherController
+    let storm: StormController
+    let radar: RadarController
     @ObservationIgnored var calendar = Calendar.current
 
     /// Sky position until a home location is set: the sun math needs somewhere.
@@ -87,12 +105,16 @@ final class AppModel {
         showFPS = options.showFPS
         isDebugMenuPresented = options.opensDebugMenu
         isSettingsPresented = options.opensSettings
+        isRadarPresented = options.opensRadar
         usesSampleFixtures = options.fixtures == "sample"
         pinnedNightDim = options.nightDim
         self.settings = settings
         self.secrets = secrets
         self.weather = weather
+        storm = StormController(weather: weather, simulation: options.storm)
+        radar = RadarController()
         weather.location = settings.homeLocation?.coordinate ?? weather.location
+        radar.viewport = RadarViewport(center: location)
     }
 
     var location: GeoPoint {
@@ -102,6 +124,21 @@ final class AppModel {
     func setHomeLocation(_ home: HomeLocation) {
         settings.homeLocation = home
         weather.location = home.coordinate
+        radar.viewport = RadarViewport(center: home.coordinate)
+    }
+
+    /// Simulations show even with automatic takeover off.
+    var isStormTakeoverShown: Bool {
+        isRadarPresented || storm.isTakeoverActive && (storm.simulation != nil || settings.stormAutomatic)
+    }
+
+    /// Back from the takeover: closes radar opened on demand, or dismisses the storm.
+    func closeStormTakeover() {
+        if isRadarPresented {
+            isRadarPresented = false
+        } else {
+            storm.dismiss()
+        }
     }
 
     func now(_ real: Date = .now) -> Date {
@@ -120,8 +157,10 @@ final class AppModel {
         SceneEngine.palette(for: scene(at: date))
     }
 
+    /// Storm mode raises the dim.
     func isNightDimmed(at date: Date) -> Bool {
-        pinnedNightDim ?? NightDim.isDimmed(
+        guard !isStormTakeoverShown else { return false }
+        return pinnedNightDim ?? NightDim.isDimmed(
             at: date,
             schedule: settings.nightSchedule,
             override: settings.nightDimOverride,

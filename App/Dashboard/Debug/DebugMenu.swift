@@ -53,6 +53,7 @@ struct DebugMenu: View {
             }
             section("Quality") { qualityRow }
             section("Weather") { weatherRow }
+            section("Storm") { stormRow }
         }
         .padding(Theme.Layout.paneInset)
         .frame(width: 1240)
@@ -154,6 +155,41 @@ struct DebugMenu: View {
             .buttonStyle(.glass)
             .accessibilityIdentifier("debug.weather.refresh")
         }
+    }
+
+    private var stormRow: some View {
+        let storm = model.storm
+        let options: [(id: String, title: String, simulation: StormSimulation?)] = [
+            ("storm", "Simulate storm", .storm),
+            ("alert", "Simulate alert", .alert),
+            ("clear", "Clear", nil),
+        ]
+        return HStack(spacing: Theme.Space.m) {
+            ForEach(options, id: \.id) { option in
+                let selected = storm.simulation == option.simulation
+                Button {
+                    storm.simulation = option.simulation
+                } label: {
+                    Label(option.title, systemImage: selected ? "checkmark.circle.fill" : "circle")
+                        .lineLimit(1)
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.glass)
+                .accessibilityValue(selected ? "selected" : "")
+                .accessibilityIdentifier("debug.storm.\(option.id)")
+            }
+            Text(stormStatus)
+                .font(Theme.Typeface.caption)
+                .foregroundStyle(Theme.Ink.secondary)
+                .lineLimit(1)
+                .accessibilityIdentifier("debug.storm.state")
+        }
+    }
+
+    private var stormStatus: String {
+        let state = model.storm.state
+        guard state.isActive else { return "Calm" }
+        return state.reasons.map(\.rawValue).sorted().joined(separator: ", ")
     }
 
     private var qualityRow: some View {

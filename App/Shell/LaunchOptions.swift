@@ -1,4 +1,5 @@
 import Foundation
+import PaneCore
 
 /// Launch arguments for repeatable states. UserDefaults reads `-key value` pairs, so a value that
 /// starts with `-` is lost; none of these take negative numbers.
@@ -21,6 +22,14 @@ struct LaunchOptions {
     var offline = false
     /// With `-fixtures sample`, seeds the offline cache with a report this many minutes old.
     var weatherAge: Int?
+    /// `-storm storm|alert` starts with a simulated storm.
+    var storm: StormSimulation?
+    /// `-stormLayout side|bottom` sets the storm strip layout.
+    var stormLayout: StormLayout?
+    /// `-radar 1` opens radar as if the weather card was clicked.
+    var opensRadar = false
+    /// Debug builds: `-home 41.88,-87.63` sets the home location.
+    var home: GeoPoint?
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {
         LaunchOptions(
@@ -35,8 +44,18 @@ struct LaunchOptions {
             resetsSettings: defaults.bool(forKey: "resetSettings"),
             nightDim: defaults.string(forKey: "nightDim").flatMap { ["on": true, "off": false][$0] },
             offline: defaults.bool(forKey: "offline"),
-            weatherAge: defaults.object(forKey: "weatherAge") == nil ? nil : defaults.integer(forKey: "weatherAge")
+            weatherAge: defaults.object(forKey: "weatherAge") == nil ? nil : defaults.integer(forKey: "weatherAge"),
+            storm: defaults.string(forKey: "storm").flatMap(StormSimulation.init(rawValue:)),
+            stormLayout: defaults.string(forKey: "stormLayout").flatMap(StormLayout.init(rawValue:)),
+            opensRadar: defaults.bool(forKey: "radar"),
+            home: defaults.string(forKey: "home").flatMap(parsePoint)
         )
+    }
+
+    static func parsePoint(_ text: String) -> GeoPoint? {
+        let parts = text.split(separator: ",").compactMap { Double($0.trimmingCharacters(in: .whitespaces)) }
+        guard parts.count == 2, abs(parts[0]) <= 90, abs(parts[1]) <= 180 else { return nil }
+        return GeoPoint(latitude: parts[0], longitude: parts[1])
     }
 
     static func parseDate(_ text: String) -> Date? {

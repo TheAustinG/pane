@@ -2,11 +2,6 @@
 import MapKit
 import SwiftUI
 
-enum StormLayout: String {
-    case side
-    case bottom
-}
-
 /// Storm takeover in both strip layouts. The map is real MapKit over a sample location; the radar
 /// echoes are drawn here as a stand-in for the tile renderer.
 struct StormSample: View {
