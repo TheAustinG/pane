@@ -23,7 +23,6 @@ struct PaneApp: App {
         WindowGroup {
             RootView(model: model, options: options)
                 .preferredColorScheme(.dark)
-                .task { await model.weather.run() }
         }
     }
 }
@@ -37,10 +36,16 @@ private struct RootView: View {
         if let page = PreviewPage(rawValue: options.designPreview ?? "") {
             DesignPreviewView(page: page)
         } else {
-            DashboardView(model: model)
+            dashboard
         }
         #else
-        DashboardView(model: model)
+        dashboard
         #endif
+    }
+
+    /// The live weather loop runs only behind the real dashboard, never behind the design preview.
+    private var dashboard: some View {
+        DashboardView(model: model)
+            .task { await model.weather.run() }
     }
 }

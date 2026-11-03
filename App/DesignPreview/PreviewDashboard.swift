@@ -24,12 +24,9 @@ enum PreviewDashboard {
         } else {
             settings.nightSchedule.isEnabled = false
         }
-        return AppModel(
-            options: options,
-            settings: settings,
-            secrets: InMemorySecretStore(),
-            weather: WeatherController(service: OfflineWeatherService())
-        )
+        let weather = WeatherWiring.controller(options: options)
+        Task { await weather.refreshNow() }
+        return AppModel(options: options, settings: settings, secrets: InMemorySecretStore(), weather: weather)
     }
 
     /// `-previewFocus` ids from the earlier sample layout, plus the Settings button.
