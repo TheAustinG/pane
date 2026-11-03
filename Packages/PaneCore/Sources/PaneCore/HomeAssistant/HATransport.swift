@@ -1,4 +1,5 @@
 import Foundation
+import Synchronization
 
 /// One WebSocket connection carrying Home Assistant's JSON text frames.
 public protocol HATransport: Sendable {
@@ -43,18 +44,25 @@ public struct URLSessionHATransportFactory: HATransportFactory {
 }
 
 final class URLSessionHATransport: HATransport, @unchecked Sendable {
-    private let task: URLSessionWebSocketTask
+    /// Phase 0 measured `get_states` on a real install well past the 1 MB default.
+    static let maximumMessageSize = 32 * 1024 * 1024
 
-    init(url: URL) {
-        task = URLSession.shared.webSocketTask(with: url)
+    private let task: URLSessionWebSocketTask
+    private let closed = Mutex(false)
+
+    init(url: URL, session: URLSession = .shared) {
+        task = session.webSocketTask(with: url)
+        task.maximumMessageSize = Self.maximumMessageSize
         task.resume()
     }
 
     func send(_ text: String) async throws {
+        guard !isClosed else { throw URLError(.networkConnectionLost) }
         try await task.send(.string(text))
     }
 
     func receive() async throws -> String {
+        guard !isClosed else { throw URLError(.networkConnectionLost) }
         switch try await task.receive() {
         case .string(let text): return text
         case .data(let data): return String(decoding: data, as: UTF8.self)
@@ -63,6 +71,19 @@ final class URLSessionHATransport: HATransport, @unchecked Sendable {
     }
 
     func close() {
-        task.cancel(with: .goingAway, reason: nil)
+        let wasOpen = closed.withLock { closed in
+            defer { closed = true }
+            return !closed
+        }
+        guard wasOpen else { return }
+        task.cancel(with: .normalClosure, reason: nil)
+    }
+
+    var maximumMessageSize: Int {
+        task.maximumMessageSize
+    }
+
+    private var isClosed: Bool {
+        closed.withLock { $0 }
     }
 }
