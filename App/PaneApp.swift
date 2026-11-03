@@ -12,11 +12,13 @@ struct PaneApp: App {
         let settings = AppSettings(reset: options.resetsSettings)
         WeatherWiring.prefillHomeLocation(settings, options: options)
         if let layout = options.stormLayout { settings.stormLayout = layout }
+        let secrets = KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane")
         _model = State(initialValue: AppModel(
             options: options,
             settings: settings,
-            secrets: KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane"),
-            weather: WeatherWiring.controller(options: options)
+            secrets: secrets,
+            weather: WeatherWiring.controller(options: options),
+            home: HomeWiring.controller(options: options, secrets: secrets)
         ))
     }
 
@@ -49,5 +51,6 @@ private struct RootView: View {
         DashboardView(model: model)
             .task { await model.weather.run() }
             .task { await model.storm.run() }
+            .task { await model.home.run() }
     }
 }

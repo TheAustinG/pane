@@ -27,6 +27,9 @@ struct DashboardView: View {
         .onChange(of: model.isStormTakeoverShown) { _, shown in
             if !shown { focus = .card(.current) }
         }
+        .onChange(of: model.isHomeScenesPresented) { _, presented in
+            if !presented, !model.isStormTakeoverShown { focus = .card(.home) }
+        }
         #if DEBUG
         .onPlayPauseCommand(perform: handlesDebugMenu ? { model.isDebugMenuPresented.toggle() } : nil)
         .onChange(of: model.isDebugMenuPresented) { _, presented in
@@ -59,8 +62,13 @@ struct DashboardView: View {
                     layout(date: date, context: context)
                     settingsEntry
                 }
-                .disabled(!isInteractive)
+                .disabled(!isInteractive || model.isHomeScenesPresented)
                 .transition(.opacity)
+                if model.isHomeScenesPresented {
+                    HomeScenesOverlay(model: model)
+                        .disabled(!isInteractive)
+                        .transition(.opacity)
+                }
             }
             Color.clear
                 .frame(width: 1, height: 1)
@@ -84,6 +92,7 @@ struct DashboardView: View {
             #endif
         }
         .animation(Theme.Motion.takeover, value: takeover)
+        .animation(Theme.Motion.state, value: model.isHomeScenesPresented)
         .environment(\.glassShade, palette.glassShade)
     }
 

@@ -49,6 +49,9 @@ targets:
         NSLocalNetworkUsageDescription: Pane reads Home Assistant and Portainer on your home network.
         PaneHomeLatitude: $(PANE_HOME_LATITUDE)
         PaneHomeLongitude: $(PANE_HOME_LONGITUDE)
+        PaneHAScheme: $(PANE_HA_SCHEME)
+        PaneHAHost: $(PANE_HA_HOST)
+        PaneHAToken: $(PANE_HA_TOKEN)
 
   PaneUITests:
     type: bundle.ui-testing

@@ -26,7 +26,14 @@ enum PreviewDashboard {
         }
         let weather = WeatherWiring.controller(options: options)
         Task { await weather.refreshNow() }
-        return AppModel(options: options, settings: settings, secrets: InMemorySecretStore(), weather: weather)
+        let secrets = InMemorySecretStore()
+        return AppModel(
+            options: options,
+            settings: settings,
+            secrets: secrets,
+            weather: weather,
+            home: HomeWiring.controller(options: options, secrets: secrets)
+        )
     }
 
     /// `-previewFocus` ids from the earlier sample layout, plus the Settings button.

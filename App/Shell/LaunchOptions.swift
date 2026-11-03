@@ -31,6 +31,14 @@ struct LaunchOptions {
     /// Debug builds: `-home 41.88,-87.63` sets and stores the home location, so later launches keep
     /// it until `-resetSettings 1`.
     var home: GeoPoint?
+    /// `-homeScenes 1` opens the scene buttons as if the Home card was clicked.
+    var opensHomeScenes = false
+    /// Debug builds: `-homeNudge dryAir|humidAir|doorUnlockedLate|lightsOnAway|bedroomTVLate` lays
+    /// states over the live ones that raise that nudge.
+    var homeNudge: HomeNudgeKind?
+    /// Debug builds: `-homeSetup prefill` fills the setup screen's fields from
+    /// `local/Secrets.local.xcconfig` without saving them, so a UI test can finish setup.
+    var homeSetupPrefill = false
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {
         LaunchOptions(
@@ -49,7 +57,10 @@ struct LaunchOptions {
             storm: defaults.string(forKey: "storm").flatMap(StormSimulation.init(rawValue:)),
             stormLayout: defaults.string(forKey: "stormLayout").flatMap(StormLayout.init(rawValue:)),
             opensRadar: defaults.bool(forKey: "radar"),
-            home: defaults.string(forKey: "home").flatMap(parsePoint)
+            home: defaults.string(forKey: "home").flatMap(parsePoint),
+            opensHomeScenes: defaults.bool(forKey: "homeScenes"),
+            homeNudge: defaults.string(forKey: "homeNudge").flatMap(HomeNudgeKind.init(rawValue:)),
+            homeSetupPrefill: defaults.string(forKey: "homeSetup") == "prefill"
         )
     }
 

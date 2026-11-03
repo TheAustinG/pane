@@ -3,6 +3,10 @@ import SwiftUI
 struct HomeCard: DashboardCard {
     let context: CardContext
 
+    static func activate(model: AppModel) {
+        model.isHomeScenesPresented = true
+    }
+
     var body: some View {
         #if DEBUG
         if context.model.usesSampleFixtures {

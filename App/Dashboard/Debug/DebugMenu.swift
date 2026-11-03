@@ -54,6 +54,7 @@ struct DebugMenu: View {
             section("Quality") { qualityRow }
             section("Weather") { weatherRow }
             section("Storm") { stormRow }
+            section("Home") { HomeDebugRow(model: model) }
         }
         .padding(Theme.Layout.paneInset)
         .frame(width: 1240)

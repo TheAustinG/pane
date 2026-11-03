@@ -86,6 +86,8 @@ final class AppModel {
     var isSettingsPresented: Bool
     /// Radar opened from the weather card, as opposed to a storm taking over.
     var isRadarPresented: Bool
+    /// The scene buttons opened from the Home card.
+    var isHomeScenesPresented: Bool
     let usesSampleFixtures: Bool
     let pinnedNightDim: Bool?
     let settings: AppSettings
@@ -93,12 +95,19 @@ final class AppModel {
     let weather: WeatherController
     let storm: StormController
     let radar: RadarController
+    let home: HomeController
     @ObservationIgnored var calendar = Calendar.current
 
     /// Sky position until a home location is set: the sun math needs somewhere.
     static let referenceLocation = GeoPoint(latitude: 41.88, longitude: -87.63)
 
-    init(options: LaunchOptions, settings: AppSettings, secrets: any SecretStore, weather: WeatherController) {
+    init(
+        options: LaunchOptions,
+        settings: AppSettings,
+        secrets: any SecretStore,
+        weather: WeatherController,
+        home: HomeController
+    ) {
         clock = AppClock(fixed: options.now)
         sceneOverride = options.scene.flatMap(WeatherScene.preset(named:))
         quality = options.quality
@@ -106,15 +115,18 @@ final class AppModel {
         isDebugMenuPresented = options.opensDebugMenu
         isSettingsPresented = options.opensSettings
         isRadarPresented = options.opensRadar
+        isHomeScenesPresented = options.opensHomeScenes
         usesSampleFixtures = options.fixtures == "sample"
         pinnedNightDim = options.nightDim
         self.settings = settings
         self.secrets = secrets
         self.weather = weather
+        self.home = home
         storm = StormController(weather: weather, simulation: options.storm)
         radar = RadarController()
         weather.location = settings.homeLocation?.coordinate ?? weather.location
         radar.viewport = RadarViewport(center: location)
+        home.now = { [weak self] in self?.now() ?? .now }
     }
 
     var location: GeoPoint {
@@ -143,6 +155,14 @@ final class AppModel {
 
     func now(_ real: Date = .now) -> Date {
         clock.now(real)
+    }
+
+    /// The Goodnight scene button: dims until the schedule next ends, unless already dimmed.
+    func startNightDim() {
+        let date = now()
+        let current = settings.nightDimOverride
+        guard !NightDim.isDimmed(at: date, schedule: settings.nightSchedule, override: current, calendar: calendar) else { return }
+        settings.nightDimOverride = NightDim.toggled(at: date, schedule: settings.nightSchedule, current: current, calendar: calendar)
     }
 
     func liveCondition(at date: Date) -> ConditionFamily {
