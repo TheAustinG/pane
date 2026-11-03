@@ -84,10 +84,10 @@ struct StormControllerTests {
         await stop(task)
     }
 
-    @Test func dismissHidesTheTakeoverUntilStormModeEnds() async {
+    @Test func aDismissedRainStormReturnsOnlyAfterGoingCalm() async {
         let harness = Harness()
         let storm = harness.storm
-        await harness.publish(StormFixture.report(at: start, alerts: [StormFixture.alert("a")]))
+        await harness.publish(StormFixture.report(at: start, chance: 0.9))
         let (task, _) = await harness.launch()
         #expect(storm.isTakeoverActive)
 
@@ -96,7 +96,7 @@ struct StormControllerTests {
         #expect(storm.state.isActive)
         #expect(!storm.isTakeoverActive)
 
-        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")], chance: 0.9)
+        _ = await harness.publishWhileRunning(chance: 0.9)
         #expect(!storm.isTakeoverActive)
 
         _ = await harness.publishWhileRunning()
@@ -104,8 +104,96 @@ struct StormControllerTests {
         #expect(storm.state == .calm)
         #expect(!storm.isDismissed)
 
+        _ = await harness.publishWhileRunning(chance: 0.6)
+        #expect(storm.isTakeoverActive)
+        await stop(task)
+    }
+
+    @Test func aDismissedWarningStaysHiddenAcrossADataGap() async {
+        let harness = Harness()
+        let storm = harness.storm
+        await harness.publish(StormFixture.report(at: start, alerts: [StormFixture.alert("a")]))
+        let (task, _) = await harness.launch()
+        storm.dismiss()
+
+        for _ in 1...80 { _ = await harness.advance(by: minute) }
+        #expect(storm.state == .calm)
+        #expect(!storm.isDismissed)
+
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")])
+        #expect(storm.state.reasons == [.alert])
+        #expect(storm.isDismissed)
+        #expect(!storm.isTakeoverActive)
+
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a"), StormFixture.alert("b")])
+        #expect(storm.isTakeoverActive)
+        await stop(task)
+    }
+
+    @Test func rainJoiningAStormHiddenByAnEarlierDismissalShowsIt() async {
+        let harness = Harness()
+        let storm = harness.storm
+        await harness.publish(StormFixture.report(at: start, alerts: [StormFixture.alert("a")]))
+        let (task, _) = await harness.launch()
+        storm.dismiss()
+        _ = await harness.publishWhileRunning()
+        for _ in 1...20 { _ = await harness.advance(by: minute) }
+        #expect(storm.state == .calm)
+
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")])
+        #expect(!storm.isTakeoverActive)
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")], chance: 0.6)
+        #expect(storm.isTakeoverActive)
+        await stop(task)
+    }
+
+    @Test func rainJoiningADismissedStormKeepsItHidden() async {
+        let harness = Harness()
+        let storm = harness.storm
+        await harness.publish(StormFixture.report(at: start, alerts: [StormFixture.alert("a")]))
+        let (task, _) = await harness.launch()
+        storm.dismiss()
+
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")], chance: 0.6)
+        #expect(storm.state.reasons == [.alert, .hourlyChance])
+        #expect(!storm.isTakeoverActive)
+        _ = await harness.publishWhileRunning(chance: 0.6)
+        #expect(!storm.isTakeoverActive)
+        await stop(task)
+    }
+
+    @Test func aDismissedIDIsForgottenAfterADayUnseen() async {
+        let harness = Harness()
+        let storm = harness.storm
+        await harness.publish(StormFixture.report(at: start, alerts: [StormFixture.alert("a")]))
+        let (task, _) = await harness.launch()
+        storm.dismiss()
+        _ = await harness.publishWhileRunning()
+        _ = await harness.advance(by: 24 * 3600)
+        #expect(storm.state == .calm)
+
         _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")])
         #expect(storm.isTakeoverActive)
+        await stop(task)
+    }
+
+    @Test func aDismissedIDSeenWithinADayStaysDismissed() async {
+        let harness = Harness()
+        let storm = harness.storm
+        await harness.publish(StormFixture.report(at: start, alerts: [StormFixture.alert("a")]))
+        let (task, _) = await harness.launch()
+        storm.dismiss()
+        _ = await harness.publishWhileRunning()
+
+        _ = await harness.advance(by: 20 * 3600)
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")])
+        #expect(!storm.isTakeoverActive)
+        _ = await harness.publishWhileRunning()
+
+        _ = await harness.advance(by: 10 * 3600)
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("a")])
+        #expect(storm.state.isActive)
+        #expect(!storm.isTakeoverActive)
         await stop(task)
     }
 
@@ -128,6 +216,11 @@ struct StormControllerTests {
 
         storm.dismiss()
         _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("b", severity: "extreme")], chance: 0.9)
+        #expect(!storm.isTakeoverActive)
+
+        let advisory = StormFixture.alert("c", severity: "moderate", summary: "Wind Advisory")
+        _ = await harness.publishWhileRunning(alerts: [StormFixture.alert("b", severity: "extreme"), advisory], chance: 0.9)
+        #expect(storm.state.alerts.map(\.id) == ["b", "c"])
         #expect(!storm.isTakeoverActive)
         await stop(task)
     }
@@ -192,16 +285,18 @@ struct StormControllerTests {
         storm.dismiss()
         #expect(storm.simulation == nil)
         #expect(storm.state.reasons == [.alert])
+        #expect(storm.isDismissed)
+        #expect(!storm.isTakeoverActive)
     }
 
-    @Test func aRefreshFailingForHoursEndsStormMode() async {
+    @Test func aRefreshFailingForAnHourEndsStormMode() async {
         let harness = Harness()
         let storm = harness.storm
         await harness.publish(StormFixture.report(at: start, alerts: [StormFixture.alert("a")], chance: 0.9))
         let (task, _) = await harness.launch()
         #expect(storm.state.reasons == [.alert, .hourlyChance])
 
-        for _ in 1...139 { _ = await harness.advance(by: minute) }
+        for _ in 1...79 { _ = await harness.advance(by: minute) }
         #expect(storm.state.isActive)
         _ = await harness.advance(by: minute)
         #expect(storm.state == .calm)

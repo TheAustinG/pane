@@ -10,15 +10,22 @@ private let hour: TimeInterval = 3600
 struct StormTriggerCase: Sendable, CustomTestStringConvertible {
     let name: String
     let report: WeatherReport?
+    let previous: StormEvaluation
     let expected: Set<StormReason>
 
-    init(_ name: String, _ report: WeatherReport?, _ expected: Set<StormReason>) {
+    init(_ name: String, _ report: WeatherReport?, after previous: StormEvaluation = .calm, _ expected: Set<StormReason>) {
         self.name = name
         self.report = report
+        self.previous = previous
         self.expected = expected
     }
 
     var testDescription: String { name }
+}
+
+/// Storm mode held on by `reasons`, its hold running out now unless a rule holds.
+private func storm(_ reasons: Set<StormReason>) -> StormEvaluation {
+    StormEvaluation(state: StormState(isActive: true, reasons: reasons, alerts: []), lastSignal: now.addingTimeInterval(-20 * minute))
 }
 
 private func report(
@@ -33,18 +40,28 @@ private func report(
     }
 }
 
-/// Defaults under test: storm mode turns on at a 50 percent chance and, once on, holds down to
-/// 30 percent; the minute rule needs 3 minutes at that chance with any intensity in the next hour
+/// Defaults under test: only extreme and severe alerts turn storm mode on; the minute and hourly rules
+/// turn it on at a 50 percent chance, and a rule already holding it on keeps holding down to 30
+/// percent; the minute rule needs 3 minutes at that chance with any intensity in the next hour
 /// (intensity only guards against chance alone, since its unit conversion is unverified); the hourly
 /// rule looks at the hour under way and any starting within 60 minutes; storm mode ends 20 minutes
-/// after the last rule held; reports older than 2 hours count for nothing.
+/// after the last rule held; reports older than 60 minutes count for nothing.
 @Suite("Storm rules")
 struct StormRulesTests {
     static let triggers: [StormTriggerCase] = [
         StormTriggerCase("a dry report", report(), []),
         StormTriggerCase("no report", nil, []),
-        StormTriggerCase("a minor alert", report(alerts: [StormFixture.alert("a", severity: "minor")]), [.alert]),
-        StormTriggerCase("an alert of unknown severity", report(alerts: [StormFixture.alert("a", severity: "unknown")]), [.alert]),
+        StormTriggerCase("a severe warning", report(alerts: [StormFixture.alert("a", severity: "severe")]), [.alert]),
+        StormTriggerCase("an extreme warning", report(alerts: [StormFixture.alert("a", severity: "extreme")]), [.alert]),
+        StormTriggerCase("a minor Heat Advisory alone", report(alerts: [StormFixture.alert("a", severity: "minor", summary: "Heat Advisory")]), []),
+        StormTriggerCase("a minor Frost Advisory alone", report(alerts: [StormFixture.alert("a", severity: "minor", summary: "Frost Advisory")]), []),
+        StormTriggerCase("a moderate Wind Advisory alone", report(alerts: [StormFixture.alert("a", severity: "moderate", summary: "Wind Advisory")]), []),
+        StormTriggerCase("an Air Quality Alert of unknown severity alone", report(alerts: [StormFixture.alert("a", severity: "unknown", summary: "Air Quality Alert")]), []),
+        StormTriggerCase(
+            "a warning among advisories",
+            report(alerts: [StormFixture.alert("a", severity: "minor"), StormFixture.alert("b", severity: "severe")]),
+            [.alert]
+        ),
         StormTriggerCase("three wet minutes at 50 percent", report(minutes: StormFixture.minutes(from: now, wet: 20..<23, chance: 0.5)), [.minutePrecipitation]),
         StormTriggerCase("two wet minutes are noise", report(minutes: StormFixture.minutes(from: now, wet: 20..<22)), []),
         StormTriggerCase("wet minutes at 49 percent", report(minutes: StormFixture.minutes(from: now, wet: 0..<60, chance: 0.49)), []),
@@ -64,16 +81,40 @@ struct StormRulesTests {
             report(alerts: [StormFixture.alert("a")], minutes: StormFixture.minutes(from: now, wet: 0..<10), chance: 0.9),
             [.alert, .minutePrecipitation, .hourlyChance]
         ),
-        StormTriggerCase("an alert 1 h 59 min old", report(fetchedAt: now.addingTimeInterval(-119 * minute), alerts: [StormFixture.alert("a")]), [.alert]),
-        StormTriggerCase("an alert 2 h 1 min old", report(fetchedAt: now.addingTimeInterval(-121 * minute), alerts: [StormFixture.alert("a")]), []),
-        StormTriggerCase("minutes 2 h 1 min old", report(fetchedAt: now.addingTimeInterval(-121 * minute), minutes: StormFixture.minutes(from: now, wet: 0..<60)), []),
-        StormTriggerCase("an hourly chance 3 h old", report(fetchedAt: now.addingTimeInterval(-3 * hour), chance: 0.9), []),
+        StormTriggerCase("an alert 59 min old", report(fetchedAt: now.addingTimeInterval(-59 * minute), alerts: [StormFixture.alert("a")]), [.alert]),
+        StormTriggerCase("an alert 61 min old", report(fetchedAt: now.addingTimeInterval(-61 * minute), alerts: [StormFixture.alert("a")]), []),
+        StormTriggerCase("wet minutes 61 min old", report(fetchedAt: now.addingTimeInterval(-61 * minute), minutes: StormFixture.minutes(from: now, wet: 0..<60)), []),
+        StormTriggerCase("an hourly chance 61 min old", report(fetchedAt: now.addingTimeInterval(-61 * minute), chance: 0.9), []),
         StormTriggerCase("a report from a clock that went back", report(fetchedAt: now.addingTimeInterval(hour), alerts: [StormFixture.alert("a")]), [.alert]),
+        StormTriggerCase("35 percent hourly while the hourly rule holds", report(chance: 0.35), after: storm([.hourlyChance]), [.hourlyChance]),
+        StormTriggerCase("29 percent hourly while the hourly rule holds", report(chance: 0.29), after: storm([.hourlyChance]), []),
+        StormTriggerCase("35 percent hourly once an alert storm ends", report(chance: 0.35), after: storm([.alert]), []),
+        StormTriggerCase("35 percent hourly while only the minute rule holds", report(chance: 0.35), after: storm([.minutePrecipitation]), []),
+        StormTriggerCase("50 percent hourly after an alert storm", report(chance: 0.5), after: storm([.alert]), [.hourlyChance]),
+        StormTriggerCase(
+            "35 percent minutes while the minute rule holds",
+            report(minutes: StormFixture.minutes(from: now, wet: 0..<10, chance: 0.35)),
+            after: storm([.minutePrecipitation]),
+            [.minutePrecipitation]
+        ),
+        StormTriggerCase(
+            "35 percent minutes while only the hourly rule holds",
+            report(minutes: StormFixture.minutes(from: now, wet: 0..<10, chance: 0.35)),
+            after: storm([.hourlyChance]),
+            []
+        ),
+        StormTriggerCase(
+            "35 percent minutes and hourly once an alert storm ends",
+            report(minutes: StormFixture.minutes(from: now, wet: 0..<10, chance: 0.35), chance: 0.35),
+            after: storm([.alert]),
+            []
+        ),
+        StormTriggerCase("an advisory does not hold an alert storm", report(alerts: [StormFixture.alert("a", severity: "moderate")]), after: storm([.alert]), []),
     ]
 
     @Test(arguments: triggers)
     func trigger(_ trigger: StormTriggerCase) {
-        let evaluation = StormRules().evaluate(report: trigger.report, at: now)
+        let evaluation = StormRules().evaluate(report: trigger.report, at: now, previous: trigger.previous)
         #expect(evaluation.state.reasons == trigger.expected)
         #expect(evaluation.state.isActive == !trigger.expected.isEmpty)
         #expect(evaluation.lastSignal == (trigger.expected.isEmpty ? nil : now))
@@ -155,7 +196,7 @@ struct StormRulesTests {
         let rules = StormRules()
         let on = rules.evaluate(report: report(alerts: [StormFixture.alert("a")]), at: now)
         let holding = rules.evaluate(report: report(), at: now.addingTimeInterval(15 * minute), previous: on)
-        let again = rules.evaluate(report: report(chance: 0.4), at: now.addingTimeInterval(16 * minute), previous: holding)
+        let again = rules.evaluate(report: report(chance: 0.5), at: now.addingTimeInterval(16 * minute), previous: holding)
         #expect(again.state.reasons == [.hourlyChance])
         let stillOn = rules.evaluate(report: report(), at: now.addingTimeInterval(35 * minute), previous: again)
         #expect(stillOn.state.isActive)
@@ -175,17 +216,17 @@ struct StormRulesTests {
         #expect(rules.evaluate(report: report(), at: now.addingTimeInterval(20 * minute), previous: held) == .calm)
     }
 
-    @Test func anOfflineReportStopsHoldingStormModeAfterTwoHours() {
+    @Test func anOfflineReportStopsHoldingStormModeAfterAnHour() {
         let rules = StormRules()
         let offline = report(alerts: [StormFixture.alert("a")], minutes: StormFixture.minutes(from: now, wet: 0..<60), chance: 0.9)
         var evaluation = StormEvaluation.calm
         var firstCalm: Date?
-        for step in 0...(3 * 60) {
+        for step in 0...(2 * 60) {
             let time = now.addingTimeInterval(TimeInterval(step) * minute)
             evaluation = rules.evaluate(report: offline, at: time, previous: evaluation)
             if !evaluation.state.isActive, firstCalm == nil { firstCalm = time }
         }
-        #expect(firstCalm == now.addingTimeInterval(140 * minute))
+        #expect(firstCalm == now.addingTimeInterval(80 * minute))
         #expect(evaluation == .calm)
     }
 
@@ -194,5 +235,35 @@ struct StormRulesTests {
         let on = rules.evaluate(report: report(alerts: [StormFixture.alert("a")]), at: now)
         #expect(rules.evaluate(report: nil, at: now.addingTimeInterval(19 * minute), previous: on).state.isActive)
         #expect(rules.evaluate(report: nil, at: now.addingTimeInterval(20 * minute), previous: on) == .calm)
+    }
+
+    @Test func everyAlertIsListedWhileStormModeIsOnForAnyReason() {
+        let rules = StormRules()
+        let advisory = StormFixture.alert("heat", severity: "minor", summary: "Heat Advisory")
+        let warning = StormFixture.alert("flood", severity: "severe", summary: "Flood Warning")
+        let wet = StormFixture.minutes(from: now, wet: 0..<10)
+
+        let advisoryOnly = rules.evaluate(report: report(alerts: [advisory]), at: now)
+        #expect(advisoryOnly == .calm)
+
+        let raining = rules.evaluate(report: report(alerts: [advisory], minutes: wet), at: now)
+        #expect(raining.state.reasons == [.minutePrecipitation])
+        #expect(raining.state.alerts == [advisory])
+
+        let both = rules.evaluate(report: report(alerts: [advisory, warning], minutes: wet), at: now)
+        #expect(both.state.reasons == [.alert, .minutePrecipitation])
+        #expect(both.state.alerts == [warning, advisory])
+
+        let holding = rules.evaluate(report: report(alerts: [advisory]), at: now.addingTimeInterval(5 * minute), previous: raining)
+        #expect(holding.state.reasons == [.minutePrecipitation])
+        #expect(holding.state.alerts == [advisory])
+    }
+
+    @Test func alertSeveritiesAreConfigurable() {
+        let rules = StormRules(alertSeverities: ["extreme", "severe", "moderate"])
+        let wind = StormFixture.alert("wind", severity: "moderate", summary: "Wind Advisory")
+        #expect(rules.evaluate(report: report(alerts: [wind]), at: now).state.reasons == [.alert])
+        #expect(rules.triggers(wind))
+        #expect(!StormRules().triggers(wind))
     }
 }
