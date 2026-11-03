@@ -45,7 +45,7 @@ public struct StormRules: Hashable, Sendable {
         var reasons = Set<StormReason>()
         var alerts: [WeatherAlertInfo] = []
         if let report, isUsable(report, at: now) {
-            alerts = Self.mostSevereFirst(report.alerts ?? [])
+            alerts = currentAlerts(in: report, at: now)
             if alerts.contains(where: triggers) { reasons.insert(.alert) }
             let minuteThreshold = holding.contains(.minutePrecipitation) ? exitChance : enterChance
             if minuteRuleHolds(report.minutes ?? [], at: now, threshold: minuteThreshold) { reasons.insert(.minutePrecipitation) }
@@ -68,6 +68,13 @@ public struct StormRules: Hashable, Sendable {
     /// Whether the alert alone turns storm mode on.
     public func triggers(_ alert: WeatherAlertInfo) -> Bool {
         alertSeverities.contains(alert.severity)
+    }
+
+    /// Alerts of a usable report that have not ended, most severe first, exactly as issued. An alert
+    /// that ended between refreshes must not hold the takeover.
+    public func currentAlerts(in report: WeatherReport?, at now: Date) -> [WeatherAlertInfo] {
+        guard let report, isUsable(report, at: now) else { return [] }
+        return Self.mostSevereFirst((report.alerts ?? []).filter { !$0.hasEnded(at: now) })
     }
 
     func isUsable(_ report: WeatherReport, at now: Date) -> Bool {

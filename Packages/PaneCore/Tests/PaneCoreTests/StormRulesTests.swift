@@ -109,6 +109,10 @@ struct StormRulesTests {
             after: storm([.alert]),
             []
         ),
+        StormTriggerCase("a warning that ended a minute ago", report(alerts: [StormFixture.alert("a", endDate: now.addingTimeInterval(-minute))]), []),
+        StormTriggerCase("a warning ending now", report(alerts: [StormFixture.alert("a", endDate: now)]), []),
+        StormTriggerCase("a warning ending in a minute", report(alerts: [StormFixture.alert("a", endDate: now.addingTimeInterval(minute))]), [.alert]),
+        StormTriggerCase("a warning that ended does not hold an alert storm", report(alerts: [StormFixture.alert("a", endDate: now)]), after: storm([.alert]), []),
         StormTriggerCase("an advisory does not hold an alert storm", report(alerts: [StormFixture.alert("a", severity: "moderate")]), after: storm([.alert]), []),
     ]
 
@@ -265,5 +269,25 @@ struct StormRulesTests {
         #expect(rules.evaluate(report: report(alerts: [wind]), at: now).state.reasons == [.alert])
         #expect(rules.triggers(wind))
         #expect(!StormRules().triggers(wind))
+    }
+
+    @Test func endedAlertsAreNotListed() {
+        let rules = StormRules()
+        let ended = StormFixture.alert("ended", severity: "extreme", endDate: now)
+        let advisory = StormFixture.alert("heat", severity: "minor", endDate: now.addingTimeInterval(hour))
+        let warning = StormFixture.alert("flood", severity: "severe")
+        let wet = StormFixture.minutes(from: now, wet: 0..<10)
+
+        let raining = rules.evaluate(report: report(alerts: [ended, advisory, warning], minutes: wet), at: now)
+        #expect(raining.state.alerts == [warning, advisory])
+
+        let holding = rules.evaluate(report: report(alerts: [ended, advisory]), at: now.addingTimeInterval(minute), previous: raining)
+        #expect(holding.state.isActive)
+        #expect(holding.state.alerts == [advisory])
+
+        #expect(rules.currentAlerts(in: report(alerts: [ended, advisory, warning]), at: now) == [warning, advisory])
+        #expect(rules.currentAlerts(in: report(alerts: [ended, advisory, warning]), at: now.addingTimeInterval(hour)) == [warning])
+        #expect(rules.currentAlerts(in: report(fetchedAt: now.addingTimeInterval(-61 * minute), alerts: [warning]), at: now).isEmpty)
+        #expect(rules.currentAlerts(in: nil, at: now).isEmpty)
     }
 }

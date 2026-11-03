@@ -22,10 +22,6 @@ public struct StormState: Hashable, Sendable {
     }
 
     public static let calm = StormState(isActive: false, reasons: [], alerts: [])
-
-    var hasPrecipitation: Bool {
-        reasons.contains(.minutePrecipitation) || reasons.contains(.hourlyChance)
-    }
 }
 
 /// Debug "simulate storm": forces storm mode, with or without the sample alert.
@@ -45,24 +41,22 @@ public final class StormController {
     public var simulation: StormSimulation? {
         didSet { evaluate() }
     }
-    /// Whether a dismissal hides the real storm's takeover. Dismissed alert ids stay dismissed
-    /// through calm spells, so only a warning with a new id, or rain after storm mode has gone calm
-    /// and come back, shows the takeover again.
+    /// Whether Back hid the real storm's takeover. It lasts until storm mode next goes calm; until
+    /// then only a warning with a new id shows the takeover again.
     public private(set) var isDismissed = false
+    /// Alerts to show with radar: `state.alerts` while storm mode or a simulation is on, otherwise
+    /// every current alert, so radar opened from the weather card lists advisories too mild for
+    /// storm mode. Most severe first, exactly as issued.
+    public private(set) var alerts: [WeatherAlertInfo] = []
 
     /// The longest the loop waits between evaluations when the report does not change.
     public static let tick: TimeInterval = 60
-    /// A dismissed alert id is forgotten once no report has carried it for this long.
-    public static let dismissalMemory: TimeInterval = 24 * 3600
 
     @ObservationIgnored private let weather: WeatherController
     @ObservationIgnored private let clock: any WeatherClock
     @ObservationIgnored private let rules: StormRules
     @ObservationIgnored private var evaluation = StormEvaluation.calm
-    /// When each dismissed alert id was last seen in a report.
-    @ObservationIgnored private var dismissedAlerts: [String: Date] = [:]
-    /// Back was pressed during the current storm, so rain joining it does not show it again.
-    @ObservationIgnored private var dismissedThisStorm = false
+    @ObservationIgnored private var dismissedAlertIDs: Set<String> = []
 
     public init(
         weather: WeatherController,
@@ -81,14 +75,13 @@ public final class StormController {
         state.isActive && (simulation != nil || !isDismissed)
     }
 
-    /// Hides the takeover and dismisses every alert on it. Clears a simulation instead.
+    /// Hides the takeover until storm mode next goes calm, and dismisses every alert on it. Clears a
+    /// simulation instead.
     public func dismiss() {
         if simulation != nil {
             simulation = nil
         } else if state.isActive {
-            let now = clock.now
-            for alert in state.alerts { dismissedAlerts[alert.id] = now }
-            dismissedThisStorm = true
+            dismissedAlertIDs.formUnion(state.alerts.map(\.id))
             isDismissed = true
         }
     }
@@ -105,36 +98,21 @@ public final class StormController {
     /// Measured on the controller's clock: a pinned or scrubbed app clock says nothing about the storm.
     func evaluate() {
         let now = clock.now
-        let wasActive = evaluation.state.isActive
         evaluation = rules.evaluate(report: weather.report, at: now, previous: evaluation)
         let next = simulation.map(Self.simulatedState) ?? evaluation.state
         if next != state { state = next }
-        rememberDismissedAlerts(at: now)
-        let hidden = resolveDismissal(for: evaluation.state, wasActive: wasActive)
-        if hidden != isDismissed { isDismissed = hidden }
+        let shown = next.isActive ? next.alerts : rules.currentAlerts(in: weather.report, at: now)
+        if shown != alerts { alerts = shown }
+        updateDismissal(for: evaluation.state)
     }
 
-    /// Returns whether the takeover stays hidden, and forgets a dismissal of this storm once it ends.
-    private func resolveDismissal(for storm: StormState, wasActive: Bool) -> Bool {
-        guard storm.isActive else {
-            dismissedThisStorm = false
-            return false
+    private func updateDismissal(for storm: StormState) {
+        if !storm.isActive {
+            dismissedAlertIDs = []
+            if isDismissed { isDismissed = false }
+        } else if isDismissed, storm.alerts.contains(where: { rules.triggers($0) && !dismissedAlertIDs.contains($0.id) }) {
+            isDismissed = false
         }
-        if storm.alerts.contains(where: { rules.triggers($0) && dismissedAlerts[$0.id] == nil }) {
-            dismissedThisStorm = false
-            return false
-        }
-        // A storm with no warning left undismissed starts hidden unless it brings rain.
-        if !wasActive { return !storm.hasPrecipitation }
-        if isDismissed, !dismissedThisStorm, storm.hasPrecipitation { return false }
-        return isDismissed
-    }
-
-    private func rememberDismissedAlerts(at now: Date) {
-        for alert in weather.report?.alerts ?? [] {
-            if let seen = dismissedAlerts[alert.id], seen < now { dismissedAlerts[alert.id] = now }
-        }
-        dismissedAlerts = dismissedAlerts.filter { now.timeIntervalSince($0.value) < Self.dismissalMemory }
     }
 
     private func waitForReport(until deadline: Date) async {
