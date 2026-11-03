@@ -37,6 +37,11 @@ public struct GeoBounds: Hashable, Sendable {
         self.east = east
         self.west = west
     }
+
+    /// Edges count as inside. Assumes the bounds do not cross the antimeridian.
+    public func contains(_ point: GeoPoint) -> Bool {
+        (south...north).contains(point.latitude) && (west...east).contains(point.longitude)
+    }
 }
 
 /// The map area the takeover shows, sized in screen points so the controller can pick a zoom whose
@@ -97,7 +102,13 @@ public enum TileMath {
         return min(max(Int(ideal.rounded()), range.lowerBound), range.upperBound)
     }
 
-    /// Every tile at `z` that touches `bounds`.
+    public static func tile(containing point: GeoPoint, z: Int) -> TileCoordinate {
+        let count = 1 << z
+        func index(_ value: Double) -> Int { min(max(Int(floor(value * Double(count))), 0), count - 1) }
+        return TileCoordinate(z: z, x: index(mercatorX(longitude: point.longitude)), y: index(mercatorY(latitude: point.latitude)))
+    }
+
+    /// Every tile at `z` that touches `bounds`, row by row from the top left.
     public static func tiles(covering bounds: GeoBounds, z: Int) -> [TileCoordinate] {
         let count = 1 << z
         func index(_ value: Double) -> Int { min(max(Int(floor(value * Double(count))), 0), count - 1) }
