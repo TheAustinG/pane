@@ -20,6 +20,14 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(waitForHelp(app, containing: "Pane has no GPS"))
 
         XCUIRemote.shared.press(.down)
+        XCTAssertTrue(waitForFocus(cell(app, "settings.storm.layout")))
+        XCTAssertTrue(waitForHelp(app, containing: "weather strip sits when radar takes over"))
+
+        XCUIRemote.shared.press(.down)
+        XCTAssertTrue(waitForFocus(cell(app, "settings.storm.automatic")))
+        XCTAssertTrue(waitForHelp(app, containing: "opens only from the weather card"))
+
+        XCUIRemote.shared.press(.down)
         XCTAssertTrue(waitForFocus(cell(app, "settings.night.enabled")))
         XCTAssertTrue(waitForHelp(app, containing: "dims to about 30 percent"))
 

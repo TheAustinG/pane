@@ -227,7 +227,7 @@ Pane has no brand accent. The sky supplies the color of every screen; the interf
 The canvas is 1920x1080 points, the tvOS screen at 1x.
 
 - **Dashboard:** 72 pt top and bottom margins, 96 pt side margins, 32 pt gutters. Top row 464 pt: the clock block on the left, the current weather pane (600 pt wide) on the right. Bottom row 440 pt: forecast (700 pt), Home (482 pt), GitHub (482 pt). Pane content insets are 30 pt top and bottom and 40 pt at the sides.
-- **Storm takeover:** radar fills the whole screen edge to edge, and the weather strip floats over it in one of two layouts chosen in Settings. Side: a 600 pt glass column on the right with conditions (compact clock, temperature, a one-line house status and the Apple Weather mark) and the alert with its full text; the radar timeline floats bottom left. Bottom: a 252 pt glass strip across the bottom with conditions, the alert title and QR code, and two house lines; the timeline floats above it.
+- **Storm takeover:** radar fills the whole screen edge to edge, and the weather strip floats over it in one of two layouts chosen in Settings. Side: a 600 pt glass column on the right with conditions (compact clock, temperature, a one-line house status and the Apple Weather mark) and the alerts, stacked, most severe first; the radar timeline floats bottom left. Bottom: a 252 pt glass strip across the bottom with conditions, the alert title and QR code, and two house lines; the timeline floats above it.
 - **Night dim:** the whole layout stays in place and is lowered to about 30 percent; particles stop. Storm mode and nudges still raise it.
 - **Settings:** a 620 pt left column (screen title and a glass help pane that explains the focused row) and a 1000 pt native list on the right, with 80 pt between them.
 - **Setup:** a 680 pt left column (glass icon, screen title, instructions) and an 860 pt right column with fields, a status line and actions stacked vertically, 96 pt apart.
@@ -273,7 +273,7 @@ A 52 pt icon well (Well 14%), a Body Medium title, an optional Caption detail at
 - **Warning:** the same shape in coral, for a lost connection or a failed setup test.
 
 ### Alert Banner
-A weather alert, coral fill and stroke, title at Title size with a filled warning triangle, issuer and expiry at Caption. The message text is shown exactly as issued and wraps; it is never shortened. A QR code (132 pt, 104 pt when stacked) links to Apple's alert details page. In the bottom strip, where the full text cannot fit, the banner shows the title and expiry, and clicking it opens the full text.
+A weather alert, coral fill and stroke, title at Title size with a filled warning triangle, issuer and end time ("until 8:15 PM") at Caption. WeatherKit gives an alert's summary, issuer, region, severity and end time, not its full text, so the title is the summary exactly as issued and wraps; it is never shortened, and the full text lives on Apple's alert details page. A QR code (132 pt, 104 pt when stacked) links to that page. Clicking a banner opens the alert detail: every active alert with a large QR code. In the bottom strip only the first alert fits, and its caption says how many more there are.
 
 ### Scene Button
 Native `.buttonStyle(.glass)` with a label and SF Symbol ("Goodnight", "Movie", "Morning"). Focus is the platform's: a white platter with dark text. Disabled buttons dim and are skipped by focus.
@@ -303,7 +303,7 @@ A mesh gradient built from the scene's five colors, drifting slowly, with a soft
 - **Do** keep text at 24 pt or larger and at Regular weight or heavier below 64 pt.
 - **Do** use native tvOS controls for lists, toggles, fields and scene buttons, and let the platform draw their focus.
 - **Do** show focus on custom panes with the 1.04 lift, 16% sheen, 75% rim and the outside-only shadow.
-- **Do** show weather alert text exactly as issued, wrapped, with the QR code to Apple's alert page.
+- **Do** show weather alert summaries exactly as issued, wrapped, with the QR code to Apple's alert page for the full text.
 - **Do** keep the Apple Weather mark on screen whenever weather data is shown.
 - **Do** stack setup actions vertically under their fields.
 

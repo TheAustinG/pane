@@ -17,10 +17,14 @@ enum WeatherWiring {
     }
 
     /// Debug simulator builds start with the home location from `local/Secrets.local.xcconfig`, so
-    /// live runs need no city search. Device and Release builds leave the keys empty.
+    /// live runs need no city search. Device and Release builds leave the keys empty. `-home` wins.
     @MainActor
     static func prefillHomeLocation(_ settings: AppSettings, options: LaunchOptions) {
         #if DEBUG
+        if let home = options.home {
+            settings.homeLocation = HomeLocation(name: "Debug location", coordinate: home)
+            return
+        }
         guard settings.homeLocation == nil, !options.resetsSettings,
               let latitude = plistDouble("PaneHomeLatitude"),
               let longitude = plistDouble("PaneHomeLongitude") else { return }

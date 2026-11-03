@@ -19,15 +19,18 @@ struct DashboardView: View {
         .defaultFocus($focus, initialFocus ?? .card(.current))
         .task {
             try? await Task.sleep(for: .milliseconds(600))
-            if focus == nil, !model.isSettingsPresented { focus = initialFocus ?? .card(.current) }
+            if focus == nil, !model.isSettingsPresented, !model.isStormTakeoverShown { focus = initialFocus ?? .card(.current) }
         }
         .fullScreenCover(isPresented: $model.isSettingsPresented) {
             SettingsRoot(model: model)
         }
+        .onChange(of: model.isStormTakeoverShown) { _, shown in
+            if !shown { focus = .card(.current) }
+        }
         #if DEBUG
         .onPlayPauseCommand(perform: handlesDebugMenu ? { model.isDebugMenuPresented.toggle() } : nil)
         .onChange(of: model.isDebugMenuPresented) { _, presented in
-            if !presented { focus = .card(.current) }
+            if !presented, !model.isStormTakeoverShown { focus = .card(.current) }
         }
         #endif
     }
@@ -43,13 +46,28 @@ struct DashboardView: View {
     private func screen(at date: Date) -> some View {
         let palette = model.palette(at: date)
         let dimmed = model.isNightDimmed(at: date)
+        let takeover = model.isStormTakeoverShown
         let context = CardContext(model: model, date: date, palette: palette)
         return ZStack {
-            SkyView(target: palette, quality: model.quality, particlesEnabled: !dimmed, animates: !model.isSettingsPresented)
-            layout(date: date, context: context)
+            SkyView(target: palette, quality: model.quality, particlesEnabled: !dimmed && !takeover, animates: !model.isSettingsPresented && !takeover)
+            if takeover {
+                StormTakeover(model: model, date: date)
+                    .disabled(!isInteractive)
+                    .transition(.opacity)
+            } else {
+                Group {
+                    layout(date: date, context: context)
+                    settingsEntry
+                }
                 .disabled(!isInteractive)
-            settingsEntry
-                .disabled(!isInteractive)
+                .transition(.opacity)
+            }
+            Color.clear
+                .frame(width: 1, height: 1)
+                .accessibilityElement()
+                .accessibilityLabel("Storm takeover")
+                .accessibilityValue(takeover ? "on" : "off")
+                .accessibilityIdentifier("dashboard.stormTakeover")
             Color.black
                 .opacity(dimmed ? 1 - Theme.Dim.night : 0)
                 .ignoresSafeArea()
@@ -65,6 +83,7 @@ struct DashboardView: View {
             DebugOverlay(model: model)
             #endif
         }
+        .animation(Theme.Motion.takeover, value: takeover)
         .environment(\.glassShade, palette.glassShade)
     }
 

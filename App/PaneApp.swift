@@ -11,6 +11,7 @@ struct PaneApp: App {
         self.options = options
         let settings = AppSettings(reset: options.resetsSettings)
         WeatherWiring.prefillHomeLocation(settings, options: options)
+        if let layout = options.stormLayout { settings.stormLayout = layout }
         _model = State(initialValue: AppModel(
             options: options,
             settings: settings,
@@ -47,5 +48,6 @@ private struct RootView: View {
     private var dashboard: some View {
         DashboardView(model: model)
             .task { await model.weather.run() }
+            .task { await model.storm.run() }
     }
 }

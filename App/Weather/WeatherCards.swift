@@ -5,9 +5,13 @@ struct CurrentWeatherCard: DashboardCard {
     let context: CardContext
 
     /// The Settings button stays hidden until focused, so with no location the card itself is the
-    /// way in.
+    /// way in. Otherwise it opens radar.
     static func activate(model: AppModel) {
-        if model.weather.location == nil { model.isSettingsPresented = true }
+        if model.weather.location == nil {
+            model.isSettingsPresented = true
+        } else {
+            model.isRadarPresented = true
+        }
     }
 
     var body: some View {
@@ -25,6 +29,10 @@ struct CurrentWeatherCard: DashboardCard {
 
 struct ForecastCard: DashboardCard {
     let context: CardContext
+
+    static func activate(model: AppModel) {
+        CurrentWeatherCard.activate(model: model)
+    }
 
     var body: some View {
         let weather = context.model.weather

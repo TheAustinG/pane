@@ -26,13 +26,3 @@ private struct WeatherSettingsRows: View {
         .accessibilityIdentifier("settings.weather.location")
     }
 }
-
-/// Storm strip layout and storm mode options (Phase 3).
-enum StormSettingsSection: SettingsSection {
-    static let title = "Storm mode"
-    static var isAvailable: Bool { false }
-
-    static func rows(model: AppModel) -> some View {
-        EmptyView()
-    }
-}

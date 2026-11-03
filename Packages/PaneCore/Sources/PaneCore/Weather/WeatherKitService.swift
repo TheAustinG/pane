@@ -103,14 +103,17 @@ private extension MinuteForecast {
 }
 
 private extension WeatherAlertInfo {
+    /// One `detailsURL` lists every alert active at the location, so it changes as alerts come and
+    /// go and is shared between them; the id has to come from the alert itself.
     init(_ alert: WeatherAlert) {
         self.init(
-            id: alert.detailsURL.absoluteString,
+            id: [alert.summary, alert.source, alert.region ?? ""].joined(separator: "|"),
             summary: alert.summary,
             source: alert.source,
             severity: alert.severity.rawValue,
             detailsURL: alert.detailsURL,
-            region: alert.region
+            region: alert.region,
+            endDate: (try? JSONEncoder().encode(alert)).flatMap(Self.endDate(fromEncodedAlert:))
         )
     }
 }
