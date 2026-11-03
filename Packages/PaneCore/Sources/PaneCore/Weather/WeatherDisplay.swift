@@ -34,7 +34,8 @@ public struct WeatherDisplay: Hashable, Sendable {
         public var fraction: Double?
         public var sunrise: String
         public var sunset: String
-        /// "Sunset in 33 min", "5h 15m of light left", "Sunrise in 19 min", "Sunrise 6:23 AM" or "Night".
+        /// "Sunset in 33 min", "5h 15m of light left", "Sunrise in 19 min" or "Sunrise 6:23 AM" (the next
+        /// one, also after sunset); "Night" only where the sun math has no sunrise.
         public var caption: String
     }
 
@@ -87,9 +88,13 @@ public struct WeatherDisplay: Hashable, Sendable {
                 low: format.string(day.low)
             )
         }
+        // After sunset the arc shows tomorrow, so its sunrise label agrees with the caption.
+        let isAfterSunset = sun.sunset(on: date).map { date >= $0 } ?? false
+        let arcDay = isAfterSunset ? calendar.date(byAdding: .day, value: 1, to: date) ?? date : date
         daylight = Self.makeDaylight(
-            sunrise: sun.sunrise(on: date),
-            sunset: sun.sunset(on: date),
+            sunrise: sun.sunrise(on: arcDay),
+            sunset: sun.sunset(on: arcDay),
+            nextSunrise: sun.nextSunrise(after: date),
             at: date,
             calendar: calendar
         )
@@ -101,19 +106,23 @@ public struct WeatherDisplay: Hashable, Sendable {
         return Int((chance * 10).rounded()) * 10
     }
 
-    static func makeDaylight(sunrise: Date?, sunset: Date?, at date: Date, calendar: Calendar) -> Daylight {
+    static func makeDaylight(
+        sunrise: Date?,
+        sunset: Date?,
+        nextSunrise: Date?,
+        at date: Date,
+        calendar: Calendar
+    ) -> Daylight {
         let label = { (time: Date?) in time.map { ClockLabel.string($0, calendar: calendar) } ?? "--" }
         var fraction: Double?
         var caption = "Night"
-        if let sunrise, let sunset, sunset > sunrise {
-            if date < sunrise {
-                let wait = sunrise.timeIntervalSince(date)
-                caption = wait < 2 * 3600 ? "Sunrise in \(DurationText.string(wait))" : "Sunrise \(label(sunrise))"
-            } else if date < sunset {
-                fraction = date.timeIntervalSince(sunrise) / sunset.timeIntervalSince(sunrise)
-                let left = sunset.timeIntervalSince(date)
-                caption = left < 3600 ? "Sunset in \(DurationText.string(left))" : "\(DurationText.string(left)) of light left"
-            }
+        if let sunrise, let sunset, sunset > sunrise, sunrise <= date, date < sunset {
+            fraction = date.timeIntervalSince(sunrise) / sunset.timeIntervalSince(sunrise)
+            let left = sunset.timeIntervalSince(date)
+            caption = left < 3600 ? "Sunset in \(DurationText.string(left))" : "\(DurationText.string(left)) of light left"
+        } else if let nextSunrise, nextSunrise > date {
+            let wait = nextSunrise.timeIntervalSince(date)
+            caption = wait < 2 * 3600 ? "Sunrise in \(DurationText.string(wait))" : "Sunrise \(label(nextSunrise))"
         }
         return Daylight(fraction: fraction, sunrise: label(sunrise), sunset: label(sunset), caption: caption)
     }

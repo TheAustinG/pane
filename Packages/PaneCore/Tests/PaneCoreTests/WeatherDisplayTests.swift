@@ -231,8 +231,12 @@ private let expectedFamilies: [String: ConditionFamily] = [
 
 @Suite("Weather daylight")
 struct WeatherDaylightTests {
-    private let report = WeatherFixture.report(at: local(2026, 11, 2, 12), day: { _ in
-        .init(sunrise: local(2026, 11, 2, 6, 24), sunset: local(2026, 11, 2, 16, 44))
+    private let report = WeatherFixture.report(at: local(2026, 11, 2, 12), day: { day in
+        let offset = calendar.dateComponents([.day], from: local(2026, 11, 2, 0), to: day).day ?? 0
+        return .init(
+            sunrise: local(2026, 11, 2 + offset, 6, 24 + offset),
+            sunset: local(2026, 11, 2 + offset, 16, 44 - offset)
+        )
     })
 
     @Test(arguments: [
@@ -244,11 +248,23 @@ struct WeatherDaylightTests {
         (local(2026, 11, 2, 15, 44), "1h of light left"),
         (local(2026, 11, 2, 16, 11), "Sunset in 33 min"),
         (local(2026, 11, 2, 16, 43), "Sunset in 1 min"),
-        (local(2026, 11, 2, 16, 44), "Night"),
-        (local(2026, 11, 2, 19, 0), "Night"),
+        (local(2026, 11, 2, 16, 44), "Sunrise 6:25 AM"),
+        (local(2026, 11, 2, 19, 0), "Sunrise 6:25 AM"),
+        (local(2026, 11, 3, 0, 30), "Sunrise 6:25 AM"),
+        (local(2026, 11, 3, 5, 0), "Sunrise in 1h 25m"),
     ])
     func captions(date: Date, caption: String) {
         #expect(display(report, at: date).daylight.caption == caption)
+    }
+
+    @Test func arcShowsTomorrowAfterSunset() {
+        let evening = display(report, at: local(2026, 11, 2, 19, 0)).daylight
+        #expect(evening.sunrise == "6:25 AM")
+        #expect(evening.sunset == "4:43 PM")
+        #expect(evening.fraction == nil)
+        let afternoon = display(report, at: local(2026, 11, 2, 15, 0)).daylight
+        #expect(afternoon.sunrise == "6:24 AM")
+        #expect(afternoon.sunset == "4:44 PM")
     }
 
     @Test func fractionRunsFromSunriseToSunset() throws {
