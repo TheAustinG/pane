@@ -2,7 +2,7 @@ import Foundation
 import PaneCore
 
 /// Launch arguments for repeatable states. UserDefaults reads `-key value` pairs, so a value that
-/// starts with `-` is lost; none of these take negative numbers.
+/// starts with `-` is lost: `-home` cannot take a southern latitude.
 struct LaunchOptions {
     var designPreview: String?
     /// A `WeatherScene` preset name, or nil for the live scene.
@@ -28,7 +28,8 @@ struct LaunchOptions {
     var stormLayout: StormLayout?
     /// `-radar 1` opens radar as if the weather card was clicked.
     var opensRadar = false
-    /// Debug builds: `-home 41.88,-87.63` sets the home location.
+    /// Debug builds: `-home 41.88,-87.63` sets and stores the home location, so later launches keep
+    /// it until `-resetSettings 1`.
     var home: GeoPoint?
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {

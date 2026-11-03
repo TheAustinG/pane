@@ -18,7 +18,8 @@ struct RadarBackdrop: View {
         .task {
             while !Task.isCancelled {
                 if revision != radar.revision { revision = radar.revision }
-                try? await Task.sleep(for: .milliseconds(200))
+                let loading = radar.readyFrameIDs.count < radar.frames.count || radar.frames.isEmpty
+                try? await Task.sleep(for: loading ? .milliseconds(200) : .seconds(2))
             }
         }
         .task(id: player.isPaused) {

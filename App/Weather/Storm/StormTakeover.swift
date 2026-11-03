@@ -71,7 +71,7 @@ struct StormTakeover: View {
 
     private func isValid(_ focus: StormFocus?) -> Bool {
         switch focus {
-        case .alert(let index): !isDetailShown && alerts.indices.contains(index)
+        case .alert(let index): !isDetailShown && alerts.indices.contains(index) && (index == 0 || model.settings.stormLayout == .side)
         case .detail(let index): isDetailShown && alerts.indices.contains(index)
         case .timeline: !isDetailShown
         case nil: false

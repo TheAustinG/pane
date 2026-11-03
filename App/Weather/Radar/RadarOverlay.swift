@@ -54,7 +54,6 @@ final class RadarOverlayRenderer: MKOverlayRenderer {
             state = Shown(frame: frame, next: next, tiles: tiles, revision: revision)
             return old
         }
-        images.keep(tileCount: tiles.count)
         if let next, next != frame, next != previous.next || tiles != previous.tiles {
             images.prefetch(frame: next, tiles: tiles)
         }

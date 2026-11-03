@@ -19,7 +19,7 @@ struct DashboardView: View {
         .defaultFocus($focus, initialFocus ?? .card(.current))
         .task {
             try? await Task.sleep(for: .milliseconds(600))
-            if focus == nil, !model.isSettingsPresented { focus = initialFocus ?? .card(.current) }
+            if focus == nil, !model.isSettingsPresented, !model.isStormTakeoverShown { focus = initialFocus ?? .card(.current) }
         }
         .fullScreenCover(isPresented: $model.isSettingsPresented) {
             SettingsRoot(model: model)

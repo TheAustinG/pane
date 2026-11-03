@@ -132,11 +132,13 @@ final class AppModel {
         isRadarPresented || storm.isTakeoverActive && (storm.simulation != nil || settings.stormAutomatic)
     }
 
-    /// Back from the takeover: closes radar opened on demand and dismisses any storm under it, so
-    /// one press always returns to the dashboard.
+    /// Back from the takeover: closes radar opened on demand and dismisses whatever storm is on
+    /// screen under it, a simulation and then a real one, so one press returns to the dashboard. A
+    /// storm hidden by the automatic takeover setting is left alone.
     func closeStormTakeover() {
         isRadarPresented = false
-        if storm.isTakeoverActive { storm.dismiss() }
+        if storm.simulation != nil { storm.dismiss() }
+        if storm.isTakeoverActive, settings.stormAutomatic { storm.dismiss() }
     }
 
     func now(_ real: Date = .now) -> Date {
