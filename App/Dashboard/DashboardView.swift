@@ -33,7 +33,7 @@ struct DashboardView: View {
         #if DEBUG
         .onPlayPauseCommand(perform: handlesDebugMenu ? { model.isDebugMenuPresented.toggle() } : nil)
         .onChange(of: model.isDebugMenuPresented) { _, presented in
-            if !presented, !model.isStormTakeoverShown { focus = .card(.current) }
+            if !presented, !model.isStormTakeoverShown, !model.isHomeScenesPresented { focus = .card(.current) }
         }
         #endif
     }

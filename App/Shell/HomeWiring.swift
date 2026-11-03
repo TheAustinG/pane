@@ -13,6 +13,7 @@ enum HomeWiring {
             return controller
         }
         #endif
+        if options.resetsSettings { HomeController.reset(secrets: secrets) }
         let controller = HomeController(secrets: secrets, transport: URLSessionHATransportFactory())
         #if DEBUG
         applyDebugOverrides(controller, options: options)
