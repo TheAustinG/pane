@@ -37,7 +37,7 @@ struct DebugMenu: View {
     ]
 
     var body: some View {
-        VStack(alignment: .leading, spacing: Theme.Space.l) {
+        VStack(alignment: .leading, spacing: Theme.Space.m) {
             HStack(alignment: .firstTextBaseline) {
                 Text("Debug")
                     .font(Theme.Typeface.headline)
