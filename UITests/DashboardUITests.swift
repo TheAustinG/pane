@@ -14,6 +14,32 @@ final class DashboardUITests: XCTestCase {
         XCTAssertTrue(waitForFocus(weather))
     }
 
+    func testIdleFocusRestsAndAPressBringsItBack() {
+        let app = XCUIApplication()
+        app.launchArguments = ["-fixtures", "sample", "-nightDim", "off", "-resetSettings", "1"]
+        app.launch()
+        let weather = app.buttons["dashboard.card.current"]
+        let home = app.buttons["dashboard.card.home"]
+        XCTAssertTrue(waitForFocus(weather, timeout: 10))
+        XCUIRemote.shared.press(.down)
+        XCUIRemote.shared.press(.left)
+        XCTAssertTrue(waitForFocus(home))
+
+        XCTAssertTrue(waitForFocus(home, is: false, timeout: 14), "Home card still focused after 10 s idle")
+        XCTAssertTrue(waitForFocus(app.buttons["dashboard.rest"], timeout: 2))
+        XCTAssertFalse(app.buttons.matching(NSPredicate(format: "identifier BEGINSWITH 'dashboard.card.' AND hasFocus == true")).firstMatch.exists)
+        saveGateShot("dashboard-resting")
+
+        XCUIRemote.shared.press(.left)
+        XCTAssertTrue(waitForFocus(home, timeout: 5), "A press should bring focus back to the last card")
+    }
+
+    private func saveGateShot(_ name: String) {
+        guard let directory = ProcessInfo.processInfo.environment["PANE_GATE_SHOTS"] else { return }
+        let url = URL(fileURLWithPath: directory).appendingPathComponent("\(name).png")
+        try? XCUIScreen.main.screenshot().pngRepresentation.write(to: url)
+    }
+
     func testNightDimFollowsSchedule() {
         let before = XCUIApplication()
         before.launchArguments = ["-resetSettings", "1", "-now", "2026-11-01T22:30"]

@@ -3,6 +3,8 @@ import SwiftUI
 enum DashboardFocus: Hashable {
     case settings
     case card(CardSlot)
+    /// An invisible target that holds focus after a quiet spell, so no pane stays lit.
+    case rest
 }
 
 struct DashboardView: View {
@@ -10,7 +12,15 @@ struct DashboardView: View {
     var initialFocus: DashboardFocus?
     /// The design preview turns this off so its own Play/Pause steps through pages.
     var handlesDebugMenu = true
+    /// The design preview keeps its chosen focus for screenshots.
+    var releasesIdleFocus = true
     @FocusState private var focus: DashboardFocus?
+    @State private var lastFocus: DashboardFocus = .card(.current)
+    @State private var isResting = false
+    /// Bumped by a card press, which does not always move focus.
+    @State private var interactions = 0
+
+    static let idleFocusDelay: Duration = .seconds(10)
 
     var body: some View {
         TimelineView(.everyMinute) { timeline in
@@ -24,15 +34,63 @@ struct DashboardView: View {
         .fullScreenCover(isPresented: $model.isSettingsPresented) {
             SettingsRoot(model: model)
         }
+        .task(id: IdleKey(focus: focus, interactions: interactions)) {
+            await releaseFocusWhenIdle()
+        }
+        .onChange(of: focus) { _, new in
+            if let new, new != .rest {
+                lastFocus = new
+                isResting = false
+            }
+        }
         .onChange(of: model.isStormTakeoverShown) { _, shown in
-            if !shown { focus = .card(.current) }
+            if shown { model.isHomeScenesPresented = false } else { focus = .card(.current) }
+        }
+        .onChange(of: model.isHomeScenesPresented) { _, presented in
+            if !presented, !model.isStormTakeoverShown { focus = .card(.home) }
         }
         #if DEBUG
         .onPlayPauseCommand(perform: handlesDebugMenu ? { model.isDebugMenuPresented.toggle() } : nil)
         .onChange(of: model.isDebugMenuPresented) { _, presented in
-            if !presented, !model.isStormTakeoverShown { focus = .card(.current) }
+            if !presented, !model.isStormTakeoverShown, !model.isHomeScenesPresented { focus = .card(.current) }
         }
         #endif
+    }
+
+    private struct IdleKey: Equatable {
+        let focus: DashboardFocus?
+        let interactions: Int
+    }
+
+    private func releaseFocusWhenIdle() async {
+        guard releasesIdleFocus, let current = focus, current != .rest else { return }
+        try? await Task.sleep(for: Self.idleFocusDelay)
+        guard !Task.isCancelled, focus == current, !model.isHomeScenesPresented, !model.isSettingsPresented else { return }
+        #if DEBUG
+        guard !model.isDebugMenuPresented else { return }
+        #endif
+        isResting = true
+        try? await Task.sleep(for: .milliseconds(50))
+        if isResting, focus == current { focus = .rest }
+    }
+
+    private func wake() {
+        isResting = false
+        focus = lastFocus
+    }
+
+    /// Enabled only while resting, so ordinary navigation never lands on it.
+    private var restTarget: some View {
+        Button(action: wake) {
+            Color.clear.frame(width: 160, height: 80)
+        }
+        .buttonStyle(RestButtonStyle())
+        .disabled(!isResting)
+        .focused($focus, equals: .rest)
+        .onMoveCommand { _ in wake() }
+        .accessibilityIdentifier("dashboard.rest")
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .padding(.top, Theme.Layout.marginVertical)
     }
 
     private var isInteractive: Bool {
@@ -58,9 +116,15 @@ struct DashboardView: View {
                 Group {
                     layout(date: date, context: context)
                     settingsEntry
+                    restTarget
                 }
-                .disabled(!isInteractive)
+                .disabled(!isInteractive || model.isHomeScenesPresented)
                 .transition(.opacity)
+                if model.isHomeScenesPresented {
+                    HomeScenesOverlay(model: model)
+                        .disabled(!isInteractive)
+                        .transition(.opacity)
+                }
             }
             Color.clear
                 .frame(width: 1, height: 1)
@@ -83,7 +147,9 @@ struct DashboardView: View {
             DebugOverlay(model: model)
             #endif
         }
+        .environment(\.marqueePaused, dimmed || takeover || model.isSettingsPresented)
         .animation(Theme.Motion.takeover, value: takeover)
+        .animation(Theme.Motion.state, value: model.isHomeScenesPresented)
         .environment(\.glassShade, palette.glassShade)
     }
 
@@ -107,6 +173,7 @@ struct DashboardView: View {
 
     private func card(_ slot: CardSlot, context: CardContext) -> some View {
         Button {
+            interactions += 1
             CardSlots.activate(slot, model: model)
         } label: {
             CardSlots.content(for: slot, context: context)
@@ -155,5 +222,13 @@ private struct SettingsEntryStyle: ButtonStyle {
                 configuration.label.foregroundStyle(Color.clear)
             }
         }
+    }
+}
+
+/// Draws nothing, focused or not. The content is clear rather than hidden, because the focus engine
+/// skips views at 0.01 opacity or below.
+private struct RestButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
     }
 }
