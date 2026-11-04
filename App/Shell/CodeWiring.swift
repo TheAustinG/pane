@@ -8,8 +8,7 @@ enum CodeWiring {
     static func controller(options: LaunchOptions, secrets: any SecretStore) -> CodeController {
         #if DEBUG
         if options.fixtures == "sample" {
-            let controller = CodeFixtures.controller(behind: options.codeNudge ?? true)
-            return controller
+            return CodeFixtures.controller(behind: options.codeNudge ?? true, now: options.now ?? .now)
         }
         #endif
         if options.resetsSettings { CodeController.reset(secrets: secrets) }

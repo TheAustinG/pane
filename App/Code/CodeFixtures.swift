@@ -4,8 +4,6 @@ import PaneCore
 
 /// Sample GitHub and Portainer data for repeatable Code card states. Invented names only.
 enum CodeFixtures {
-    static let revisionLabel = "org.opencontainers.image.revision"
-
     private static let lantern = DeployTarget(repository: "sample/lantern", workflow: "publish.yml", containerName: "lantern")
     private static let paneSample = DeployTarget(repository: "sample/pane-sample", workflow: "release.yml", containerName: "pane-sample")
 
@@ -27,7 +25,10 @@ enum CodeFixtures {
                 imageID: "sha256:\(sha(index + 7))",
                 state: "running",
                 created: now.addingTimeInterval(-5 * 86_400),
-                labels: [revisionLabel: running]
+                labels: [
+                    RevisionComparison.revisionLabel: running,
+                    RevisionComparison.sourceLabel: "https://github.com/\(target.repository)",
+                ]
             ))
             runs.append(PublishRun(
                 repository: target.repository,
