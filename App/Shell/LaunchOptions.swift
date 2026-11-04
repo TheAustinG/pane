@@ -39,6 +39,12 @@ struct LaunchOptions {
     /// Debug builds: `-homeSetup prefill` fills the setup screen's fields from
     /// `local/Secrets.local.xcconfig` without saving them, so a UI test can finish setup.
     var homeSetupPrefill = false
+    /// `-codeNudge on|off`: with `-fixtures sample`, picks the sample with or without the deploy
+    /// nudge (on when absent); in Debug builds on live data, forces the nudge on or off.
+    var codeNudge: Bool?
+    /// Debug builds: `-codeSetup prefill` fills the GitHub and Portainer setup fields from
+    /// `local/Secrets.local.xcconfig` without saving them, so a UI test can finish setup.
+    var codeSetupPrefill = false
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {
         LaunchOptions(
@@ -60,7 +66,9 @@ struct LaunchOptions {
             home: defaults.string(forKey: "home").flatMap(parsePoint),
             opensHomeScenes: defaults.bool(forKey: "homeScenes"),
             homeNudge: defaults.string(forKey: "homeNudge").flatMap(HomeNudgeKind.init(rawValue:)),
-            homeSetupPrefill: defaults.string(forKey: "homeSetup") == "prefill"
+            homeSetupPrefill: defaults.string(forKey: "homeSetup") == "prefill",
+            codeNudge: defaults.string(forKey: "codeNudge").flatMap { ["on": true, "off": false][$0] },
+            codeSetupPrefill: defaults.string(forKey: "codeSetup") == "prefill"
         )
     }
 

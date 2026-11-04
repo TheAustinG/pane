@@ -58,6 +58,7 @@ struct DebugMenu: View {
                     section("Weather") { weatherRow }
                     section("Storm") { stormRow }
                     section("Home") { HomeDebugRow(model: model) }
+                    section("Code") { CodeDebugRow(model: model) }
                 }
                 .padding(Theme.Space.m)
             }

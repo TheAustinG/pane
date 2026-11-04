@@ -18,7 +18,8 @@ struct PaneApp: App {
             settings: settings,
             secrets: secrets,
             weather: WeatherWiring.controller(options: options),
-            home: HomeWiring.controller(options: options, secrets: secrets)
+            home: HomeWiring.controller(options: options, secrets: secrets),
+            code: CodeWiring.controller(options: options, secrets: secrets)
         ))
     }
 
@@ -52,5 +53,6 @@ private struct RootView: View {
             .task { await model.weather.run() }
             .task { await model.storm.run() }
             .task { await model.home.run() }
+            .task { await model.code.run() }
     }
 }
