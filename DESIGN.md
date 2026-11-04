@@ -261,6 +261,7 @@ The dashboard's container and its focus target.
 - **Focus:** scales to 1.04, gains a 16% white sheen under the content, a 2 pt white rim at 75%, and the focus lift shadow. Spring animation, 0.35 s response, 0.82 damping.
 - **Pressed:** scales to 0.98 while the clickpad is held.
 - **Action:** the weather pane opens radar; the Home pane opens the scene buttons; Back returns.
+- **Idle:** after 10 seconds with no remote input, focus moves to an invisible resting target so no pane stays lit. Any press brings it back to the pane that had it.
 
 ### Pane Heading
 Uppercase Label type at Ink 72% with an optional SF Symbol: "NEXT 6 HOURS", "HOME", "GITHUB". It is the pane's heading, never a kicker above another heading.

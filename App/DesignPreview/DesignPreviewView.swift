@@ -75,13 +75,15 @@ struct DesignPreviewView: View {
             DashboardView(
                 model: dashboardModel,
                 initialFocus: PreviewDashboard.focus(for: requestedFocus),
-                handlesDebugMenu: false
+                handlesDebugMenu: false,
+                releasesIdleFocus: false
             )
         case .night:
             DashboardView(
                 model: nightModel,
                 initialFocus: PreviewDashboard.focus(for: requestedFocus),
-                handlesDebugMenu: false
+                handlesDebugMenu: false,
+                releasesIdleFocus: false
             )
         default:
             samplePage
