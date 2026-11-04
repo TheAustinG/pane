@@ -1,0 +1,52 @@
+{
+  "Id": "sha256:6829b1cef51e4ad2bbf66b3b91e69a4caa938dc4f88d5778046968c717a9baf7",
+  "RepoTags": [
+    "ghcr.io/sample-user/beacon:latest"
+  ],
+  "RepoDigests": [
+    "ghcr.io/sample-user/beacon@sha256:eb3f5594d3abaeebe22794b528462d8d0c2b031ca66514cd1064359f89b91d5d"
+  ],
+  "Comment": "buildkit.dockerfile.v0",
+  "Created": "2026-09-26T05:17:11.941394352Z",
+  "Config": {
+    "User": "beacon",
+    "ExposedPorts": {
+      "8787/tcp": {}
+    },
+    "Env": [
+      "PATH=/usr/local/bin:/usr/bin:/bin",
+      "PORT=8080"
+    ],
+    "Cmd": [
+      "beacon",
+      "serve"
+    ],
+    "WorkingDir": "/app",
+    "Labels": {
+      "org.opencontainers.image.created": "2026-09-26T05:16:57.194Z",
+      "org.opencontainers.image.revision": "6ad3d84a366a70090e8d06984877c3ecea4fd250",
+      "org.opencontainers.image.source": "https://github.com/sample-user/beacon",
+      "org.opencontainers.image.title": "beacon",
+      "org.opencontainers.image.url": "https://github.com/sample-user/beacon",
+      "org.opencontainers.image.version": "latest"
+    },
+    "ArgsEscaped": true
+  },
+  "Architecture": "amd64",
+  "Os": "linux",
+  "Size": 671555962,
+  "GraphDriver": {
+    "Data": {},
+    "Name": "overlay2"
+  },
+  "RootFS": {
+    "Type": "layers",
+    "Layers": [
+      "sha256:d5a561d5d3027fc4a65bc1046b78715e23cb9eb7cd5b5cdfd179b8bd66df57cb",
+      "sha256:cdb5c809544b802c9dd820e1e07105e05d30c6fe0d611560d86b9ab4b0a3c88d"
+    ]
+  },
+  "Metadata": {
+    "LastTagTime": "0001-01-01T00:00:00Z"
+  }
+}
