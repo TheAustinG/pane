@@ -101,7 +101,7 @@ struct StatusRow<Trailing: View>: View {
             VStack(alignment: .leading, spacing: 0) {
                 Text(title).font(Theme.Typeface.bodyStrong)
                 if let detail {
-                    Text(detail)
+                    MarqueeText(text: detail)
                         .font(Theme.Typeface.caption)
                         .foregroundStyle(Theme.Ink.secondary)
                 }

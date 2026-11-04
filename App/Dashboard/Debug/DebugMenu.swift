@@ -45,16 +45,24 @@ struct DebugMenu: View {
                 Spacer(minLength: Theme.Space.l)
                 appTime
             }
-            section("Scene") { sceneGrid }
-            section("Time") { timeRow }
-            section("Display") {
-                Toggle("FPS HUD", isOn: $model.showFPS)
-                    .accessibilityIdentifier("debug.fps")
+            // The sections outgrow a 1080 pt screen; the scroll view follows focus down to them.
+            ScrollView(.vertical) {
+                VStack(alignment: .leading, spacing: Theme.Space.m) {
+                    section("Scene") { sceneGrid }
+                    section("Time") { timeRow }
+                    section("Display") {
+                        Toggle("FPS HUD", isOn: $model.showFPS)
+                            .accessibilityIdentifier("debug.fps")
+                    }
+                    section("Quality") { qualityRow }
+                    section("Weather") { weatherRow }
+                    section("Storm") { stormRow }
+                    section("Home") { HomeDebugRow(model: model) }
+                }
+                .padding(Theme.Space.m)
             }
-            section("Quality") { qualityRow }
-            section("Weather") { weatherRow }
-            section("Storm") { stormRow }
-            section("Home") { HomeDebugRow(model: model) }
+            .padding(-Theme.Space.m)
+            .frame(maxHeight: 800)
         }
         .padding(Theme.Layout.paneInset)
         .frame(width: 1240)

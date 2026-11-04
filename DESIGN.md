@@ -266,7 +266,7 @@ The dashboard's container and its focus target.
 Uppercase Label type at Ink 72% with an optional SF Symbol: "NEXT 6 HOURS", "HOME", "GITHUB". It is the pane's heading, never a kicker above another heading.
 
 ### Status Row
-A 52 pt icon well (Well 14%), a Body Medium title, an optional Caption detail at Ink 80%, and an optional trailing view (a nudge chip, avatars). The title never truncates before the trailing view shrinks.
+A 52 pt icon well (Well 14%), a Body Medium title, an optional Caption detail at Ink 80%, and an optional trailing view (a nudge chip, avatars). The title never truncates before the trailing view shrinks. A detail wider than its space scrolls left at 36 pt/s behind an 18 pt edge fade, with a second copy 56 pt behind it, and holds 3 s each time it returns to the start; it stands still and truncates under Reduce Motion, night dim, the storm takeover and Settings.
 
 ### Nudge Chip
 - **Nudge:** Label type in Nudge Ink on the amber fill with a 1 pt amber stroke, 20 pt corners, optional symbol in Nudge Amber.

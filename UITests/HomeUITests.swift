@@ -187,6 +187,8 @@ final class HomeUITests: XCTestCase {
         XCUIRemote.shared.press(.playPause)
         XCTAssertTrue(app.staticTexts["debug.menu"].waitForExistence(timeout: 5))
         focusDebugHomeRow(app, "debug.home.drop")
+        XCTAssertTrue(app.buttons["debug.home.drop"].isHittable, "Drop connection is off screen")
+        saveGateShot("debug-home-row")
         let state = app.staticTexts["debug.home.state"]
         XCTAssertTrue(state.label.hasPrefix("connected"), state.label)
         let before = reconnects(state.label)

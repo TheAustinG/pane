@@ -91,6 +91,7 @@ struct DashboardView: View {
             DebugOverlay(model: model)
             #endif
         }
+        .environment(\.marqueePaused, dimmed || takeover || model.isSettingsPresented)
         .animation(Theme.Motion.takeover, value: takeover)
         .animation(Theme.Motion.state, value: model.isHomeScenesPresented)
         .environment(\.glassShade, palette.glassShade)
