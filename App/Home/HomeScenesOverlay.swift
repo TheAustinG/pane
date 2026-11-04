@@ -21,11 +21,17 @@ struct HomeScenesOverlay: View {
         home.selection.scenes.map { home.entities[$0] ?? HAEntity(entityID: $0, state: "unavailable") }
     }
 
-    private var canRun: Bool { home.connection.isConnected && !scenes.isEmpty }
+    /// Scenes and input buttons read `unknown` until first pressed, so only `unavailable` (or an
+    /// entity missing from Home Assistant) disables a button.
+    private func isRunnable(_ scene: HAEntity) -> Bool {
+        home.connection.isConnected && scene.state != "unavailable"
+    }
+
+    private var canRun: Bool { scenes.contains(where: isRunnable) }
 
     /// Back needs something focusable to hear it, so a panel with every button disabled gets a Close
     /// button.
-    private var firstFocusID: String { canRun ? scenes[0].entityID : Self.closeID }
+    private var firstFocusID: String { scenes.first(where: isRunnable)?.entityID ?? Self.closeID }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -90,7 +96,7 @@ struct HomeScenesOverlay: View {
                 .lineLimit(1)
         }
         .buttonStyle(.glass)
-        .disabled(!canRun)
+        .disabled(!isRunnable(scene))
         .focused($focus, equals: scene.entityID)
         .accessibilityIdentifier("home.scene.\(scene.entityID)")
     }
@@ -153,7 +159,7 @@ struct HomeScenesOverlay: View {
     private static func symbol(for scene: HAEntity) -> String {
         let text = "\(scene.friendlyName) \(scene.entityID)".lowercased()
         let table: [(words: [String], symbol: String)] = [
-            (["goodnight", "good night", "good_night", "bedtime", "sleep"], "moon.zzz"),
+            (HomeSelection.goodnightWords + ["bedtime", "sleep"], "moon.zzz"),
             (["movie", "film", "cinema", "theater", "theatre"], "film"),
             (["morning", "wake", "sunrise"], "sun.horizon"),
             (["away", "leaving", "leave"], "figure.walk"),

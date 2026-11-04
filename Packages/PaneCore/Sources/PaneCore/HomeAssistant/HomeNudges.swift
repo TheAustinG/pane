@@ -7,7 +7,6 @@ public enum HomeNudgeKind: String, CaseIterable, Sendable, Codable {
     case lightsOnAway
     case bedroomTVLate
 
-    /// The chip text on the Home card.
     public var chipText: String {
         switch self {
         case .dryAir: "Dry air"
@@ -18,7 +17,6 @@ public enum HomeNudgeKind: String, CaseIterable, Sendable, Codable {
         }
     }
 
-    /// The Settings toggle title.
     public var settingsTitle: String {
         switch self {
         case .dryAir: "Dry air below 35%"

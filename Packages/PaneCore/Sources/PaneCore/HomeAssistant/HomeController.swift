@@ -126,7 +126,6 @@ public final class HomeController {
         restartConnection()
     }
 
-    /// Clears the address, token, selection and preferences.
     public func forget() throws {
         try secrets.setString(nil, for: .homeAssistantToken)
         server = nil
@@ -158,7 +157,7 @@ public final class HomeController {
 
     /// Runs a scene button: `scene.turn_on`, `script.turn_on` or `input_button.press`.
     public func activateScene(_ entityID: String) async throws {
-        let domain = String(entityID.prefix { $0 != "." })
+        let domain = HAEntity.domain(of: entityID)
         switch domain {
         case "scene", "script":
             try await callService(domain: domain, service: "turn_on", entityID: entityID)
@@ -402,18 +401,31 @@ public final class HomeController {
         refresh(change.entityID)
     }
 
-    /// Changes that arrived before the snapshot are applied only where they are newer than it.
     private func applySnapshot(_ states: [HAEntity]) {
-        var fresh = Dictionary(states.map { ($0.entityID, $0) }, uniquingKeysWith: { _, last in last })
-        for change in earlyChanges {
-            guard let current = fresh[change.entityID], let since = current.lastUpdated else { continue }
-            let changedAt = change.newState?.lastUpdated ?? change.timeFired
-            if let changedAt, changedAt > since { fresh[change.entityID] = change.newState }
-        }
+        let fresh = Self.merge(snapshot: states, earlyChanges: earlyChanges)
         earlyChanges = []
         hasSnapshot = true
         live = fresh
         rebuildEntities()
+    }
+
+    /// Changes that arrived before the snapshot are applied only where they are newer than it.
+    nonisolated static func merge(snapshot states: [HAEntity], earlyChanges: [HAStateChange]) -> [String: HAEntity] {
+        var fresh = Dictionary(states.map { ($0.entityID, $0) }, uniquingKeysWith: { _, last in last })
+        for change in earlyChanges {
+            guard let current = fresh[change.entityID] else {
+                // Created after the snapshot was taken; removals of unknown entities need nothing.
+                if let created = change.newState { fresh[change.entityID] = created }
+                continue
+            }
+            let changedAt = change.newState?.lastUpdated ?? change.timeFired
+            guard let since = current.lastUpdated, let changedAt else {
+                fresh[change.entityID] = change.newState
+                continue
+            }
+            if changedAt > since { fresh[change.entityID] = change.newState }
+        }
+        return fresh
     }
 
     private func refresh(_ entityID: String) {

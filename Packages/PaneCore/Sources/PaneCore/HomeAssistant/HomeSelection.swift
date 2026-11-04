@@ -67,10 +67,14 @@ public struct HomeSelection: Hashable, Sendable, Codable {
     /// name or id says Goodnight.
     public func goodnightEntityID(in entities: [String: HAEntity]) -> String? {
         if let goodnightScene, scenes.contains(goodnightScene) { return goodnightScene }
-        return scenes.first { id in
-            let name = (entities[id]?.friendlyName ?? id).lowercased()
-            return [name, id.lowercased()].contains { $0.contains("goodnight") || $0.contains("good night") || $0.contains("good_night") }
-        }
+        return scenes.first { id in Self.isGoodnight(name: entities[id]?.friendlyName ?? id, entityID: id) }
+    }
+
+    public static let goodnightWords = ["goodnight", "good night", "good_night"]
+
+    public static func isGoodnight(name: String, entityID: String) -> Bool {
+        let text = "\(name) \(entityID)".lowercased()
+        return goodnightWords.contains { text.contains($0) }
     }
 }
 

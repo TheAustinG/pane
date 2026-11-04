@@ -27,12 +27,14 @@ enum PreviewDashboard {
         let weather = WeatherWiring.controller(options: options)
         Task { await weather.refreshNow() }
         let secrets = InMemorySecretStore()
+        let home = HomeWiring.controller(options: options, secrets: secrets)
+        Task { await home.run() }
         return AppModel(
             options: options,
             settings: settings,
             secrets: secrets,
             weather: weather,
-            home: HomeWiring.controller(options: options, secrets: secrets)
+            home: home
         )
     }
 

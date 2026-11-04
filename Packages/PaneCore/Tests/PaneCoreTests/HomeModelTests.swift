@@ -165,3 +165,41 @@ struct HomeServerTests {
         #expect(!HomeConnection.disconnected(since: HomeSample.start, retryAt: nil).isConnected)
     }
 }
+
+@Suite("Home snapshot merge")
+struct HomeSnapshotMergeTests {
+    private let t0 = Date(timeIntervalSince1970: 1_800_000_000)
+
+    private func entity(_ id: String, _ state: String, at date: Date?) -> HAEntity {
+        HAEntity(entityID: id, state: state, lastChanged: date, lastUpdated: date)
+    }
+
+    @Test func newerEarlyChangesWinAndOlderOnesAreDropped() {
+        let snapshot = [entity("light.a", "off", at: t0), entity("light.b", "off", at: t0)]
+        let early = [
+            HAStateChange(entityID: "light.a", newState: entity("light.a", "on", at: t0 + 5), timeFired: t0 + 5),
+            HAStateChange(entityID: "light.b", newState: entity("light.b", "on", at: t0 - 5), timeFired: t0 - 5),
+        ]
+        let merged = HomeController.merge(snapshot: snapshot, earlyChanges: early)
+        #expect(merged["light.a"]?.state == "on")
+        #expect(merged["light.b"]?.state == "off")
+    }
+
+    @Test func anEntityCreatedDuringTheSnapshotIsKept() {
+        let early = [HAStateChange(entityID: "lock.new", newState: entity("lock.new", "locked", at: t0), timeFired: t0)]
+        let merged = HomeController.merge(snapshot: [entity("light.a", "off", at: t0)], earlyChanges: early)
+        #expect(merged["lock.new"]?.state == "locked")
+    }
+
+    @Test func aRemovalOfAnUnknownEntityChangesNothing() {
+        let early = [HAStateChange(entityID: "lock.gone", newState: nil, timeFired: t0)]
+        let merged = HomeController.merge(snapshot: [entity("light.a", "off", at: t0)], earlyChanges: early)
+        #expect(merged.keys.sorted() == ["light.a"])
+    }
+
+    @Test func aSnapshotEntryWithoutATimestampTakesTheEarlyChange() {
+        let early = [HAStateChange(entityID: "light.a", newState: entity("light.a", "on", at: t0), timeFired: t0)]
+        let merged = HomeController.merge(snapshot: [entity("light.a", "off", at: nil)], earlyChanges: early)
+        #expect(merged["light.a"]?.state == "on")
+    }
+}

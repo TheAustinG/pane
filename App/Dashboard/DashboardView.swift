@@ -44,7 +44,7 @@ struct DashboardView: View {
             }
         }
         .onChange(of: model.isStormTakeoverShown) { _, shown in
-            if !shown { focus = .card(.current) }
+            if shown { model.isHomeScenesPresented = false } else { focus = .card(.current) }
         }
         .onChange(of: model.isHomeScenesPresented) { _, presented in
             if !presented, !model.isStormTakeoverShown { focus = .card(.home) }

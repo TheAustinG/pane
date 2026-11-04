@@ -109,7 +109,6 @@ public final class FixtureHATransportFactory: HATransportFactory {
         return FixtureHATransport(server: self, connection: id)
     }
 
-    /// Current states, sorted by entity id.
     public var entities: [HAEntity] {
         state.withLock { $0.entities.values.sorted { $0.entityID < $1.entityID } }
     }

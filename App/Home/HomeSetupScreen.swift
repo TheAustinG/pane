@@ -23,6 +23,7 @@ struct HomeSetupScreen: View {
         case passed(HomeServerInfo)
         case failed(HomeSetupError)
         case saveFailed
+        case forgetFailed
     }
 
     private struct Tested: Equatable {
@@ -123,6 +124,8 @@ struct HomeSetupScreen: View {
             NudgeChip(text: Self.message(for: error), symbol: "exclamationmark.triangle.fill", tone: .warning)
         case .saveFailed:
             NudgeChip(text: "Could not save the token to the Keychain. Try again.", symbol: "exclamationmark.triangle.fill", tone: .warning)
+        case .forgetFailed:
+            NudgeChip(text: "Could not remove the token from the Keychain. Try again.", symbol: "exclamationmark.triangle.fill", tone: .warning)
         }
     }
 
@@ -189,7 +192,12 @@ struct HomeSetupScreen: View {
     }
 
     private func forget() {
-        try? model.home.forget()
+        do {
+            try model.home.forget()
+        } catch {
+            status = .forgetFailed
+            return
+        }
         address = ""
         token = ""
         status = .idle

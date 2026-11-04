@@ -14,8 +14,8 @@ struct HomeCard: DashboardCard {
     }
 }
 
-/// Where each nudge chip sits: on the row whose reading raised it. Bedroom TV has no row of its own
-/// on the card, so it joins the people row.
+/// Where each nudge chip sits: on the row whose reading raised it. `chips(_:)` places the bedroom
+/// TV, which has no row of its own.
 private enum HomeRow: String, CaseIterable {
     case climate, humidity, lock, lights, people
 
@@ -25,7 +25,7 @@ private enum HomeRow: String, CaseIterable {
         case .humidity: [.dryAir, .humidAir]
         case .lock: [.doorUnlockedLate]
         case .lights: [.lightsOnAway]
-        case .people: [.bedroomTVLate]
+        case .people: []
         }
     }
 }
@@ -135,8 +135,14 @@ private struct HomeContent: View {
         }
     }
 
+    /// The bedroom TV has no row, so its chip joins the people row, or the last row shown when
+    /// there is none, rather than going unseen.
     private func chips(_ row: HomeRow) -> [HomeNudgeKind] {
-        row.nudges.filter { summary.nudge($0) != nil }
+        let rows = visibleRows
+        var kinds = row.nudges
+        let tvRow = rows.contains(.people) ? HomeRow.people : rows.last
+        if row == tvRow { kinds.append(.bedroomTVLate) }
+        return kinds.filter { summary.nudge($0) != nil }
     }
 
     private func chipStack(_ kinds: [HomeNudgeKind]) -> some View {
@@ -194,7 +200,7 @@ private struct HomeContent: View {
         }
         // Four stacked chips overrun the pane; the thermostat detail is the line the card can spare.
         let detail = summary.nudges.count >= 4 ? nil : climateDetail(climate)
-        return StatusRow(symbol: "thermometer.medium", title: title, detail: detail)
+        return statusRow(.climate, symbol: "thermometer.medium", title: title, detail: detail)
     }
 
     private func climateDetail(_ climate: HomeSummary.Climate) -> String? {

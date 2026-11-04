@@ -16,6 +16,7 @@ struct MarqueeText: View {
     @Environment(\.marqueePaused) private var paused
     @State private var textWidth: CGFloat = 0
     @State private var boxWidth: CGFloat = 0
+    @State private var offset: CGFloat = 0
 
     static let speed: CGFloat = 36
     static let hold: TimeInterval = 3
@@ -37,27 +38,35 @@ struct MarqueeText: View {
             }
             .overlay(alignment: .leading) {
                 if scrolls {
-                    TimelineView(.animation) { timeline in
-                        let offset = offset(at: timeline.date)
-                        HStack(spacing: Self.gap) {
-                            Text(text).fixedSize()
-                            Text(text).fixedSize()
-                        }
-                        .offset(x: offset)
-                        .frame(width: boxWidth, alignment: .leading)
-                        .clipped()
-                        .mask(edgeFade(leading: offset < 0))
+                    HStack(spacing: Self.gap) {
+                        Text(text).fixedSize()
+                        Text(text).fixedSize()
                     }
+                    .offset(x: offset)
+                    .frame(width: boxWidth, alignment: .leading)
+                    .clipped()
+                    .mask(edgeFade(leading: offset < 0))
                     .accessibilityHidden(true)
+                    .task(id: textWidth) { await loop() }
                 }
             }
     }
 
-    private func offset(at date: Date) -> CGFloat {
+    /// One linear animation per pass, so nothing redraws during the hold. At the end of a pass the
+    /// second copy sits exactly where the first started, so the jump back to 0 is invisible.
+    private func loop() async {
         let travel = textWidth + Self.gap
-        let cycle = Self.hold + Double(travel / Self.speed)
-        let elapsed = date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: cycle)
-        return elapsed < Self.hold ? 0 : -CGFloat(elapsed - Self.hold) * Self.speed
+        let duration = Double(travel / Self.speed)
+        var reset = Transaction()
+        reset.disablesAnimations = true
+        while !Task.isCancelled {
+            withTransaction(reset) { offset = 0 }
+            try? await Task.sleep(for: .seconds(Self.hold))
+            guard !Task.isCancelled else { break }
+            withAnimation(.linear(duration: duration)) { offset = -travel }
+            try? await Task.sleep(for: .seconds(duration))
+        }
+        withTransaction(reset) { offset = 0 }
     }
 
     /// The leading edge fades only while moving, so the line reads cleanly while it holds.

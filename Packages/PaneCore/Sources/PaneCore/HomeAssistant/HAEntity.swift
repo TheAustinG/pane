@@ -92,7 +92,9 @@ public struct HAEntity: Hashable, Sendable, Codable, Identifiable {
 
     public var id: String { entityID }
 
-    public var domain: String {
+    public var domain: String { Self.domain(of: entityID) }
+
+    public static func domain(of entityID: String) -> String {
         String(entityID.prefix { $0 != "." })
     }
 
