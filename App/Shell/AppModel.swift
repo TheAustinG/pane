@@ -58,7 +58,7 @@ final class AppSettings {
         homeLocation = Self.load(HomeLocation.self, from: defaults, key: Keys.homeLocation)
         stormLayout = Self.load(StormLayout.self, from: defaults, key: Keys.stormLayout) ?? .side
         stormAutomatic = Self.load(Bool.self, from: defaults, key: Keys.stormAutomatic) ?? true
-        backgroundMode = Self.load(BackgroundMode.self, from: defaults, key: Keys.backgroundMode) ?? .auto
+        backgroundMode = Self.load(BackgroundMode.self, from: defaults, key: Keys.backgroundMode) ?? .gradient
     }
 
     private enum Keys {
