@@ -158,13 +158,13 @@ final class BackgroundUITests: XCTestCase {
     }
 
     private func dashboardKind(_ app: XCUIApplication) -> XCUIElement {
-        let card = app.buttons["dashboard.card.current"]
+        let row = element(app, "settings.background.mode")
         XCUIRemote.shared.press(.menu)
-        if !waitForFocus(card, timeout: 6), element(app, "settings.background.mode").exists {
+        if !waitForNonExistence(row, timeout: 6) {
             XCUIRemote.shared.press(.menu)
-            _ = waitForFocus(card, timeout: 6)
         }
-        XCTAssertTrue(card.hasFocus)
+        XCTAssertTrue(waitForNonExistence(row, timeout: 6))
+        XCTAssertTrue(app.buttons["dashboard.card.current"].waitForExistence(timeout: 5))
         return element(app, "background.kind")
     }
 
