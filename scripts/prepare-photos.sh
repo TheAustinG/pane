@@ -4,7 +4,7 @@
 # named <slot>.<jpg|jpeg|png|heic|tif> for one of the 28 slots: a condition (clear,
 # partlyCloudy, cloudy, rain, storm, snow, fog), a dash and a time (dawn, day, dusk, night),
 # for example clear-dawn.jpg. Each is cropped to 16:9 around its center, scaled to 1920x1080,
-# blurred with a Gaussian of sigma 24 px and written to <out-dir>/<slot>.heic (default
+# blurred with a Gaussian of sigma 12 px and written to <out-dir>/<slot>.heic (default
 # App/Photos). Missing slots are listed, and the script fails unless --allow-missing is given.
 set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/lib.sh"

@@ -1,6 +1,6 @@
 // Usage: swift scripts/blur-photo.swift <out-dir> <image>...
 // Crops each image to 16:9 around its center, scales it to 1920x1080, blurs it with a Gaussian
-// of sigma 24 px and writes <out-dir>/<image name>.heic. Edges are clamped before the blur so
+// of sigma 12 px and writes <out-dir>/<image name>.heic. Edges are clamped before the blur so
 // they do not darken.
 import CoreImage
 import Foundation
@@ -8,7 +8,7 @@ import ImageIO
 
 let width = 1920.0
 let height = 1080.0
-let sigma = 24.0
+let sigma = 12.0
 let quality = 0.6
 
 func fail(_ message: String) -> Never {
