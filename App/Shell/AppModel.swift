@@ -96,6 +96,7 @@ final class AppModel {
     let storm: StormController
     let radar: RadarController
     let home: HomeController
+    let code: CodeController
     @ObservationIgnored var calendar = Calendar.current
 
     /// Sky position until a home location is set: the sun math needs somewhere.
@@ -106,7 +107,8 @@ final class AppModel {
         settings: AppSettings,
         secrets: any SecretStore,
         weather: WeatherController,
-        home: HomeController
+        home: HomeController,
+        code: CodeController
     ) {
         clock = AppClock(fixed: options.now)
         sceneOverride = options.scene.flatMap(WeatherScene.preset(named:))
@@ -122,11 +124,13 @@ final class AppModel {
         self.secrets = secrets
         self.weather = weather
         self.home = home
+        self.code = code
         storm = StormController(weather: weather, simulation: options.storm)
         radar = RadarController()
         weather.location = settings.homeLocation?.coordinate ?? weather.location
         radar.viewport = RadarViewport(center: location)
         home.now = { [weak self] in self?.now() ?? .now }
+        code.now = { [weak self] in self?.now() ?? .now }
     }
 
     var location: GeoPoint {

@@ -1,0 +1,23 @@
+{
+  "errors": [
+    {
+      "path": [
+        "query",
+        "viewer",
+        "nosuchfield"
+      ],
+      "extensions": {
+        "code": "undefinedField",
+        "typeName": "User",
+        "fieldName": "nosuchfield"
+      },
+      "locations": [
+        {
+          "line": 1,
+          "column": 18
+        }
+      ],
+      "message": "Field 'nosuchfield' doesn't exist on type 'User'"
+    }
+  ]
+}

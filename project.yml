@@ -52,6 +52,11 @@ targets:
         PaneHAScheme: $(PANE_HA_SCHEME)
         PaneHAHost: $(PANE_HA_HOST)
         PaneHAToken: $(PANE_HA_TOKEN)
+        PaneGitHubToken: $(PANE_GITHUB_TOKEN)
+        PanePortainerScheme: $(PANE_PORTAINER_SCHEME)
+        PanePortainerHost: $(PANE_PORTAINER_HOST)
+        PanePortainerToken: $(PANE_PORTAINER_TOKEN)
+        PanePortainerEnvironment: $(PANE_PORTAINER_ENDPOINT_ID)
 
   PaneUITests:
     type: bundle.ui-testing

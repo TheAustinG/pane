@@ -1,0 +1,106 @@
+{
+  "sha": "8eb48593be61f4aea40289948a11b28a4010db0c",
+  "node_id": "NODE_959ba3084031",
+  "commit": {
+    "author": {
+      "name": "Sample User",
+      "email": "sample-user@example.invalid",
+      "date": "2026-11-04T02:12:14Z"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "sample-user@example.invalid",
+      "date": "2026-11-04T02:12:14Z"
+    },
+    "message": "Merge pull request #5 from sample-user/feature-porch\n\nAdd the porch light card and its sample data.",
+    "tree": {
+      "sha": "359ae1563658114ed8afd80ecc9e1d5b7078d246",
+      "url": "https://api.github.com/repos/sample-user/lantern/git/trees/359ae1563658114ed8afd80ecc9e1d5b7078d246"
+    },
+    "url": "https://api.github.com/repos/sample-user/lantern/git/commits/8eb48593be61f4aea40289948a11b28a4010db0c",
+    "comment_count": 0,
+    "verification": {
+      "verified": true,
+      "reason": "valid",
+      "signature": "-----BEGIN PGP SIGNATURE-----\n\nwsFcBAABCAAQBQJq6pR+CRC1aQ7uu5UhlAAA/9AQAGSq/GhkievoVwk4Lz6m3vnp\nIlH1TTM2BsE6y0SmtBp4n57zJNNS5I1838XV38Z52c0mzEQS3whRN2fYulfvYCzu\nWKWbBioJUGfg9pX+xt1x1XEd5rSR1PPOvmmQUGDBfbbLlwLAacDs9/JJzedlyjU2\n0HRdAbXvbmVhpeMDC78CMplIRRNyua3wo2QhCtRSA4h/adT2Pu1Lgd5Pmd9KJiuX\nRJ4hDgyuSSu0k/sfZgvFm2cSSdIob+eB2Vg3QsFbdcKylU7dOq5DIISajzTIARn7\nH67kleTgc5piCwgPlAOBcjU2G8J6cARhoy0PtidDxeob10QJUUNC3r3c66vic9wF\nOqmO0LWzuQzwpwcfJIKupxt4tFiV9sRULbHCL7xGdeyhVt+BaDIEY4w7QSScAmuv\nXnb7C21+GSgMQNCCxXr7s+vID0q5gSfJNjvy+q6bzQX3N6gF2aMGPi2efpA7SDcS\nb3zl/+EOBopVPGzJxCwIij0f4Px5aZwuTv0J4kf/VhvSch43IjMWYdhrEIa39LX9\nkiPW10Xw6EThiGGddWJL2rW7fonOpPAnTVh/D6W7HLKbLWD5b845B3Fcp5ftHn9w\n/5lbgU+265dLr3lmOtctcFxkPh9myLPTm4oCiWfJwlq9XZvysnA5qcqBexqoFMq3\nAxMC1zMrW4WIIo5Jqu/K\n=BrIe\n-----END PGP SIGNATURE-----\n",
+      "payload": "tree 359ae1563658114ed8afd80ecc9e1d5b7078d246\nparent 63aba7f909b00362b35d0c8a0dae2d43e655ab30\nparent 48d887be12dca2e0a7ed727674a5712615e5edca\nauthor Sample User <sample-user@example.invalid> 1793758334 -0600\ncommitter GitHub <sample-user@example.invalid> 1793758334 -0600\n\nMerge pull request #5 from sample-user/feature-porch\n\nAdd the Home Assistant card",
+      "verified_at": "2026-11-04T02:12:15Z"
+    }
+  },
+  "url": "https://api.github.com/repos/sample-user/lantern/commits/8eb48593be61f4aea40289948a11b28a4010db0c",
+  "html_url": "https://github.com/sample-user/lantern/commit/8eb48593be61f4aea40289948a11b28a4010db0c",
+  "comments_url": "https://api.github.com/repos/sample-user/lantern/commits/8eb48593be61f4aea40289948a11b28a4010db0c/comments",
+  "author": {
+    "login": "sample-user",
+    "id": 1001,
+    "node_id": "NODE_e54629da928d",
+    "avatar_url": "https://avatars.example.invalid/u/1",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/sample-user",
+    "html_url": "https://github.com/sample-user",
+    "followers_url": "https://api.github.com/users/sample-user/followers",
+    "following_url": "https://api.github.com/users/sample-user/following{/other_user}",
+    "gists_url": "https://api.github.com/users/sample-user/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/sample-user/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/sample-user/subscriptions",
+    "organizations_url": "https://api.github.com/users/sample-user/orgs",
+    "repos_url": "https://api.github.com/users/sample-user/repos",
+    "events_url": "https://api.github.com/users/sample-user/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/sample-user/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "committer": {
+    "login": "web-flow",
+    "id": 1015,
+    "node_id": "NODE_190043d26dcb",
+    "avatar_url": "https://avatars.example.invalid/u/1",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/web-flow",
+    "html_url": "https://github.com/web-flow",
+    "followers_url": "https://api.github.com/users/web-flow/followers",
+    "following_url": "https://api.github.com/users/web-flow/following{/other_user}",
+    "gists_url": "https://api.github.com/users/web-flow/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/web-flow/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/web-flow/subscriptions",
+    "organizations_url": "https://api.github.com/users/web-flow/orgs",
+    "repos_url": "https://api.github.com/users/web-flow/repos",
+    "events_url": "https://api.github.com/users/web-flow/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/web-flow/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "parents": [
+    {
+      "sha": "63aba7f909b00362b35d0c8a0dae2d43e655ab30",
+      "url": "https://api.github.com/repos/sample-user/lantern/commits/63aba7f909b00362b35d0c8a0dae2d43e655ab30",
+      "html_url": "https://github.com/sample-user/lantern/commit/63aba7f909b00362b35d0c8a0dae2d43e655ab30"
+    },
+    {
+      "sha": "48d887be12dca2e0a7ed727674a5712615e5edca",
+      "url": "https://api.github.com/repos/sample-user/lantern/commits/48d887be12dca2e0a7ed727674a5712615e5edca",
+      "html_url": "https://github.com/sample-user/lantern/commit/48d887be12dca2e0a7ed727674a5712615e5edca"
+    }
+  ],
+  "stats": {
+    "total": 12,
+    "additions": 12,
+    "deletions": 0
+  },
+  "files": [
+    {
+      "sha": "5985b235041212d6c18ff6771c72a6a281d71c80",
+      "filename": "Sources/Porch/PorchCard.swift",
+      "status": "added",
+      "additions": 12,
+      "deletions": 0,
+      "changes": 12,
+      "blob_url": "https://github.com/sample-user/lantern/blob/8eb48593be61f4aea40289948a11b28a4010db0c/Sources/Porch/PorchCard.swift",
+      "raw_url": "https://github.com/sample-user/lantern/raw/8eb48593be61f4aea40289948a11b28a4010db0c/Sources/Porch/PorchCard.swift",
+      "contents_url": "https://api.github.com/repos/sample-user/lantern/contents/Sources/Porch/PorchCard.swift?ref=8eb48593be61f4aea40289948a11b28a4010db0c",
+      "patch": "@@ -0,0 +1,12 @@\n+struct PorchCard {}\n"
+    }
+  ]
+}

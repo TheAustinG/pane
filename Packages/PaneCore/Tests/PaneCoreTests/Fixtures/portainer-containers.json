@@ -1,0 +1,178 @@
+[
+  {
+    "Command": "beacon serve",
+    "Created": 1793549920,
+    "Health": {
+      "FailingStreak": 0,
+      "Status": "healthy"
+    },
+    "HostConfig": {
+      "NetworkMode": "bridge"
+    },
+    "Id": "bd4a364fddbb5920af0811b6b323849cbef12846e48c5abe53c6672973621419",
+    "Image": "ghcr.io/sample-user/beacon:latest",
+    "ImageID": "sha256:6829b1cef51e4ad2bbf66b3b91e69a4caa938dc4f88d5778046968c717a9baf7",
+    "Labels": {
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "beacon",
+      "com.docker.compose.service": "beacon",
+      "org.opencontainers.image.created": "2026-09-26T05:16:57.194Z",
+      "org.opencontainers.image.revision": "6ad3d84a366a70090e8d06984877c3ecea4fd250",
+      "org.opencontainers.image.source": "https://github.com/sample-user/beacon",
+      "org.opencontainers.image.title": "beacon",
+      "org.opencontainers.image.url": "https://github.com/sample-user/beacon",
+      "org.opencontainers.image.version": "latest"
+    },
+    "Mounts": [],
+    "Names": [
+      "/beacon-beacon-1"
+    ],
+    "NetworkSettings": {
+      "Networks": {}
+    },
+    "Ports": [
+      {
+        "PrivatePort": 8787,
+        "Type": "tcp"
+      }
+    ],
+    "State": "running",
+    "Status": "Up 3 hours (healthy)"
+  },
+  {
+    "Command": "ledger serve",
+    "Created": 1790644969,
+    "Health": {
+      "FailingStreak": 0,
+      "Status": "healthy"
+    },
+    "HostConfig": {
+      "NetworkMode": "bridge"
+    },
+    "Id": "44921e0c9e6611a2021e0b2f463067e8d361427f309bedf999be6a6139711773",
+    "Image": "ghcr.io/sample-user/ledger:latest",
+    "ImageID": "sha256:5abfbc5cf08b1a4d56c295410e6c6c1069bbe8c8c087617efc6d31e9b48358d6",
+    "Labels": {
+      "com.docker.compose.container-number": "1",
+      "com.docker.compose.oneoff": "False",
+      "com.docker.compose.project": "ledger",
+      "com.docker.compose.service": "app",
+      "org.opencontainers.image.created": "2026-09-29T01:21:01.653Z",
+      "org.opencontainers.image.revision": "2631942d3d7b642e8ba3c838886486e9e189182e",
+      "org.opencontainers.image.source": "https://github.com/sample-user/ledger",
+      "org.opencontainers.image.title": "ledger",
+      "org.opencontainers.image.url": "https://github.com/sample-user/ledger",
+      "org.opencontainers.image.version": "latest"
+    },
+    "Mounts": [],
+    "Names": [
+      "/ledger"
+    ],
+    "NetworkSettings": {
+      "Networks": {}
+    },
+    "Ports": [
+      {
+        "PrivatePort": 8790,
+        "Type": "tcp"
+      }
+    ],
+    "State": "running",
+    "Status": "Up 3 hours (healthy)"
+  },
+  {
+    "Command": "run",
+    "Created": 1793498205,
+    "Health": {
+      "FailingStreak": 0,
+      "Status": "none"
+    },
+    "HostConfig": {
+      "NetworkMode": "bridge"
+    },
+    "Id": "e397c78db47a418972926a530cf247231b9871835b1f70a943951c56880868a1",
+    "Image": "example/socket-proxy:latest",
+    "ImageID": "sha256:29cd992bc46d2a388697f2f3abc4204b831e48961a1e5a6a6aa756835e817565",
+    "Labels": {
+      "org.opencontainers.image.source": "https://github.com/example-org/socket-proxy",
+      "org.opencontainers.image.title": "socket-proxy",
+      "org.opencontainers.image.revision": "6881066ec47259c3322262b69ae4605347339292",
+      "org.opencontainers.image.created": "2026-07-27T09:28:41.172Z"
+    },
+    "Mounts": [],
+    "Names": [
+      "/socket-proxy"
+    ],
+    "NetworkSettings": {
+      "Networks": {}
+    },
+    "Ports": [
+      {
+        "PrivatePort": 2375,
+        "Type": "tcp"
+      }
+    ],
+    "State": "running",
+    "Status": "Up 3 hours"
+  },
+  {
+    "Command": "run",
+    "Created": 1793069891,
+    "Health": {
+      "FailingStreak": 0,
+      "Status": "none"
+    },
+    "HostConfig": {
+      "NetworkMode": "bridge"
+    },
+    "Id": "0e50ed5c670d794232321d99095f47eb5cb64a6fd25db2a4cd2b88c8f06c063f",
+    "Image": "ghcr.io/example-org/hub:stable",
+    "ImageID": "sha256:6be7b449071ef2cc8c47f401ee6a2b0b6e429fe4ddf819643749d2cc6a737388",
+    "Labels": {
+      "org.opencontainers.image.source": "https://github.com/example-org/hub",
+      "org.opencontainers.image.title": "hub",
+      "org.opencontainers.image.created": "2026-10-24 20:07:48+00:00"
+    },
+    "Mounts": [],
+    "Names": [
+      "/hub"
+    ],
+    "NetworkSettings": {
+      "Networks": {}
+    },
+    "Ports": [],
+    "State": "running",
+    "Status": "Up 3 hours"
+  },
+  {
+    "Command": "run",
+    "Created": 1793497397,
+    "Health": {
+      "FailingStreak": 0,
+      "Status": "healthy"
+    },
+    "HostConfig": {
+      "NetworkMode": "bridge"
+    },
+    "Id": "dcfad6528b10f1b239ecf0aac6a338aec47297b3537d16294d984db21dfc28d5",
+    "Image": "example/updater",
+    "ImageID": "sha256:0e181674447f3b702001e6bd3d02b27003a46dff0ae8db9ddf1312f3d8e1aea5",
+    "Labels": {},
+    "Mounts": [],
+    "Names": [
+      "/updater"
+    ],
+    "NetworkSettings": {
+      "Networks": {}
+    },
+    "Ports": [
+      {
+        "PrivatePort": 3000,
+        "Type": "tcp"
+      }
+    ],
+    "State": "running",
+    "Status": "Up 3 hours (healthy)"
+  }
+]
