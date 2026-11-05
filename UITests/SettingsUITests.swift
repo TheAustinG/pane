@@ -28,6 +28,14 @@ final class SettingsUITests: XCTestCase {
         XCTAssertTrue(waitForHelp(app, containing: "opens only from the weather card"))
 
         XCUIRemote.shared.press(.down)
+        XCTAssertTrue(waitForFocus(cell(app, "settings.background.mode")))
+        XCTAssertTrue(waitForHelp(app, containing: "blurred photo of the sky"))
+
+        XCUIRemote.shared.press(.down)
+        XCTAssertTrue(waitForFocus(cell(app, "settings.background.credits")))
+        XCTAssertTrue(waitForHelp(app, containing: "photographer and license"))
+
+        XCUIRemote.shared.press(.down)
         XCTAssertTrue(waitForFocus(cell(app, "settings.night.enabled")))
         XCTAssertTrue(waitForHelp(app, containing: "dims to about 30 percent"))
 
