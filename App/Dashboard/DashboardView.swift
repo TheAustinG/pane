@@ -107,7 +107,14 @@ struct DashboardView: View {
         let takeover = model.isStormTakeoverShown
         let context = CardContext(model: model, date: date, palette: palette)
         return ZStack {
-            SkyView(target: palette, quality: model.quality, particlesEnabled: !dimmed && !takeover, animates: !model.isSettingsPresented && !takeover)
+            BackgroundView(
+                kind: model.backgroundKind(at: date),
+                photo: model.photoKey(at: date),
+                palette: palette,
+                quality: model.quality,
+                particlesEnabled: !dimmed && !takeover,
+                animates: !model.isSettingsPresented && !takeover
+            )
             if takeover {
                 StormTakeover(model: model, date: date)
                     .disabled(!isInteractive)

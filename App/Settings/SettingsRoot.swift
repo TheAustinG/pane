@@ -10,12 +10,13 @@ struct SettingsRoot: View {
 
     var body: some View {
         TimelineView(.everyMinute) { timeline in
-            content(palette: model.palette(at: model.now(timeline.date)))
+            content(date: model.now(timeline.date))
         }
     }
 
-    private func content(palette: ScenePalette) -> some View {
-        NavigationStack {
+    private func content(date: Date) -> some View {
+        let palette = model.palette(at: date)
+        return NavigationStack {
             HStack(alignment: .top, spacing: 80) {
                 VStack(alignment: .leading, spacing: Theme.Space.l) {
                     Text("Settings")
@@ -38,7 +39,13 @@ struct SettingsRoot: View {
         }
         .background {
             ZStack {
-                SkyView(target: palette, quality: model.quality, particlesEnabled: false)
+                BackgroundView(
+                    kind: model.backgroundKind(at: date),
+                    photo: model.photoKey(at: date),
+                    palette: palette,
+                    quality: model.quality,
+                    particlesEnabled: false
+                )
                 Color.black.opacity(0.35).ignoresSafeArea()
             }
         }

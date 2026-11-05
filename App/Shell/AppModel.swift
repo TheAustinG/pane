@@ -43,10 +43,14 @@ final class AppSettings {
         didSet { store(stormAutomatic, key: Keys.stormAutomatic) }
     }
 
+    var backgroundMode: BackgroundMode {
+        didSet { store(backgroundMode, key: Keys.backgroundMode) }
+    }
+
     init(defaults: UserDefaults = .standard, reset: Bool = false) {
         self.defaults = defaults
         if reset {
-            [Keys.nightSchedule, Keys.nightDimOverride, Keys.homeLocation, Keys.stormLayout, Keys.stormAutomatic]
+            [Keys.nightSchedule, Keys.nightDimOverride, Keys.homeLocation, Keys.stormLayout, Keys.stormAutomatic, Keys.backgroundMode]
                 .forEach { defaults.removeObject(forKey: $0) }
         }
         nightSchedule = Self.load(NightSchedule.self, from: defaults, key: Keys.nightSchedule) ?? .standard
@@ -54,6 +58,7 @@ final class AppSettings {
         homeLocation = Self.load(HomeLocation.self, from: defaults, key: Keys.homeLocation)
         stormLayout = Self.load(StormLayout.self, from: defaults, key: Keys.stormLayout) ?? .side
         stormAutomatic = Self.load(Bool.self, from: defaults, key: Keys.stormAutomatic) ?? true
+        backgroundMode = Self.load(BackgroundMode.self, from: defaults, key: Keys.backgroundMode) ?? .auto
     }
 
     private enum Keys {
@@ -62,6 +67,7 @@ final class AppSettings {
         static let homeLocation = "settings.homeLocation"
         static let stormLayout = "settings.stormLayout"
         static let stormAutomatic = "settings.stormAutomatic"
+        static let backgroundMode = "settings.backgroundMode"
     }
 
     private func store<T: Encodable>(_ value: T, key: String) {
@@ -179,6 +185,18 @@ final class AppModel {
 
     func palette(at date: Date) -> ScenePalette {
         SceneEngine.palette(for: scene(at: date))
+    }
+
+    /// `-photoCycle` pins the photo here, so the cycle runs whatever the scene and setting say.
+    var photoOverride: PhotoKey?
+
+    func backgroundKind(at date: Date) -> BackgroundKind {
+        if photoOverride != nil { return .photo }
+        return BackgroundPolicy.kind(mode: settings.backgroundMode, scene: scene(at: date), isStormActive: storm.state.isActive)
+    }
+
+    func photoKey(at date: Date) -> PhotoKey {
+        photoOverride ?? BackgroundPolicy.photoKey(for: scene(at: date))
     }
 
     /// Storm mode raises the dim.
