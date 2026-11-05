@@ -79,6 +79,12 @@ final class AppSettings {
     }
 }
 
+struct BackgroundState {
+    let kind: BackgroundKind
+    let photo: PhotoKey
+    let palette: ScenePalette
+}
+
 /// App-wide state shared by the dashboard, background, settings and debug menu.
 @MainActor
 @Observable
@@ -187,16 +193,14 @@ final class AppModel {
         SceneEngine.palette(for: scene(at: date))
     }
 
-    /// `-photoCycle` pins the photo here, so the cycle runs whatever the scene and setting say.
-    var photoOverride: PhotoKey?
-
-    func backgroundKind(at date: Date) -> BackgroundKind {
-        if photoOverride != nil { return .photo }
-        return BackgroundPolicy.kind(mode: settings.backgroundMode, scene: scene(at: date), isStormActive: storm.state.isActive)
-    }
-
-    func photoKey(at date: Date) -> PhotoKey {
-        photoOverride ?? BackgroundPolicy.photoKey(for: scene(at: date))
+    /// `mode` overrides the stored setting, for the Settings preview.
+    func background(at date: Date, mode: BackgroundMode? = nil) -> BackgroundState {
+        let scene = scene(at: date)
+        return BackgroundState(
+            kind: BackgroundPolicy.kind(mode: mode ?? settings.backgroundMode, scene: scene, isStormActive: storm.state.isActive),
+            photo: BackgroundPolicy.photoKey(for: scene),
+            palette: SceneEngine.palette(for: scene)
+        )
     }
 
     /// Storm mode raises the dim.

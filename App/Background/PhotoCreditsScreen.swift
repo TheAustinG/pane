@@ -60,6 +60,8 @@ struct PhotoCreditsScreen: View {
         }
         var lines = [credit.title, credit.attribution]
         if !credit.attribution.contains(credit.license) { lines.append(credit.license) }
+        if let licenseURL = credit.licenseURL { lines.append(licenseURL.absoluteString) }
+        lines.append("Cropped, resized and blurred for Pane.")
         return lines.joined(separator: "\n")
     }
 }

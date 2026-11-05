@@ -23,7 +23,10 @@ enum PhotoStore {
     }
 
     private static var shown: [PhotoKey: Shown] = [:]
-    private static var unreadable: Set<PhotoKey> = []
+    /// Slots whose decode failed, with when to try again; a memory spike can fail one decode.
+    private static var unreadable: [PhotoKey: Date] = [:]
+    private static var decoding: [PhotoKey: Task<DecodedPhoto?, Never>] = [:]
+    static let retryAfter: TimeInterval = 600
     static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "pane", category: "background")
 
     /// The photo if a layer still shows it, so a second background (Settings) appears at once.
@@ -31,20 +34,29 @@ enum PhotoStore {
         shown[key]?.photo
     }
 
-    /// Nil for a missing or unreadable photo, logged the first time.
+    /// Nil for a missing or unreadable photo, logged the first time. A caller asking for a slot
+    /// already being decoded joins that decode, so a target that flips back and forth decodes once.
     static func load(_ key: PhotoKey) async -> DecodedPhoto? {
         if let photo = cached(key) { return photo }
-        guard !unreadable.contains(key) else { return nil }
-        let url = Bundle.main.url(forResource: key.name, withExtension: "heic")
-        let decoded = await Task.detached(priority: .userInitiated) {
-            url.flatMap(decode).map { DecodedPhoto(key: key, image: $0) }
-        }.value
-        if let photo = cached(key) { return photo }
-        guard let decoded else {
-            unreadable.insert(key)
-            log.error("Photo \(key.name, privacy: .public).heic is missing or unreadable; showing the gradient")
+        if let retry = unreadable[key], retry > .now { return nil }
+        guard let url = Bundle.main.url(forResource: key.name, withExtension: "heic") else {
+            if unreadable[key] == nil { log.error("Photo \(key.name, privacy: .public).heic is missing; showing the gradient") }
+            unreadable[key] = .distantFuture
             return nil
         }
+        let task = decoding[key] ?? Task.detached(priority: .userInitiated) {
+            decode(url).map { DecodedPhoto(key: key, image: $0) }
+        }
+        decoding[key] = task
+        let decoded = await task.value
+        decoding[key] = nil
+        if let photo = cached(key) { return photo }
+        guard let decoded else {
+            if unreadable[key] == nil { log.error("Photo \(key.name, privacy: .public).heic did not decode; showing the gradient") }
+            unreadable[key] = .now.addingTimeInterval(retryAfter)
+            return nil
+        }
+        unreadable[key] = nil
         shown = shown.filter { $0.value.photo != nil }
         shown[key] = Shown(photo: decoded)
         return decoded

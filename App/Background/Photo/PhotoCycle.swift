@@ -4,28 +4,45 @@ import Foundation
 import os
 import PaneCore
 
-/// `-photoCycle <seconds>`: pins the photo to each slot in turn and, after every crossfade, logs
-/// the memory footprint, so a long run shows whether decoded photos are released.
+/// `-photoCycle <seconds>`: steps the scene through every photo slot and, after every crossfade,
+/// logs the memory footprint, so a long run shows whether decoded photos are released. Run it with
+/// `-background photo`.
 @MainActor
 enum PhotoCycle {
     private static var isRunning = false
     private static var crossfades = 0
+    /// Settings draws a second background that crossfades to the same photo; count each step once.
+    private static var lastLogged: BackgroundTarget?
     private static let log = Logger(subsystem: Bundle.main.bundleIdentifier ?? "pane", category: "photo-cycle")
 
     static func run(model: AppModel, interval: Double?) async {
         guard let interval, interval > 0, !isRunning else { return }
         isRunning = true
-        defer { isRunning = false }
+        let previous = model.sceneOverride
+        defer {
+            isRunning = false
+            model.sceneOverride = previous
+        }
         var step = 0
         while !Task.isCancelled {
-            model.photoOverride = PhotoKey.all[step % PhotoKey.all.count]
+            model.sceneOverride = scene(for: PhotoKey.all[step % PhotoKey.all.count])
             step += 1
             try? await Task.sleep(for: .seconds(interval))
         }
     }
 
+    static func scene(for key: PhotoKey) -> WeatherScene {
+        switch key.time {
+        case .dawn: WeatherScene(condition: key.condition, sunAltitude: 2, isMorning: true)
+        case .day: WeatherScene(condition: key.condition, sunAltitude: 40, isMorning: true)
+        case .dusk: WeatherScene(condition: key.condition, sunAltitude: 2, isMorning: false)
+        case .night: WeatherScene(condition: key.condition, sunAltitude: -30, isMorning: false)
+        }
+    }
+
     static func crossfadeEnded(to target: BackgroundTarget) {
-        guard isRunning else { return }
+        guard isRunning, target != lastLogged else { return }
+        lastLogged = target
         crossfades += 1
         let footprint = footprintMB.map { String(format: "%.1f", $0) } ?? "unknown"
         let line = "photo-cycle n=\(crossfades) key=\(target.name) footprintMB=\(footprint)"

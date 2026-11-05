@@ -1,6 +1,5 @@
 import Foundation
 
-/// The background setting.
 public enum BackgroundMode: String, CaseIterable, Hashable, Sendable, Codable {
     case gradient
     case photo
@@ -8,7 +7,6 @@ public enum BackgroundMode: String, CaseIterable, Hashable, Sendable, Codable {
     case auto
 }
 
-/// What the background draws right now.
 public enum BackgroundKind: String, Hashable, Sendable {
     case gradient
     case photo

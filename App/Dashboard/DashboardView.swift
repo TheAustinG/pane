@@ -102,14 +102,15 @@ struct DashboardView: View {
     }
 
     private func screen(at date: Date) -> some View {
-        let palette = model.palette(at: date)
+        let background = model.background(at: date)
+        let palette = background.palette
         let dimmed = model.isNightDimmed(at: date)
         let takeover = model.isStormTakeoverShown
         let context = CardContext(model: model, date: date, palette: palette)
         return ZStack {
             BackgroundView(
-                kind: model.backgroundKind(at: date),
-                photo: model.photoKey(at: date),
+                kind: background.kind,
+                photo: background.photo,
                 palette: palette,
                 quality: model.quality,
                 particlesEnabled: !dimmed && !takeover,

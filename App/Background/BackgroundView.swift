@@ -1,7 +1,6 @@
 import PaneCore
 import SwiftUI
 
-/// What the background is set to show.
 enum BackgroundTarget: Hashable {
     case gradient
     case photo(PhotoKey)
@@ -62,7 +61,7 @@ struct BackgroundView: View {
     }
 
     private var isPhotoSettled: Bool {
-        !isFading && layers.allSatisfy(\.isPhoto)
+        !isFading && layers.count == 1 && layers[0].isPhoto && layers[0].target == target
     }
 
     var body: some View {
@@ -84,8 +83,8 @@ struct BackgroundView: View {
         .accessibilityHidden(true)
         .overlay {
             ZStack {
-                marker("Background", value: kind == .photo ? "photo \(photo.name)" : "gradient", id: "background.kind")
-                marker("Background photo", value: isPhotoSettled ? "yes" : "no", id: "background.photoLoaded")
+                AccessibilityMarker(label: "Background", value: kind == .photo ? "photo \(photo.name)" : "gradient", id: "background.kind")
+                AccessibilityMarker(label: "Background photo", value: isPhotoSettled ? "yes" : "no", id: "background.photoLoaded")
             }
         }
         .task(id: Step(target: target, isFading: isFading)) {
@@ -114,15 +113,6 @@ struct BackgroundView: View {
         }
     }
 
-    private func marker(_ label: String, value: String, id: String) -> some View {
-        Color.clear
-            .frame(width: 1, height: 1)
-            .accessibilityElement()
-            .accessibilityLabel(label)
-            .accessibilityValue(value)
-            .accessibilityIdentifier(id)
-    }
-
     /// Runs again when the target changes or a crossfade ends, so a change during a crossfade
     /// waits for it and only the current and incoming photos are ever decoded.
     private func show(_ target: BackgroundTarget) async {
@@ -131,7 +121,13 @@ struct BackgroundView: View {
         if case .photo(let key) = target {
             let photo = await PhotoStore.load(key)
             guard !Task.isCancelled else { return }
-            if let photo { content = .photo(photo) }
+            if let photo {
+                content = .photo(photo)
+            } else if layers.last?.target == .gradient {
+                try? await Task.sleep(for: .seconds(PhotoStore.retryAfter))
+                guard !Task.isCancelled else { return }
+                return await show(target)
+            }
         }
         guard layers.last?.target != content.target else { return }
         crossfade(to: Layer(content: content))
@@ -176,6 +172,22 @@ struct BackgroundView: View {
         var isPhoto: Bool {
             if case .photo = content { true } else { false }
         }
+    }
+}
+
+/// An invisible element that exposes state to UI tests.
+struct AccessibilityMarker: View {
+    let label: String
+    let value: String
+    let id: String
+
+    var body: some View {
+        Color.clear
+            .frame(width: 1, height: 1)
+            .accessibilityElement()
+            .accessibilityLabel(label)
+            .accessibilityValue(value)
+            .accessibilityIdentifier(id)
     }
 }
 

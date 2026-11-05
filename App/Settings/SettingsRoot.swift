@@ -16,7 +16,8 @@ struct SettingsRoot: View {
     }
 
     private func content(date: Date) -> some View {
-        let palette = model.palette(at: date)
+        let background = model.background(at: date, mode: preview.mode)
+        let palette = background.palette
         return NavigationStack {
             HStack(alignment: .top, spacing: 80) {
                 VStack(alignment: .leading, spacing: Theme.Space.l) {
@@ -41,19 +42,18 @@ struct SettingsRoot: View {
         .background {
             ZStack {
                 BackgroundView(
-                    kind: preview.kind(in: model, at: date),
-                    photo: model.photoKey(at: date),
+                    kind: background.kind,
+                    photo: background.photo,
                     palette: palette,
                     quality: model.quality,
                     particlesEnabled: false
                 )
                 Color.black.opacity(0.35).ignoresSafeArea()
-                Color.clear
-                    .frame(width: 1, height: 1)
-                    .accessibilityElement()
-                    .accessibilityLabel("Background preview")
-                    .accessibilityValue((preview.mode ?? model.settings.backgroundMode).rawValue)
-                    .accessibilityIdentifier("settings.background.preview")
+                AccessibilityMarker(
+                    label: "Background preview",
+                    value: (preview.mode ?? model.settings.backgroundMode).rawValue,
+                    id: "settings.background.preview"
+                )
             }
         }
         .environment(\.glassShade, palette.glassShade)

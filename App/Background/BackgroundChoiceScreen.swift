@@ -8,11 +8,6 @@ import SwiftUI
 @Observable
 final class BackgroundPreview {
     var mode: BackgroundMode?
-
-    func kind(in model: AppModel, at date: Date) -> BackgroundKind {
-        guard let mode, model.photoOverride == nil else { return model.backgroundKind(at: date) }
-        return BackgroundPolicy.kind(mode: mode, scene: model.scene(at: date), isStormActive: model.storm.state.isActive)
-    }
 }
 
 extension EnvironmentValues {
