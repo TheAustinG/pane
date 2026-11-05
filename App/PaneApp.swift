@@ -55,5 +55,8 @@ private struct RootView: View {
             .task { await model.storm.run() }
             .task { await model.home.run() }
             .task { await model.code.run() }
+            #if DEBUG
+            .task { await PhotoCycle.run(model: model, interval: options.photoCycle) }
+            #endif
     }
 }
