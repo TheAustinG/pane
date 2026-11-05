@@ -71,8 +71,11 @@ extension CodeSetupError {
             "Portainer has no environment with that id. Check the number in its Environments list."
         case .certificateChanged:
             "The server's certificate is not the one Pane trusts. Forget Portainer and set it up again if you replaced it."
-        case .unexpectedReply:
-            "The server answered, but not like \(service.name). Check the address."
+        case .unexpectedReply(let reason):
+            switch service {
+            case .github: "GitHub did not accept the request: \(reason). Try again later."
+            case .portainer: "The server answered, but not like Portainer. Check the address."
+            }
         }
     }
 }

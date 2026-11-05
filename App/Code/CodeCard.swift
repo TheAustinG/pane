@@ -11,6 +11,7 @@ struct CodeCard: DashboardCard {
             github: code.github,
             connection: code.githubConnection,
             portainerConnection: code.portainerConnection,
+            portainerProblem: code.portainerProblem,
             summary: code.contributionSummary(),
             nudges: code.nudges,
             now: context.date,
@@ -23,6 +24,7 @@ private struct CodeContent: View {
     let github: GitHubSnapshot?
     let connection: CodeConnection
     let portainerConnection: CodeConnection
+    let portainerProblem: CodeSetupError?
     let summary: ContributionSummary?
     let nudges: [DeployStatus]
     let now: Date
@@ -48,6 +50,13 @@ private struct CodeContent: View {
         }
     }
 
+    /// Only failures that need the owner; a dropped connection retries on its own.
+    private var portainerWarning: String? {
+        if portainerConnection == .authFailed { return "Portainer token rejected" }
+        if case .failed = portainerConnection, portainerProblem == .certificateChanged { return "Portainer certificate changed" }
+        return nil
+    }
+
     private var header: some View {
         HStack(spacing: Theme.Space.s) {
             PaneHeading(text: "GitHub", symbol: "arrow.triangle.branch")
@@ -60,7 +69,10 @@ private struct CodeContent: View {
                 NudgeChip(text: "GitHub unreachable", symbol: "wifi.exclamationmark", tone: .warning)
                     .accessibilityIdentifier("code.warning")
             default:
-                EmptyView()
+                if let portainerWarning {
+                    NudgeChip(text: portainerWarning, symbol: "shippingbox", tone: .warning)
+                        .accessibilityIdentifier("code.warning")
+                }
             }
         }
         .frame(height: 30)

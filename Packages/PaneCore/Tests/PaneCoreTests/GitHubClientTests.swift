@@ -176,6 +176,31 @@ struct GitHubClientTests {
         #expect(http.keys == ["/repos/sample-user/lantern/activity"])
     }
 
+    @Test func publishRunsSkipPullRequestBuilds() throws {
+        let runs = #"{"workflow_runs":[{"head_sha":"\#(String(repeating: "c", count: 40))","updated_at":"2026-11-02T10:00:00Z","conclusion":"success","event":"pull_request"},{"head_sha":"\#(String(repeating: "d", count: 40))","updated_at":"2026-11-01T10:00:00Z","conclusion":"success","event":"push"}]}"#
+        let run = try #require(try GitHubClient.parseRun(Data(runs.utf8), repository: "a/b", workflow: "publish.yml"))
+        #expect(run.headSHA == String(repeating: "d", count: 40))
+        let onlyPullRequests = #"{"workflow_runs":[{"head_sha":"\#(String(repeating: "c", count: 40))","updated_at":"2026-11-02T10:00:00Z","conclusion":"success","event":"pull_request_target"}]}"#
+        #expect(try GitHubClient.parseRun(Data(onlyPullRequests.utf8), repository: "a/b", workflow: "publish.yml") == nil)
+    }
+
+    @Test func graphQLErrorsBesideAViewerAreTolerated() throws {
+        let response = HTTPURLResponse(url: URL(string: "https://api.github.com/graphql")!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+        let partial = #"{"data":{"viewer":{"login":"sample-user"}},"errors":[{"message":"Resource not accessible"}]}"#
+        try GitHubClient.checkGraphQLErrors(Data(partial.utf8), response: response, now: now)
+        let empty = #"{"data":null,"errors":[{"message":"Resource not accessible"}]}"#
+        #expect(throws: GitHubError.graphQL("Resource not accessible")) {
+            try GitHubClient.checkGraphQLErrors(Data(empty.utf8), response: response, now: now)
+        }
+    }
+
+    @Test func latestCommitWithNoPushReturnsNil() async throws {
+        let http = FakeHTTP()
+        http.set("/repos/sample-user/harbor-pull/activity", status: 200, json: "[]")
+        let repositories = [RepositoryPush(nameWithOwner: "sample-user/harbor-pull", pushedAt: CodeSample.date("2026-11-01T23:22:39Z"))]
+        #expect(try await client(http).latestCommit(repositories: repositories, previous: nil) == nil)
+    }
+
     @Test func latestCommitRefetchesACachedMergeLine() async throws {
         let http = FakeHTTP()
         CodeSample.routes(http)

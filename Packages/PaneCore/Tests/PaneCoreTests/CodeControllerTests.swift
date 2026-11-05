@@ -289,6 +289,35 @@ struct CodeControllerTests {
         await harness.stop()
     }
 
+    @Test func aPortainerFailureHidesNudgesFromTheLastGoodRead() async {
+        let harness = CodeHarness()
+        await harness.refreshBoth()
+        let controller = harness.controller
+        #expect(controller.nudges.map(\.target) == [CodeSample.ledger])
+
+        harness.portainer.fail(with: URLError(.timedOut))
+        harness.clock.advance(by: 300)
+        await waitUntil { if case .failed = controller.portainerConnection { true } else { false } }
+        #expect(!controller.deploys.isEmpty)
+        #expect(controller.nudges.isEmpty)
+        controller.debugNudge = true
+        #expect(!controller.nudges.isEmpty)
+        await harness.stop()
+    }
+
+    @Test func aDifferentTokenDropsTheOldAccountsSnapshot() async throws {
+        let harness = CodeHarness()
+        await harness.refreshBoth()
+        let controller = harness.controller
+        try controller.configureGitHub(token: CodeSample.githubToken)
+        #expect(controller.github != nil)
+        try controller.configureGitHub(token: "sample-other-token")
+        #expect(controller.github == nil)
+        #expect(controller.candidates.isEmpty)
+        #expect(controller.deploys.isEmpty)
+        await harness.stop()
+    }
+
     @Test func aRefusedPortainerKeyStopsTheChecks() async {
         let harness = CodeHarness()
         harness.portainer.set("/api/endpoints/3/docker/containers/json", fixture: "portainer-bad-key", status: 401)

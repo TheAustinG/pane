@@ -140,6 +140,8 @@ public final class CodeController {
 
     /// Targets that are behind, after `nudgeEnabled` and `debugNudge`, newest build first.
     public var nudges: [DeployStatus] {
+        // Comparisons from before a Portainer failure may no longer hold.
+        if debugNudge == nil, portainerConnection != .ready { return [] }
         var statuses = deploys
         if debugNudge == true, statuses.isEmpty, let first = activeTargets.first {
             statuses = [DeployStatus(target: first, run: nil, container: nil, verdict: .unknown)]
@@ -162,7 +164,15 @@ public final class CodeController {
     /// Saves the token and refreshes with it.
     public func configureGitHub(token: String) throws {
         let token = token.trimmingCharacters(in: .whitespacesAndNewlines)
+        let previousToken = try? secrets.string(for: .githubToken)
         try secrets.setString(token.isEmpty ? nil : token, for: .githubToken)
+        if token != previousToken {
+            // The snapshot may belong to another account, and its login feeds the deploy pass.
+            github = nil
+            store.set(nil, forKey: Keys.github)
+            candidates = []
+            deploys = []
+        }
         resetGitHubState()
         githubConnection = token.isEmpty ? .notConfigured : .loading
         restartGitHub()
@@ -410,7 +420,7 @@ public final class CodeController {
         let viewer = try await client.viewer()
         var latest = previous?.login == viewer.login ? previous?.latestCommit : nil
         do {
-            latest = try await client.latestCommit(repositories: viewer.repositories, previous: latest)
+            latest = try await client.latestCommit(repositories: viewer.repositories, previous: latest) ?? latest
         } catch GitHubError.unauthorized {
             throw GitHubError.unauthorized
         } catch GitHubError.rateLimited(let until) {

@@ -117,7 +117,7 @@ struct GitHubClient: Sendable {
 
     func latestSuccessfulRun(repository: String, workflow: String) async throws -> PublishRun? {
         let path = try Self.repoPath(repository, "actions", "workflows", workflow, "runs")
-        let data = try await get(path, query: [URLQueryItem(name: "status", value: "success"), URLQueryItem(name: "per_page", value: "1")])
+        let data = try await get(path, query: [URLQueryItem(name: "status", value: "success"), URLQueryItem(name: "per_page", value: "10")])
         return try Self.parseRun(data, repository: repository, workflow: workflow)
     }
 
@@ -140,7 +140,6 @@ struct GitHubClient: Sendable {
             best = (repository.nameWithOwner, push)
         }
         guard let best, let sha = best.push.after else { return nil }
-        // A merge line cached before PR titles were read is fetched again once.
         if let previous, previous.repository == best.repository, previous.sha == sha, !Self.isPullRequestMerge(previous.headline) {
             return LatestCommit(repository: best.repository, branch: best.push.branch, sha: sha, headline: previous.headline, date: best.push.timestamp)
         }
@@ -230,13 +229,23 @@ struct GitHubClient: Sendable {
         }
 
         let errors: [Item]?
+        let data: Viewer?
+
+        struct Viewer: Decodable {
+            let viewer: Empty?
+        }
+
+        struct Empty: Decodable {}
     }
 
     static func checkGraphQLErrors(_ data: Data, response: HTTPURLResponse, now: Date) throws {
-        guard let errors = (try? JSONDecoder().decode(GraphQLErrors.self, from: data))?.errors, !errors.isEmpty else { return }
+        let reply = try? JSONDecoder().decode(GraphQLErrors.self, from: data)
+        guard let errors = reply?.errors, !errors.isEmpty else { return }
         if errors.contains(where: { $0.type == "RATE_LIMITED" }) {
             throw GitHubError.rateLimited(until: rateLimitReset(response, now: now) ?? now.addingTimeInterval(60))
         }
+        // An error on one field or repository still leaves the rest of the viewer usable.
+        if reply?.data?.viewer != nil { return }
         throw GitHubError.graphQL(errors.compactMap(\.message).first ?? "GraphQL error")
     }
 
@@ -345,11 +354,13 @@ struct GitHubClient: Sendable {
             let headSHA: String
             let updatedAt: Date
             let conclusion: String?
+            let event: String?
 
             enum CodingKeys: String, CodingKey {
                 case headSHA = "head_sha"
                 case updatedAt = "updated_at"
                 case conclusion
+                case event
             }
         }
 
@@ -362,7 +373,10 @@ struct GitHubClient: Sendable {
 
     static func parseRun(_ data: Data, repository: String, workflow: String) throws -> PublishRun? {
         let runs = try decode(RunsReply.self, from: data).workflowRuns
-        guard let run = runs.first(where: { $0.conclusion == nil || $0.conclusion == "success" }) else { return nil }
+        // A pull request run tests the build without publishing an image.
+        guard let run = runs.first(where: { run in
+            (run.conclusion == nil || run.conclusion == "success") && !(run.event ?? "").hasPrefix("pull_request")
+        }) else { return nil }
         return PublishRun(repository: repository, workflow: workflow, headSHA: run.headSHA, completedAt: run.updatedAt)
     }
 }
