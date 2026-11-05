@@ -77,6 +77,9 @@ struct BackgroundView: View {
                 reduceMotion: reduceMotion
             )
             SkyVignette()
+            if animates, layers.allSatisfy(\.isPhoto) {
+                FrameTick()
+            }
         }
         .ignoresSafeArea()
         .allowsHitTesting(false)
@@ -171,6 +174,19 @@ struct BackgroundView: View {
 
         var isPhoto: Bool {
             if case .photo = content { true } else { false }
+        }
+    }
+}
+
+/// With no SwiftUI animation running, presenting Settings stalls the main thread inside SwiftUI's
+/// update loop for up to 30 s on tvOS 27 (simulator and the A15). The gradient's drift always ticks
+/// every frame; a photo does not, so this stands in for it at a fraction of the cost.
+private struct FrameTick: View {
+    var body: some View {
+        TimelineView(.animation) { context in
+            Color.white
+                .opacity(context.date.timeIntervalSinceReferenceDate.truncatingRemainder(dividingBy: 2) < 1 ? 0.002 : 0.001)
+                .frame(width: 1, height: 1)
         }
     }
 }
