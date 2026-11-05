@@ -5,6 +5,7 @@ import SwiftUI
 struct SettingsRoot: View {
     let model: AppModel
     @State private var help = SettingsHelpState()
+    @State private var preview = BackgroundPreview()
 
     private static let placeholder = "Choose a row to see what it does."
 
@@ -40,16 +41,23 @@ struct SettingsRoot: View {
         .background {
             ZStack {
                 BackgroundView(
-                    kind: model.backgroundKind(at: date),
+                    kind: preview.kind(in: model, at: date),
                     photo: model.photoKey(at: date),
                     palette: palette,
                     quality: model.quality,
                     particlesEnabled: false
                 )
                 Color.black.opacity(0.35).ignoresSafeArea()
+                Color.clear
+                    .frame(width: 1, height: 1)
+                    .accessibilityElement()
+                    .accessibilityLabel("Background preview")
+                    .accessibilityValue((preview.mode ?? model.settings.backgroundMode).rawValue)
+                    .accessibilityIdentifier("settings.background.preview")
             }
         }
         .environment(\.glassShade, palette.glassShade)
         .environment(\.settingsHelp, help)
+        .environment(\.backgroundPreview, preview)
     }
 }
