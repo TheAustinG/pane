@@ -140,7 +140,8 @@ struct GitHubClient: Sendable {
             best = (repository.nameWithOwner, push)
         }
         guard let best, let sha = best.push.after else { return nil }
-        if let previous, previous.repository == best.repository, previous.sha == sha {
+        // A merge line cached before PR titles were read is fetched again once.
+        if let previous, previous.repository == best.repository, previous.sha == sha, !Self.isPullRequestMerge(previous.headline) {
             return LatestCommit(repository: best.repository, branch: best.push.branch, sha: sha, headline: previous.headline, date: best.push.timestamp)
         }
         let commit = try await commitHeadline(repository: best.repository, sha: sha)
@@ -308,10 +309,23 @@ struct GitHubClient: Sendable {
 
     static func parseCommit(_ data: Data) throws -> (sha: String, headline: String) {
         let reply = try decode(CommitReply.self, from: data)
-        let headline = reply.commit.message
-            .split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)
-            .first.map { $0.trimmingCharacters(in: .whitespacesAndNewlines) } ?? ""
-        return (reply.sha, headline)
+        return (reply.sha, headline(fromMessage: reply.commit.message))
+    }
+
+    /// The first line of a commit message, except for GitHub's "Merge pull request #N from ..."
+    /// commits, whose body is the pull request's title.
+    static func headline(fromMessage message: String) -> String {
+        let lines = message
+            .split(omittingEmptySubsequences: false, whereSeparator: \.isNewline)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+        let first = lines.first ?? ""
+        guard isPullRequestMerge(first),
+              let title = lines.dropFirst().first(where: { !$0.isEmpty }) else { return first }
+        return title
+    }
+
+    static func isPullRequestMerge(_ line: String) -> Bool {
+        line.wholeMatch(of: /Merge pull request #\d+ from \S+/) != nil
     }
 
     private struct WorkflowsReply: Decodable {

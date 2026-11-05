@@ -24,7 +24,7 @@ enum CodeSample {
     static let ledgerBuiltAt = date("2026-09-29T02:36:44Z")
     static let beaconBuiltAt = date("2026-09-26T05:17:29Z")
     static let latestSHA = "8eb48593be61f4aea40289948a11b28a4010db0c"
-    static let latestHeadline = "Merge pull request #5 from sample-user/feature-porch"
+    static let latestHeadline = "Add the porch light card and its sample data."
 
     static func data(_ name: String, _ ext: String = "json") -> Data {
         let url = Bundle.module.url(forResource: name, withExtension: ext, subdirectory: "Fixtures")!

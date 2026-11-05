@@ -176,6 +176,30 @@ struct GitHubClientTests {
         #expect(http.keys == ["/repos/sample-user/lantern/activity"])
     }
 
+    @Test func latestCommitRefetchesACachedMergeLine() async throws {
+        let http = FakeHTTP()
+        CodeSample.routes(http)
+        let previous = LatestCommit(repository: "sample-user/lantern", branch: "main", sha: CodeSample.latestSHA,
+                                    headline: "Merge pull request #5 from sample-user/feature-porch", date: now)
+        let repositories = [RepositoryPush(nameWithOwner: "sample-user/lantern", pushedAt: CodeSample.date("2026-11-04T02:12:15Z"))]
+        let latest = try await client(http).latestCommit(repositories: repositories, previous: previous)
+        #expect(latest?.headline == CodeSample.latestHeadline)
+    }
+
+    @Test(arguments: [
+        ("Merge pull request #5 from sample-user/feature-porch\n\nAdd the porch light card", "Add the porch light card"),
+        ("Merge pull request #12 from sample-user/fix\r\n\r\nFix the kite\r\n\r\nDetails", "Fix the kite"),
+        ("Merge pull request #7 from sample-user/empty\n\n", "Merge pull request #7 from sample-user/empty"),
+        ("Merge pull request #7 from sample-user/empty", "Merge pull request #7 from sample-user/empty"),
+        ("Merge branch 'main' into feature\n\nConflicts", "Merge branch 'main' into feature"),
+        ("Tune the kite\n\nLonger body", "Tune the kite"),
+        ("Add the porch light card (#9)", "Add the porch light card (#9)"),
+        ("", ""),
+    ])
+    func headlineUsesThePullRequestTitleForMergeCommits(message: String, expected: String) {
+        #expect(GitHubClient.headline(fromMessage: message) == expected)
+    }
+
     @Test func latestCommitLooksPastARepositoryWhoseLastPushWasADeletion() async throws {
         let http = FakeHTTP()
         http.set("/repos/sample-user/harbor-pull/activity", fixture: "github-activity-deletion-first")
