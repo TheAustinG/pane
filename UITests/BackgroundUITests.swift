@@ -71,6 +71,7 @@ final class BackgroundUITests: XCTestCase {
         XCTAssertTrue(waitForLabel(element(app, "settings.background.mode"), containing: "Photo"))
         let kind = dashboardKind(app)
         XCTAssertTrue(waitForKind(kind, startingWith: "photo"), "\(kind.value ?? "nil")")
+        XCTAssertTrue(waitForValue(element(app, "background.photoLoaded"), "yes", timeout: 15))
         attachScreenshot("background-photo")
     }
 
@@ -81,6 +82,7 @@ final class BackgroundUITests: XCTestCase {
         XCTAssertTrue(waitForLabel(element(app, "settings.background.mode"), containing: "Auto"))
         let kind = dashboardKind(app)
         XCTAssertTrue(waitForKind(kind, startingWith: "photo"), "\(kind.value ?? "nil")")
+        XCTAssertTrue(waitForValue(element(app, "background.photoLoaded"), "yes", timeout: 15))
         attachScreenshot("background-auto")
     }
 
