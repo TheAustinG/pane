@@ -126,7 +126,7 @@ final class BackgroundUITests: XCTestCase {
     private func launch(stored: String, now: String) -> XCUIApplication {
         let app = XCUIApplication()
         app.launchArguments = [
-            "-settings", "1", "-resetSettings", "1", "-fixtures", "sample", "-nightDim", "off",
+            "-settings", "1", "-resetSettings", "1", "-offline", "1", "-nightDim", "off",
             "-background", stored, "-now", now,
         ]
         app.launch()

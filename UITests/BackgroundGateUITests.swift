@@ -34,8 +34,7 @@ final class BackgroundGateUITests: XCTestCase {
         saveGateShot("auto-1-before-sunset")
 
         openDebugMenu(app)
-        moveFocus(to: app.buttons["debug.time.minus6h"], pressing: .down, limit: 6)
-        moveFocus(to: app.buttons["debug.time.plus1h"], pressing: .right, limit: 6)
+        focusTimeStep("plus1h", in: app)
         XCUIRemote.shared.press(.select)
         closeDebugMenu(app)
         XCTAssertTrue(waitForValue(kind(app), "gradient"))
@@ -75,12 +74,24 @@ final class BackgroundGateUITests: XCTestCase {
         XCTAssertTrue(waitForNonExistence(app.staticTexts["debug.menu"]))
     }
 
-    private func moveFocus(to target: XCUIElement, pressing direction: XCUIRemote.Button, limit: Int) {
-        for _ in 0..<limit where !target.hasFocus {
-            XCUIRemote.shared.press(direction)
-            _ = waitForFocus(target, timeout: 1)
+    private static let timeSteps = ["minus6h", "minus1h", "minus15m", "plus15m", "plus1h", "plus6h", "reset"]
+
+    /// Down until any time step has focus, then sideways to `step`.
+    private func focusTimeStep(_ step: String, in app: XCUIApplication) {
+        let buttons = Self.timeSteps.map { app.buttons["debug.time.\($0)"] }
+        func focusedIndex() -> Int? { buttons.firstIndex { $0.hasFocus } }
+        for _ in 0..<8 where focusedIndex() == nil {
+            XCUIRemote.shared.press(.down)
+            usleep(600_000)
         }
-        XCTAssertTrue(target.hasFocus, "focus never reached \(target.identifier)")
+        guard let start = focusedIndex(), let goal = Self.timeSteps.firstIndex(of: step) else {
+            return XCTFail("no time step took focus")
+        }
+        for _ in 0..<abs(goal - start) {
+            XCUIRemote.shared.press(goal > start ? .right : .left)
+            usleep(400_000)
+        }
+        XCTAssertTrue(waitForFocus(buttons[goal]), "focus never reached debug.time.\(step)")
     }
 
     private func kind(_ app: XCUIApplication) -> XCUIElement { element(app, "background.kind") }
