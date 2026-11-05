@@ -32,8 +32,23 @@ public struct PhotoCredits: Hashable, Sendable, Codable {
         self.photos = photos
     }
 
+    public enum ValidationError: Error, Hashable {
+        case unknownSlot(String)
+        case duplicateSlot(String)
+    }
+
     public static func decode(_ data: Data) throws -> PhotoCredits {
-        try JSONDecoder().decode(PhotoCredits.self, from: data)
+        let credits = try JSONDecoder().decode(PhotoCredits.self, from: data)
+        var seen: Set<String> = []
+        for credit in credits.photos {
+            guard credit.key != nil else { throw ValidationError.unknownSlot(credit.slot) }
+            guard seen.insert(credit.slot).inserted else { throw ValidationError.duplicateSlot(credit.slot) }
+        }
+        return credits
+    }
+
+    public func credit(for key: PhotoKey) -> PhotoCredit? {
+        photos.first { $0.slot == key.name }
     }
 
     /// Slots with no credit, in `PhotoKey.all` order.

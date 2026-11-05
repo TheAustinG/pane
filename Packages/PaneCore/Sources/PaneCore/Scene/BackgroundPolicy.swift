@@ -57,11 +57,17 @@ public enum BackgroundPolicy {
     public static let autoPhotoFrom = 0.0
 
     public static func kind(mode: BackgroundMode, scene: WeatherScene, isStormActive: Bool) -> BackgroundKind {
-        mode == .photo ? .photo : .gradient
+        switch mode {
+        case .gradient: .gradient
+        case .photo: .photo
+        case .auto: scene.sunAltitude >= autoPhotoFrom && !isStormActive ? .photo : .gradient
+        }
     }
 
     public static func timeOfDay(for scene: WeatherScene) -> TimeOfDay {
-        .day
+        if scene.sunAltitude < nightBelow { return .night }
+        if scene.sunAltitude >= dayFrom { return .day }
+        return scene.isMorning ? .dawn : .dusk
     }
 
     public static func photoKey(for scene: WeatherScene) -> PhotoKey {
