@@ -43,10 +43,14 @@ final class AppSettings {
         didSet { store(stormAutomatic, key: Keys.stormAutomatic) }
     }
 
+    var backgroundMode: BackgroundMode {
+        didSet { store(backgroundMode, key: Keys.backgroundMode) }
+    }
+
     init(defaults: UserDefaults = .standard, reset: Bool = false) {
         self.defaults = defaults
         if reset {
-            [Keys.nightSchedule, Keys.nightDimOverride, Keys.homeLocation, Keys.stormLayout, Keys.stormAutomatic]
+            [Keys.nightSchedule, Keys.nightDimOverride, Keys.homeLocation, Keys.stormLayout, Keys.stormAutomatic, Keys.backgroundMode]
                 .forEach { defaults.removeObject(forKey: $0) }
         }
         nightSchedule = Self.load(NightSchedule.self, from: defaults, key: Keys.nightSchedule) ?? .standard
@@ -54,6 +58,7 @@ final class AppSettings {
         homeLocation = Self.load(HomeLocation.self, from: defaults, key: Keys.homeLocation)
         stormLayout = Self.load(StormLayout.self, from: defaults, key: Keys.stormLayout) ?? .side
         stormAutomatic = Self.load(Bool.self, from: defaults, key: Keys.stormAutomatic) ?? true
+        backgroundMode = Self.load(BackgroundMode.self, from: defaults, key: Keys.backgroundMode) ?? .gradient
     }
 
     private enum Keys {
@@ -62,6 +67,7 @@ final class AppSettings {
         static let homeLocation = "settings.homeLocation"
         static let stormLayout = "settings.stormLayout"
         static let stormAutomatic = "settings.stormAutomatic"
+        static let backgroundMode = "settings.backgroundMode"
     }
 
     private func store<T: Encodable>(_ value: T, key: String) {
@@ -71,6 +77,12 @@ final class AppSettings {
     private static func load<T: Decodable>(_ type: T.Type, from defaults: UserDefaults, key: String) -> T? {
         defaults.data(forKey: key).flatMap { try? JSONDecoder().decode(type, from: $0) }
     }
+}
+
+struct BackgroundState {
+    let kind: BackgroundKind
+    let photo: PhotoKey
+    let palette: ScenePalette
 }
 
 /// App-wide state shared by the dashboard, background, settings and debug menu.
@@ -179,6 +191,16 @@ final class AppModel {
 
     func palette(at date: Date) -> ScenePalette {
         SceneEngine.palette(for: scene(at: date))
+    }
+
+    /// `mode` overrides the stored setting, for the Settings preview.
+    func background(at date: Date, mode: BackgroundMode? = nil) -> BackgroundState {
+        let scene = scene(at: date)
+        return BackgroundState(
+            kind: BackgroundPolicy.kind(mode: mode ?? settings.backgroundMode, scene: scene, isStormActive: storm.state.isActive),
+            photo: BackgroundPolicy.photoKey(for: scene),
+            palette: SceneEngine.palette(for: scene)
+        )
     }
 
     /// Storm mode raises the dim.

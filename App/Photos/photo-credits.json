@@ -1,0 +1,256 @@
+{
+  "photos": [
+    {
+      "slot": "clear-dawn",
+      "title": "Lake Michigan at Summer Sunrise",
+      "creator": "Roman Boed",
+      "license": "CC BY 2.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/2.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Lake_Michigan_at_Summer_Sunrise_(29539524797).jpg",
+      "attribution": "Photo: Roman Boed, CC BY 2.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "clear-day",
+      "title": "Big Sky Illinois",
+      "creator": "David Jakes from Naperville, USA",
+      "license": "CC BY 4.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/4.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Big_Sky_Illinois_-_Flickr_-_David_Jakes.jpg",
+      "attribution": "Photo: David Jakes from Naperville, USA, CC BY 4.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "clear-dusk",
+      "title": "Tree silhouettes against orange sky",
+      "creator": "freestocks.org",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Tree_silhouettes_against_orange_sky_(Unsplash).jpg",
+      "attribution": "Photo: freestocks.org, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "clear-night",
+      "title": "Sublime purple night sky",
+      "creator": "Vincentiu Solomon",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Sublime_purple_night_sky_(Unsplash).jpg",
+      "attribution": "Photo: Vincentiu Solomon, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "partlyCloudy-dawn",
+      "title": "Countryside sunset 1",
+      "creator": "Jordan McQueen",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Countryside_sunset_1_(Unsplash).jpg",
+      "attribution": "Photo: Jordan McQueen, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "partlyCloudy-day",
+      "title": "Clouds over grassy shore",
+      "creator": "David Marcu",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Clouds_over_grassy_shore_(Unsplash).jpg",
+      "attribution": "Photo: David Marcu, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "partlyCloudy-dusk",
+      "title": "Sunset Clouds Illuminated on Seedskadee NWR",
+      "creator": "USFWS Mountain-Prairie",
+      "license": "Public domain",
+      "licenseURL": "https://commons.wikimedia.org/wiki/File:Sunset_Clouds_Illuminated_on_Seedskadee_NWR_(20079353582).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Sunset_Clouds_Illuminated_on_Seedskadee_NWR_(20079353582).jpg",
+      "attribution": "Photo: USFWS Mountain-Prairie, public domain, via Wikimedia Commons"
+    },
+    {
+      "slot": "partlyCloudy-night",
+      "title": "Moonlight Florida United States Travel Photography",
+      "creator": "Giuseppe Milo",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Moonlight_Florida_United_States_Travel_Photography_(233161441).jpeg",
+      "attribution": "Photo: Giuseppe Milo, CC BY 3.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "cloudy-dawn",
+      "title": "CLOUDY SUNRISE",
+      "creator": "David Zvonař duvik",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:CLOUDY_SUNRISE_(Unsplash).jpg",
+      "attribution": "Photo: David Zvonař duvik, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "cloudy-day",
+      "title": "Clouds Over Broken Arrow WPA South Dakota",
+      "creator": "USFWS Mountain Prairie",
+      "license": "Public domain",
+      "licenseURL": "https://commons.wikimedia.org/wiki/File:Clouds_Over_Broken_Arrow_WPA_South_Dakota_(53921187943).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Clouds_Over_Broken_Arrow_WPA_South_Dakota_(53921187943).jpg",
+      "attribution": "Photo: USFWS Mountain Prairie, public domain, via Wikimedia Commons"
+    },
+    {
+      "slot": "cloudy-dusk",
+      "title": "Twilight atmosphere and sky",
+      "creator": "Bhavyesh Acharya",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Twilight_atmosphere_and_sky_(Unsplash).jpg",
+      "attribution": "Photo: Bhavyesh Acharya, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "cloudy-night",
+      "title": "Moonlight Wilderness",
+      "creator": "Paul Vincent Dimaranan",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Moonlight_Wilderness_(223567935).jpeg",
+      "attribution": "Photo: Paul Vincent Dimaranan, CC BY 3.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "rain-dawn",
+      "title": "Rain on the Refuge",
+      "creator": "USFWS Mountain-Prairie",
+      "license": "CC BY 2.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/2.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Rain_on_the_Refuge_(15273750629).jpg",
+      "attribution": "Photo: USFWS Mountain-Prairie, CC BY 2.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "rain-day",
+      "title": "Thunderstorm over Yellowstone Lake",
+      "creator": "NPS/Jim Peaco",
+      "license": "Public domain",
+      "licenseURL": "https://commons.wikimedia.org/wiki/File:Thunderstorm_over_Yellowstone_Lake,_Mt_(686aaa1f-a36d-4470-a6ef-aad316832529).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Thunderstorm_over_Yellowstone_Lake,_Mt_(686aaa1f-a36d-4470-a6ef-aad316832529).jpg",
+      "attribution": "Photo: NPS/Jim Peaco, public domain, via Wikimedia Commons"
+    },
+    {
+      "slot": "rain-dusk",
+      "title": "Thunderstorm at sunset, Swan Lake Flat",
+      "creator": "Neal Herbert",
+      "license": "Public domain",
+      "licenseURL": "https://commons.wikimedia.org/wiki/File:Thunderstorm_at_sunset,_Swan_Lake_Flat_(131be191-8f68-4bfe-b846-9b8b13e58187).jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Thunderstorm_at_sunset,_Swan_Lake_Flat_(131be191-8f68-4bfe-b846-9b8b13e58187).jpg",
+      "attribution": "Photo: Neal Herbert, public domain, via Wikimedia Commons"
+    },
+    {
+      "slot": "rain-night",
+      "title": "Hagley Park on a foggy Christchurch night",
+      "creator": "NCSphotography",
+      "license": "CC BY 2.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/2.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:This_was_taken_in_Hagley_Park_on_a_foggy_Christchurch_night._A_one_minute_exposure._(a_href%3D%22http-bighugelabs.com-onblack.php%5Eid%3D4674114152%22_rel%3D%22noreferrer_nofollow%22)View_On_Black(-a)_Explored_-,_Jun_5,_2010_-_Flickr_-_NCSphotography.jpg",
+      "attribution": "Photo: NCSphotography, CC BY 2.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "storm-dawn",
+      "title": "Spring Storms in Indiana",
+      "creator": "Cassie Boca",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Spring_Storms_in_Indiana_(Unsplash).jpg",
+      "attribution": "Photo: Cassie Boca, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "storm-day",
+      "title": "Nssl0225",
+      "creator": "Sean Waugh NOAA/NSSL",
+      "license": "Public domain",
+      "licenseURL": "https://commons.wikimedia.org/wiki/File:Nssl0225_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Nssl0225_-_Flickr_-_NOAA_Photo_Library.jpg",
+      "attribution": "Photo: Sean Waugh NOAA/NSSL, public domain, via Wikimedia Commons"
+    },
+    {
+      "slot": "storm-dusk",
+      "title": "Sheet lightning over Lake Maggiore, Italy",
+      "creator": "Winniepix",
+      "license": "CC BY 2.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/2.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Sheet_lightning_over_Lake_Maggiore,_Italy_(35716160114).jpg",
+      "attribution": "Photo: Winniepix, CC BY 2.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "storm-night",
+      "title": "Lightning Storm",
+      "creator": "Rolland Anthony",
+      "license": "CC BY 3.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/3.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Lightning_Storm_(63669379).jpeg",
+      "attribution": "Photo: Rolland Anthony, CC BY 3.0, via Wikimedia Commons"
+    },
+    {
+      "slot": "snow-dawn",
+      "title": "Sunset in Saskatchewan - Canada7",
+      "creator": "Alan Levine",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Sunset_in_Saskatchewan_-_Canada7.jpg",
+      "attribution": "Photo: Alan Levine, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "snow-day",
+      "title": "Snow covered hill in gray scale",
+      "creator": "Michael Browning",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Snow_covered_hill_in_gray_scale_(Unsplash).jpg",
+      "attribution": "Photo: Michael Browning, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "snow-dusk",
+      "title": "Night falls on a Silverthorne mountain",
+      "creator": "Nathan Anderson",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Night_falls_on_a_Silverthorne_mountain_(Unsplash).jpg",
+      "attribution": "Photo: Nathan Anderson, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "snow-night",
+      "title": "Paul itkin 2015",
+      "creator": "paul itkin itkin",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Paul_itkin_2015_(Unsplash).jpg",
+      "attribution": "Photo: paul itkin itkin, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "fog-dawn",
+      "title": "Foggy Farm Fields",
+      "creator": "Nicolai Dürbaum",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Foggy_Farm_Fields_(Unsplash).jpg",
+      "attribution": "Photo: Nicolai Dürbaum, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "fog-day",
+      "title": "Foggy Isolation",
+      "creator": "Will Portman",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Foggy_Isolation_(Unsplash).jpg",
+      "attribution": "Photo: Will Portman, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "fog-dusk",
+      "title": "Foggy mountain",
+      "creator": "Linh Pham",
+      "license": "CC0",
+      "licenseURL": "http://creativecommons.org/publicdomain/zero/1.0/deed.en",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:Foggy_mountain_(Unsplash).jpg",
+      "attribution": "Photo: Linh Pham, CC0, via Wikimedia Commons"
+    },
+    {
+      "slot": "fog-night",
+      "title": "Paimio 14",
+      "creator": "Tero Karppinen from Finland",
+      "license": "CC BY 2.0",
+      "licenseURL": "https://creativecommons.org/licenses/by/2.0",
+      "sourcePage": "https://commons.wikimedia.org/wiki/File:(Paimio_14_,_20240315-A7202847.JPG)_-_Flickr_-_Tero_Karppinen.jpg",
+      "attribution": "Photo: Tero Karppinen from Finland, CC BY 2.0, via Wikimedia Commons"
+    }
+  ]
+}

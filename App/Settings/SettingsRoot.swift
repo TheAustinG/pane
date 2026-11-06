@@ -5,17 +5,20 @@ import SwiftUI
 struct SettingsRoot: View {
     let model: AppModel
     @State private var help = SettingsHelpState()
+    @State private var preview = BackgroundPreview()
 
     private static let placeholder = "Choose a row to see what it does."
 
     var body: some View {
         TimelineView(.everyMinute) { timeline in
-            content(palette: model.palette(at: model.now(timeline.date)))
+            content(date: model.now(timeline.date))
         }
     }
 
-    private func content(palette: ScenePalette) -> some View {
-        NavigationStack {
+    private func content(date: Date) -> some View {
+        let background = model.background(at: date, mode: preview.mode)
+        let palette = background.palette
+        return NavigationStack {
             HStack(alignment: .top, spacing: 80) {
                 VStack(alignment: .leading, spacing: Theme.Space.l) {
                     Text("Settings")
@@ -38,11 +41,23 @@ struct SettingsRoot: View {
         }
         .background {
             ZStack {
-                SkyView(target: palette, quality: model.quality, particlesEnabled: false)
+                BackgroundView(
+                    kind: background.kind,
+                    photo: background.photo,
+                    palette: palette,
+                    quality: model.quality,
+                    particlesEnabled: false
+                )
                 Color.black.opacity(0.35).ignoresSafeArea()
+                AccessibilityMarker(
+                    label: "Background preview",
+                    value: (preview.mode ?? model.settings.backgroundMode).rawValue,
+                    id: "settings.background.preview"
+                )
             }
         }
         .environment(\.glassShade, palette.glassShade)
         .environment(\.settingsHelp, help)
+        .environment(\.backgroundPreview, preview)
     }
 }

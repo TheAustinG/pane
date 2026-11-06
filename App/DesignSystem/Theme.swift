@@ -106,6 +106,11 @@ enum Theme {
         static let nightDim = Animation.easeInOut(duration: nightDimSeconds)
         static let sceneBlendSeconds: Double = 90
         static let driftPeriods: [Double] = [34, 41, 47, 53]
+        /// Photo to photo, and photo to gradient.
+        static let photoCrossfadeSeconds: Double = 6
+        /// One leg of the photo's slow zoom; it then eases back.
+        static let photoZoomSeconds: Double = 70
+        static let photoZoomScale: Double = 1.07
     }
 
     enum Dim {

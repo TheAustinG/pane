@@ -27,7 +27,7 @@ private enum Design {
 
 /// The sun moves at most about 0.25° a minute, so a 0.1° step is at least 24 s of real time.
 /// Half of OKLab's just-noticeable difference (about 0.02) per step means the palette never
-/// visibly jumps even before SkyView glides between minute updates. The steepest stretch, blue
+/// visibly jumps even before the sky glides between minute updates. The steepest stretch, blue
 /// hour to golden hour over 4°, peaks near 0.0075.
 private let maxStepPerTenthDegree = 0.01
 

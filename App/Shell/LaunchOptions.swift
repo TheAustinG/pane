@@ -45,6 +45,11 @@ struct LaunchOptions {
     /// Debug builds: `-codeSetup prefill` fills the GitHub and Portainer setup fields from
     /// `local/Secrets.local.xcconfig` without saving them, so a UI test can finish setup.
     var codeSetupPrefill = false
+    /// `-background gradient|photo|auto` sets and stores the background setting.
+    var background: BackgroundMode?
+    /// Debug builds: `-photoCycle <seconds>` steps the photo through every slot at that interval and
+    /// logs the memory footprint after each crossfade.
+    var photoCycle: Double?
 
     static func parse(_ defaults: UserDefaults = .standard) -> LaunchOptions {
         LaunchOptions(
@@ -68,7 +73,9 @@ struct LaunchOptions {
             homeNudge: defaults.string(forKey: "homeNudge").flatMap(HomeNudgeKind.init(rawValue:)),
             homeSetupPrefill: defaults.string(forKey: "homeSetup") == "prefill",
             codeNudge: defaults.string(forKey: "codeNudge").flatMap { ["on": true, "off": false][$0] },
-            codeSetupPrefill: defaults.string(forKey: "codeSetup") == "prefill"
+            codeSetupPrefill: defaults.string(forKey: "codeSetup") == "prefill",
+            background: defaults.string(forKey: "background").flatMap(BackgroundMode.init(rawValue:)),
+            photoCycle: defaults.object(forKey: "photoCycle") == nil ? nil : defaults.double(forKey: "photoCycle")
         )
     }
 

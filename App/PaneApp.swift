@@ -12,6 +12,7 @@ struct PaneApp: App {
         let settings = AppSettings(reset: options.resetsSettings)
         WeatherWiring.prefillHomeLocation(settings, options: options)
         if let layout = options.stormLayout { settings.stormLayout = layout }
+        if let background = options.background { settings.backgroundMode = background }
         let secrets = KeychainSecretStore(service: Bundle.main.bundleIdentifier ?? "pane")
         _model = State(initialValue: AppModel(
             options: options,
@@ -54,5 +55,8 @@ private struct RootView: View {
             .task { await model.storm.run() }
             .task { await model.home.run() }
             .task { await model.code.run() }
+            #if DEBUG
+            .task { await PhotoCycle.run(model: model, interval: options.photoCycle) }
+            #endif
     }
 }
